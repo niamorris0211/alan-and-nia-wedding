@@ -17,6 +17,23 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <form
+      name="personalised-rsvp"
+      method="POST"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="personalised-rsvp" />
+      <input type="text" name="guest_slug" />
+      <input type="text" name="household_name" />
+      <input type="text" name="attending_guests" />
+      <textarea name="dietary_requirements"></textarea>
+      <input type="text" name="song_request" />
+      <textarea name="optional_note"></textarea>
+      <input type="text" name="bot-field" />
+    </form>
+
     <header class="site-header">
       <div class="container nav-wrap">
         <a class="brand" href="#home">Nia &amp; Alan</a>
@@ -369,7 +386,7 @@
               name="personalised-rsvp"
               method="POST"
               data-netlify="true"
-              netlify-honeypot="bot-field"
+              data-netlify-honeypot="bot-field"
             >
               <input type="hidden" name="form-name" value="personalised-rsvp" />
               <input
@@ -382,6 +399,12 @@
                 type="hidden"
                 id="rsvp-household-name"
                 name="household_name"
+                value=""
+              />
+              <input
+                type="hidden"
+                id="rsvp-attending-guests"
+                name="attending_guests"
                 value=""
               />
               <p class="rsvp-honeypot" hidden>

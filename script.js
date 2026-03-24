@@ -10,6 +10,7 @@ const attendingList = document.getElementById("rsvp-attending-list");
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
 const rsvpHouseholdNameInput = document.getElementById("rsvp-household-name");
+const rsvpAttendingGuestsInput = document.getElementById("rsvp-attending-guests");
 
 function getGuestHouseholds() {
   return Array.isArray(window.GUEST_HOUSEHOLDS) ? window.GUEST_HOUSEHOLDS : [];
@@ -85,6 +86,9 @@ async function submitPersonalisedRsvp(guest, form) {
   formData.set("guest_slug", guest.slug);
   formData.set("household_name", guest.displayName);
   formData.set("attending_guests", JSON.stringify(attendingGuests));
+  if (rsvpAttendingGuestsInput) {
+    rsvpAttendingGuestsInput.value = JSON.stringify(attendingGuests);
+  }
 
   const dietaryRequirements =
     formData.get("dietary_requirements")?.toString().trim() || "";
@@ -200,6 +204,9 @@ if (personalisedRsvpForm && rsvpFeedback) {
       }
       if (rsvpHouseholdNameInput) {
         rsvpHouseholdNameInput.value = activeGuest.displayName;
+      }
+      if (rsvpAttendingGuestsInput) {
+        rsvpAttendingGuestsInput.value = "";
       }
     } catch (error) {
       rsvpFeedback.textContent = "Sorry, something went wrong. Please try again.";
