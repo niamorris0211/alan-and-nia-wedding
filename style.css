@@ -213,6 +213,107 @@ h3,
   display: block;
 }
 
+.guest-welcome {
+  position: relative;
+  padding: 1.9rem 0 0;
+  z-index: 3;
+}
+
+.guest-welcome-shell {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+}
+
+.guest-welcome-card {
+  max-width: 680px;
+  margin: 0 auto -2.35rem;
+  padding: 1.7rem 2rem 1.85rem;
+  border-radius: 24px;
+  background: rgba(255, 252, 247, 0.86);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  box-shadow: 0 22px 44px rgba(49, 60, 44, 0.08);
+  text-align: center;
+}
+
+.guest-welcome-copy {
+  max-width: 32rem;
+  margin: 0.7rem auto 1.5rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.guest-welcome-button {
+  min-width: 156px;
+}
+
+.rsvp-copy-personalised {
+  margin-bottom: 1.4rem;
+}
+
+.rsvp-personalised[hidden],
+.guest-welcome[hidden],
+#rsvp-generic-copy[hidden],
+#rsvp-generic-card[hidden] {
+  display: none;
+}
+
+.rsvp-form-live {
+  display: grid;
+  gap: 1rem;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.rsvp-attending-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+
+.rsvp-attending-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(77, 102, 80, 0.14);
+  background: rgba(255, 253, 249, 0.82);
+}
+
+.rsvp-attending-item input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--moss);
+}
+
+.rsvp-attending-item span {
+  color: var(--text);
+}
+
+.rsvp-label {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.rsvp-form-live textarea,
+.rsvp-form-live input[type="text"] {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 16px;
+  border: 1px solid rgba(77, 102, 80, 0.14);
+  background: rgba(255, 253, 249, 0.92);
+  color: var(--text);
+}
+
+.rsvp-form-feedback {
+  min-height: 1.5rem;
+  margin: 0.25rem 0 0;
+  text-align: center;
+  color: var(--moss);
+}
+
 .hero-copy {
   position: relative;
   z-index: 2;
@@ -864,6 +965,16 @@ h3 {
   .hero {
     gap: 24px;
     padding: 24px;
+  }
+
+  .guest-welcome {
+    padding: 1.15rem 0 0;
+  }
+
+  .guest-welcome-card {
+    margin: 0 auto -1.2rem;
+    padding: 1.25rem 1rem 1.35rem;
+    border-radius: 20px;
   }
 
   .section {

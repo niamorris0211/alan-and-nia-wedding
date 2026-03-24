@@ -30,6 +30,22 @@
       </div>
     </header>
 
+    <section class="guest-welcome" id="guest-welcome" hidden aria-live="polite">
+      <div class="container guest-welcome-shell">
+        <div class="guest-welcome-card">
+          <p class="eyebrow">A personal note</p>
+          <h2 id="guest-welcome-heading">Hi Eleanor &amp; Keith 🤍</h2>
+          <p class="guest-welcome-copy">
+            We’re so excited to celebrate with you. Everything you need for the
+            day is here.
+          </p>
+          <a class="button button-primary guest-welcome-button" href="#rsvp"
+            >Go to RSVP</a
+          >
+        </div>
+      </div>
+    </section>
+
     <main>
       <section class="hero-section" id="home">
         <div class="flower hero-flower-left" aria-hidden="true"></div>
@@ -308,7 +324,7 @@
 
       <section class="section rsvp-section" id="rsvp">
         <div class="container rsvp-shell">
-          <div class="rsvp-copy rsvp-copy-centered">
+          <div class="rsvp-copy rsvp-copy-centered" id="rsvp-generic-copy">
             <p class="eyebrow">RSVP</p>
             <h2>RSVP</h2>
             <p class="section-intro">
@@ -316,7 +332,7 @@
             </p>
           </div>
 
-          <div class="rsvp-card rsvp-card-static">
+          <div class="rsvp-card rsvp-card-static" id="rsvp-generic-card">
             <div class="rsvp-qr-placeholder" aria-hidden="true">
               <div class="rsvp-qr-grid"></div>
             </div>
@@ -338,6 +354,71 @@
               It should only take a minute, and helps us keep everything
               running smoothly.
             </p>
+          </div>
+
+          <div class="rsvp-card rsvp-card-static rsvp-personalised" id="rsvp-personalised" hidden>
+            <div class="rsvp-copy rsvp-copy-centered rsvp-copy-personalised">
+              <p class="eyebrow">RSVP</p>
+              <h2>RSVP</h2>
+              <p class="section-intro">Please let us know who will be joining us.</p>
+            </div>
+
+            <form
+              class="rsvp-form-live"
+              id="personalised-rsvp-form"
+              name="personalised-rsvp"
+              method="POST"
+              data-netlify="true"
+              netlify-honeypot="bot-field"
+            >
+              <input type="hidden" name="form-name" value="personalised-rsvp" />
+              <input
+                type="hidden"
+                id="rsvp-guest-slug"
+                name="guest_slug"
+                value=""
+              />
+              <input
+                type="hidden"
+                id="rsvp-household-name"
+                name="household_name"
+                value=""
+              />
+              <p class="rsvp-honeypot" hidden>
+                <label>
+                  Don’t fill this out if you're human:
+                  <input name="bot-field" />
+                </label>
+              </p>
+              <div class="rsvp-attending-list" id="rsvp-attending-list"></div>
+
+              <label class="rsvp-label" for="dietary-requirements">Dietary requirements</label>
+              <textarea
+                id="dietary-requirements"
+                name="dietary_requirements"
+                rows="4"
+                placeholder="Let us know about any dietary requirements"
+              ></textarea>
+
+              <label class="rsvp-label" for="song-request">Song request</label>
+              <input
+                id="song-request"
+                name="song_request"
+                type="text"
+                placeholder="A song you’d love to hear on the dance floor"
+              />
+
+              <label class="rsvp-label" for="optional-note">Optional note</label>
+              <textarea
+                id="optional-note"
+                name="optional_note"
+                rows="4"
+                placeholder="Anything else you'd like us to know"
+              ></textarea>
+
+              <button class="button button-primary" type="submit">Submit RSVP</button>
+              <p class="rsvp-form-feedback" id="rsvp-form-feedback" aria-live="polite"></p>
+            </form>
           </div>
         </div>
       </section>
@@ -429,6 +510,7 @@
       </div>
     </footer>
 
+    <script src="guest-data.js"></script>
     <script src="script.js"></script>
   </body>
 </html>
