@@ -29,6 +29,11 @@ function resolveGuestFromQuery() {
   );
 }
 
+function hasSubmittedQueryFlag() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("submitted") === "true";
+}
+
 function renderGuestWelcome(guest) {
   if (!guestWelcomeSection || !guestWelcomeHeading || !guest) {
     return;
@@ -68,6 +73,11 @@ function renderPersonalisedRsvp(guest) {
   }
 
   renderGuestAttendanceOptions(guest);
+  if (personalisedRsvpForm) {
+    personalisedRsvpForm.action = `/?guest=${encodeURIComponent(
+      guest.slug
+    )}&submitted=true#rsvp`;
+  }
   if (rsvpGuestSlugInput) {
     rsvpGuestSlugInput.value = guest.slug;
   }
@@ -79,35 +89,20 @@ function renderPersonalisedRsvp(guest) {
   personalisedRsvpCard.hidden = false;
 }
 
-async function submitPersonalisedRsvp(guest, form) {
+function buildSubmissionPayload(guest, form) {
   const formData = new FormData(form);
   const attendingGuests = formData.getAll("attendingGuests");
-
-  formData.set("guest_slug", guest.slug);
-  formData.set("household_name", guest.displayName);
-  formData.set("attending_guests", JSON.stringify(attendingGuests));
-  if (rsvpAttendingGuestsInput) {
-    rsvpAttendingGuestsInput.value = JSON.stringify(attendingGuests);
-  }
-
   const dietaryRequirements =
     formData.get("dietary_requirements")?.toString().trim() || "";
   const songRequest = formData.get("song_request")?.toString().trim() || "";
   const optionalNote = formData.get("optional_note")?.toString().trim() || "";
 
-  formData.set("dietary_requirements", dietaryRequirements);
-  formData.set("song_request", songRequest);
-  formData.set("optional_note", optionalNote);
-
-  if (
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1"
-  ) {
-    const localSubmissions = JSON.parse(
-      window.localStorage.getItem("rsvpPreviewSubmissions") || "[]"
-    );
-
-    localSubmissions.push({
+  return {
+    attendingGuests,
+    dietaryRequirements,
+    songRequest,
+    optionalNote,
+    record: {
       guest_slug: guest.slug,
       household_name: guest.displayName,
       attending_guests: attendingGuests,
@@ -115,29 +110,20 @@ async function submitPersonalisedRsvp(guest, form) {
       song_request: songRequest,
       optional_note: optionalNote,
       submitted_at: new Date().toISOString(),
-    });
-
-    window.localStorage.setItem(
-      "rsvpPreviewSubmissions",
-      JSON.stringify(localSubmissions)
-    );
-
-    return { localPreview: true };
-  }
-
-  const response = await fetch("/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: new URLSearchParams(formData).toString(),
-  });
+  };
+}
 
-  if (!response.ok) {
-    throw new Error("Unable to submit RSVP.");
+function syncRsvpHiddenFields(guest, attendingGuests) {
+  if (rsvpGuestSlugInput) {
+    rsvpGuestSlugInput.value = guest.slug;
   }
-
-  return { localPreview: false };
+  if (rsvpHouseholdNameInput) {
+    rsvpHouseholdNameInput.value = guest.displayName;
+  }
+  if (rsvpAttendingGuestsInput) {
+    rsvpAttendingGuestsInput.value = JSON.stringify(attendingGuests);
+  }
 }
 
 navLinks.forEach((link) => {
@@ -179,37 +165,50 @@ const guest = resolveGuestFromQuery();
 if (guest) {
   renderGuestWelcome(guest);
   renderPersonalisedRsvp(guest);
+  if (hasSubmittedQueryFlag() && rsvpFeedback) {
+    rsvpFeedback.textContent = "Thank you — your RSVP has been received.";
+  }
 }
 
 if (personalisedRsvpForm && rsvpFeedback) {
-  personalisedRsvpForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-
+  personalisedRsvpForm.addEventListener("submit", (event) => {
     const activeGuest = resolveGuestFromQuery();
 
     if (!activeGuest) {
+      event.preventDefault();
+      return;
+    }
+
+    const submission = buildSubmissionPayload(activeGuest, personalisedRsvpForm);
+    syncRsvpHiddenFields(activeGuest, submission.attendingGuests);
+
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
+      event.preventDefault();
+
+      const localSubmissions = JSON.parse(
+        window.localStorage.getItem("rsvpPreviewSubmissions") || "[]"
+      );
+
+      localSubmissions.push(submission.record);
+
+      window.localStorage.setItem(
+        "rsvpPreviewSubmissions",
+        JSON.stringify(localSubmissions)
+      );
+
+      rsvpFeedback.textContent =
+        "Preview saved locally. Live submissions will appear in Netlify.";
+      personalisedRsvpForm.reset();
+      if (rsvpAttendingGuestsInput) {
+        rsvpAttendingGuestsInput.value = "";
+      }
+      syncRsvpHiddenFields(activeGuest, []);
       return;
     }
 
     rsvpFeedback.textContent = "Sending your RSVP...";
-
-    try {
-      const result = await submitPersonalisedRsvp(activeGuest, personalisedRsvpForm);
-      rsvpFeedback.textContent = result?.localPreview
-        ? "Preview saved locally. Live submissions will appear in Netlify."
-        : "Thank you — your RSVP has been received.";
-      personalisedRsvpForm.reset();
-      if (rsvpGuestSlugInput) {
-        rsvpGuestSlugInput.value = activeGuest.slug;
-      }
-      if (rsvpHouseholdNameInput) {
-        rsvpHouseholdNameInput.value = activeGuest.displayName;
-      }
-      if (rsvpAttendingGuestsInput) {
-        rsvpAttendingGuestsInput.value = "";
-      }
-    } catch (error) {
-      rsvpFeedback.textContent = "Sorry, something went wrong. Please try again.";
-    }
   });
 }
