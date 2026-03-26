@@ -115,16 +115,21 @@ async function submitToEmailService(payload) {
   formData.append("_subject", `Wedding RSVP: ${payload.household_name}`);
   formData.append("_captcha", "false");
   formData.append("_template", "table");
-  formData.append("household_name", payload.household_name);
-  formData.append("guest_slug", payload.guest_slug);
-  formData.append("attending_guests", payload.attending_guests.join(", "));
+  formData.append("Household", payload.household_name);
+  formData.append("Guest Link", payload.guest_slug);
   formData.append(
-    "dietary_requirements",
+    "Attending",
+    payload.attending_guests.length
+      ? payload.attending_guests.join(", ")
+      : "No one selected"
+  );
+  formData.append(
+    "Dietary Requirements",
     payload.dietary_requirements || "None given"
   );
-  formData.append("song_request", payload.song_request || "None given");
-  formData.append("optional_note", payload.optional_note || "None given");
-  formData.append("submitted_at", payload.submitted_at);
+  formData.append("Song Request", payload.song_request || "None given");
+  formData.append("Note", payload.optional_note || "None given");
+  formData.append("Submitted At", payload.submitted_at);
 
   await fetch(endpoint, {
     method: "POST",
@@ -204,7 +209,7 @@ if (personalisedRsvpForm && rsvpFeedback) {
     ) {
       savePreviewSubmission(payload);
       rsvpFeedback.textContent =
-        "Preview saved locally. Live submissions will go to your email.";
+        "Thank you so much — we’re so excited to celebrate with you, and we’ve got your RSVP.";
       personalisedRsvpForm.reset();
       return;
     }
@@ -219,7 +224,8 @@ if (personalisedRsvpForm && rsvpFeedback) {
 
     try {
       await submitToEmailService(payload);
-      rsvpFeedback.textContent = "Thank you — your RSVP has been received.";
+      rsvpFeedback.textContent =
+        "Thank you so much — we’re so excited to celebrate with you, and we’ve got your RSVP.";
       personalisedRsvpForm.reset();
     } catch (error) {
       rsvpFeedback.textContent = "Sorry, something went wrong. Please try again.";
