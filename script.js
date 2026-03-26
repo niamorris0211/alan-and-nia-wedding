@@ -1,5 +1,5 @@
 const navLinks = document.querySelectorAll('a[href^="#"]');
-const faqButtons = document.querySelectorAll(".faq-question");
+const faqList = document.getElementById("faq-list");
 const guestWelcomeSection = document.getElementById("guest-welcome");
 const guestWelcomeHeading = document.getElementById("guest-welcome-heading");
 const guestWelcomeCopy = document.getElementById("guest-welcome-copy");
@@ -109,6 +109,10 @@ function getGuestHouseholds() {
 
 function getAccommodationData() {
   return window.ACCOMMODATION_DATA || {};
+}
+
+function getFaqItems() {
+  return Array.isArray(window.FAQ_ITEMS) ? window.FAQ_ITEMS : [];
 }
 
 function getRsvpEndpoint() {
@@ -260,6 +264,86 @@ function buildStayImageSlide(accommodation, src, index) {
   });
 
   return figure;
+}
+
+function formatFaqParagraph(paragraph) {
+  return paragraph
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line, index) => (index === 0 && line.endsWith(":") ? `<strong>${line}</strong>` : line))
+    .join("<br />");
+}
+
+function renderFaqSection() {
+  if (!faqList) {
+    return;
+  }
+
+  const faqItems = getFaqItems();
+  faqList.innerHTML = "";
+
+  faqItems.forEach((item, index) => {
+    const article = document.createElement("article");
+    article.className = "faq-item";
+
+    const questionId = `faq-question-${index + 1}`;
+    const answerId = `faq-answer-${index + 1}`;
+    const paragraphs = Array.isArray(item.answer) ? item.answer : [item.answer];
+
+    article.innerHTML = `
+      <button
+        class="faq-question"
+        id="${questionId}"
+        type="button"
+        aria-expanded="false"
+        aria-controls="${answerId}"
+      >
+        <span>${item.question}</span>
+      </button>
+      <div class="faq-answer" id="${answerId}" role="region" aria-labelledby="${questionId}">
+        ${paragraphs.map((paragraph) => `<p>${formatFaqParagraph(paragraph)}</p>`).join("")}
+      </div>
+    `;
+
+    faqList.appendChild(article);
+  });
+}
+
+function setupFaqAccordion() {
+  if (!faqList) {
+    return;
+  }
+
+  const faqButtons = faqList.querySelectorAll(".faq-question");
+
+  faqButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const faqItem = button.closest(".faq-item");
+      const answer = faqItem?.querySelector(".faq-answer");
+      const isOpen = faqItem?.classList.contains("is-open");
+
+      faqList.querySelectorAll(".faq-item").forEach((item) => {
+        const itemButton = item.querySelector(".faq-question");
+        const itemAnswer = item.querySelector(".faq-answer");
+
+        item.classList.remove("is-open");
+        itemButton?.setAttribute("aria-expanded", "false");
+
+        if (itemAnswer) {
+          itemAnswer.style.maxHeight = "0px";
+        }
+      });
+
+      if (!faqItem || !answer || isOpen) {
+        return;
+      }
+
+      faqItem.classList.add("is-open");
+      button.setAttribute("aria-expanded", "true");
+      answer.style.maxHeight = `${answer.scrollHeight}px`;
+    });
+  });
 }
 
 function updateStayCarouselControls() {
@@ -469,17 +553,8 @@ navLinks.forEach((link) => {
   });
 });
 
-faqButtons.forEach((button) => {
-  button.addEventListener("click", () => {
-    const faqItem = button.closest(".faq-item");
-    const answer = faqItem.querySelector(".faq-answer");
-    const isOpen = faqItem.classList.contains("is-open");
-
-    faqItem.classList.toggle("is-open", !isOpen);
-    button.setAttribute("aria-expanded", String(!isOpen));
-    answer.style.maxHeight = !isOpen ? `${answer.scrollHeight}px` : "0px";
-  });
-});
+renderFaqSection();
+setupFaqAccordion();
 
 if (stayCarouselPrev) {
   stayCarouselPrev.addEventListener("click", () => scrollStayCarousel(-1));

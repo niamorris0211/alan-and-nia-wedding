@@ -1123,9 +1123,14 @@ h3 {
   max-width: 900px;
 }
 
+.faq-intro {
+  max-width: 34rem;
+  margin: 0.55rem auto 0;
+}
+
 .faq-list {
   display: grid;
-  gap: 0.8rem;
+  gap: 0.95rem;
 }
 
 .bottom-image-card {
@@ -1146,9 +1151,18 @@ h3 {
 
 .faq-item {
   overflow: hidden;
-  border-radius: var(--radius-lg);
+  border-radius: 28px;
+  border: 1px solid rgba(77, 102, 80, 0.1);
   background:
     linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(239, 245, 236, 0.86));
+  box-shadow: 0 14px 36px rgba(52, 62, 52, 0.06);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.faq-item.is-open {
+  transform: translateY(-1px);
+  border-color: rgba(127, 150, 124, 0.2);
+  box-shadow: 0 20px 40px rgba(52, 62, 52, 0.09);
 }
 
 .faq-question {
@@ -1161,7 +1175,8 @@ h3 {
   border: 0;
   background: transparent;
   text-align: left;
-  font-size: 1.7rem;
+  font-size: clamp(1.22rem, 2vw, 1.5rem);
+  line-height: 1.25;
   color: var(--text);
   cursor: pointer;
 }
@@ -1169,8 +1184,14 @@ h3 {
 .faq-question::after {
   content: "+";
   flex: 0 0 auto;
-  font-size: 1.4rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
   color: var(--berry);
+  background: rgba(154, 111, 122, 0.08);
 }
 
 .faq-item.is-open .faq-question::after {
@@ -1180,13 +1201,28 @@ h3 {
 .faq-answer {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 220ms ease;
+  transition: max-height 260ms ease;
 }
 
 .faq-answer p {
   margin: 0;
-  padding: 0 1.3rem 1.25rem;
-  max-width: 38rem;
+  padding: 0 1.3rem 1rem;
+  max-width: 39rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.faq-answer p:first-child {
+  padding-top: 0.15rem;
+}
+
+.faq-answer p:last-child {
+  padding-bottom: 1.35rem;
+}
+
+.faq-answer strong {
+  color: var(--text);
+  font-weight: 600;
 }
 
 .site-footer {
