@@ -1294,10 +1294,40 @@ h3 {
     opacity: 0.22;
   }
 
+  .site-header {
+    backdrop-filter: blur(12px);
+  }
+
   .nav-wrap {
     min-height: auto;
-    padding: 1rem 0;
-    flex-direction: column;
+    padding: 0.9rem 0 0.7rem;
+    align-items: flex-start;
+  }
+
+  .brand {
+    font-size: 1.28rem;
+  }
+
+  .site-nav {
+    width: 100%;
+    gap: 0.55rem;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+    scrollbar-width: none;
+  }
+
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .site-nav a {
+    flex: 0 0 auto;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(255, 253, 249, 0.72);
+    border: 1px solid rgba(77, 102, 80, 0.08);
   }
 
   .hero-section {
@@ -1317,6 +1347,10 @@ h3 {
     margin: 0 auto -1.2rem;
     padding: 1.25rem 1rem 1.35rem;
     border-radius: 20px;
+  }
+
+  .guest-welcome-copy {
+    margin-bottom: 1.15rem;
   }
 
   .section {
@@ -1382,6 +1416,27 @@ h3 {
     grid-column: auto;
   }
 
+  .section-heading {
+    margin-bottom: 1.35rem;
+  }
+
+  .section-heading h2,
+  .schedule-weekend-heading h2,
+  .rsvp-success-state h3 {
+    line-height: 1.08;
+  }
+
+  .schedule-weekend-overview,
+  .rsvp-card-static,
+  .stay-personalised-card {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .weekend-card {
+    padding: 1.15rem 1rem;
+  }
+
   .stay-map-wrap iframe {
     height: 320px;
   }
@@ -1397,6 +1452,15 @@ h3 {
     gap: 0.35rem;
   }
 
+  .stay-personalised-summary,
+  .stay-optional-note {
+    max-width: 100%;
+  }
+
+  .stay-carousel-shell {
+    gap: 0.85rem;
+  }
+
   .stay-carousel {
     grid-auto-columns: 100%;
   }
@@ -1409,6 +1473,23 @@ h3 {
     justify-content: space-between;
   }
 
+  .rsvp-copy-centered {
+    margin-bottom: 1rem;
+  }
+
+  .rsvp-form-live {
+    gap: 0.9rem;
+  }
+
+  .rsvp-success-state {
+    padding: 2rem 1.15rem;
+  }
+
+  .rsvp-success-icon {
+    width: 76px;
+    height: 76px;
+  }
+
   .hero-actions {
     flex-direction: column;
   }
@@ -1418,7 +1499,13 @@ h3 {
   }
 
   .faq-question {
-    font-size: 1.45rem;
+    font-size: 1.28rem;
+    padding: 1rem 1rem;
+  }
+
+  .faq-answer p {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .bottom-image-card img {
