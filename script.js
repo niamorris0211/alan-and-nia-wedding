@@ -11,6 +11,7 @@ const personalisedRsvpForm = document.getElementById("personalised-rsvp-form");
 const rsvpSuccessState = document.getElementById("rsvp-success-state");
 const rsvpSuccessHeading = document.getElementById("rsvp-success-heading");
 const rsvpSuccessCopy = document.getElementById("rsvp-success-copy");
+const rsvpSuccessReset = document.getElementById("rsvp-success-reset");
 const attendingList = document.getElementById("rsvp-attending-list");
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
@@ -117,6 +118,20 @@ function getFaqItems() {
 
 function getRsvpEndpoint() {
   return window.RSVP_CONFIG?.emailSubmitEndpoint?.trim() || "";
+}
+
+function getRsvpSubmissionEndpoint() {
+  const endpoint = getRsvpEndpoint();
+
+  if (!endpoint) {
+    return "";
+  }
+
+  if (endpoint.includes("formsubmit.co/") && !endpoint.includes("formsubmit.co/ajax/")) {
+    return endpoint.replace("formsubmit.co/", "formsubmit.co/ajax/");
+  }
+
+  return endpoint;
 }
 
 function resolveGuestFromQuery() {
@@ -230,6 +245,20 @@ function showRsvpSuccessState(guest) {
   }
 
   rsvpSuccessState.hidden = false;
+}
+
+function showRsvpForm() {
+  if (personalisedRsvpForm) {
+    personalisedRsvpForm.hidden = false;
+  }
+
+  if (rsvpSuccessState) {
+    rsvpSuccessState.hidden = true;
+  }
+
+  if (rsvpFeedback) {
+    rsvpFeedback.textContent = "";
+  }
 }
 
 function renderPersonalisedSchedule(guest) {
@@ -486,7 +515,7 @@ function buildSubmissionPayload(guest, form) {
 }
 
 async function submitToEmailService(payload) {
-  const endpoint = getRsvpEndpoint();
+  const endpoint = getRsvpSubmissionEndpoint();
 
   if (!endpoint) {
     throw new Error("Missing email endpoint.");
@@ -512,10 +541,32 @@ async function submitToEmailService(payload) {
   formData.append("Note", payload.optional_note || "None given");
   formData.append("Submitted At", payload.submitted_at);
 
-  await fetch(endpoint, {
+  const response = await fetch(endpoint, {
     method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
     body: formData,
   });
+
+  let responseData = null;
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    responseData = await response.json();
+  } else {
+    responseData = await response.text();
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      typeof responseData === "object" && responseData?.message
+        ? responseData.message
+        : "RSVP submission was not accepted."
+    );
+  }
+
+  return responseData;
 }
 
 function savePreviewSubmission(payload) {
@@ -555,6 +606,12 @@ navLinks.forEach((link) => {
 
 renderFaqSection();
 setupFaqAccordion();
+
+if (rsvpSuccessReset) {
+  rsvpSuccessReset.addEventListener("click", () => {
+    showRsvpForm();
+  });
+}
 
 if (stayCarouselPrev) {
   stayCarouselPrev.addEventListener("click", () => scrollStayCarousel(-1));
@@ -608,7 +665,8 @@ if (personalisedRsvpForm && rsvpFeedback) {
       personalisedRsvpForm.reset();
       showRsvpSuccessState(activeGuest);
     } catch (error) {
-      rsvpFeedback.textContent = "Sorry, something went wrong. Please try again.";
+      rsvpFeedback.textContent =
+        "Sorry, that didn’t send properly. If this is your first test, check Hotmail for a FormSubmit activation email, then try again.";
     }
   });
 }
