@@ -8,6 +8,9 @@ const genericRsvpCopy = document.getElementById("rsvp-generic-copy");
 const genericRsvpCard = document.getElementById("rsvp-generic-card");
 const personalisedRsvpCard = document.getElementById("rsvp-personalised");
 const personalisedRsvpForm = document.getElementById("personalised-rsvp-form");
+const rsvpSuccessState = document.getElementById("rsvp-success-state");
+const rsvpSuccessHeading = document.getElementById("rsvp-success-heading");
+const rsvpSuccessCopy = document.getElementById("rsvp-success-copy");
 const attendingList = document.getElementById("rsvp-attending-list");
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
@@ -182,6 +185,47 @@ function renderPersonalisedRsvp(guest) {
   genericRsvpCopy.hidden = true;
   genericRsvpCard.hidden = true;
   personalisedRsvpCard.hidden = false;
+
+  if (personalisedRsvpForm) {
+    personalisedRsvpForm.hidden = false;
+  }
+
+  if (rsvpSuccessState) {
+    rsvpSuccessState.hidden = true;
+  }
+
+  if (rsvpFeedback) {
+    rsvpFeedback.textContent = "";
+  }
+}
+
+function showRsvpSuccessState(guest) {
+  if (!rsvpSuccessState) {
+    return;
+  }
+
+  const householdName = guest?.displayName?.trim();
+
+  if (rsvpSuccessHeading) {
+    rsvpSuccessHeading.textContent = householdName
+      ? `Thanks ${householdName} — we’ve got your RSVP`
+      : "Thanks — we’ve got your RSVP";
+  }
+
+  if (rsvpSuccessCopy) {
+    rsvpSuccessCopy.textContent =
+      "If anything changes, just message us and we’ll happily help.";
+  }
+
+  if (personalisedRsvpForm) {
+    personalisedRsvpForm.hidden = true;
+  }
+
+  if (rsvpFeedback) {
+    rsvpFeedback.textContent = "";
+  }
+
+  rsvpSuccessState.hidden = false;
 }
 
 function renderPersonalisedSchedule(guest) {
@@ -471,9 +515,8 @@ if (personalisedRsvpForm && rsvpFeedback) {
       window.location.hostname === "127.0.0.1"
     ) {
       savePreviewSubmission(payload);
-      rsvpFeedback.textContent =
-        "Thank you so much — we’re so excited to celebrate with you, and we’ve got your RSVP.";
       personalisedRsvpForm.reset();
+      showRsvpSuccessState(activeGuest);
       return;
     }
 
@@ -487,9 +530,8 @@ if (personalisedRsvpForm && rsvpFeedback) {
 
     try {
       await submitToEmailService(payload);
-      rsvpFeedback.textContent =
-        "Thank you so much — we’re so excited to celebrate with you, and we’ve got your RSVP.";
       personalisedRsvpForm.reset();
+      showRsvpSuccessState(activeGuest);
     } catch (error) {
       rsvpFeedback.textContent = "Sorry, something went wrong. Please try again.";
     }

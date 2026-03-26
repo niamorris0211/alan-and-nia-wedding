@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260326b" />
+    <link rel="stylesheet" href="style.css?v=20260326c" />
   </head>
   <body>
     <header class="site-header">
@@ -527,6 +527,21 @@
               <button class="button button-primary" type="submit">Submit RSVP</button>
               <p class="rsvp-form-feedback" id="rsvp-form-feedback" aria-live="polite"></p>
             </form>
+
+            <div class="rsvp-success-state" id="rsvp-success-state" hidden aria-live="polite">
+              <div class="rsvp-success-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" role="presentation" focusable="false">
+                  <circle cx="24" cy="24" r="23"></circle>
+                  <path d="M16 24.5 21.5 30 33 18.5"></path>
+                </svg>
+              </div>
+              <p class="eyebrow">RSVP received</p>
+              <h3 id="rsvp-success-heading">Thanks — we’ve got your RSVP</h3>
+              <p class="rsvp-success-copy" id="rsvp-success-copy">
+                If anything changes, just message us and we’ll happily help.
+              </p>
+              <p class="rsvp-success-signoff">We can’t wait to celebrate with you.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -618,9 +633,9 @@
       </div>
     </footer>
 
-    <script src="guest-data.js?v=20260326b"></script>
-    <script src="accommodation-data.js?v=20260326b"></script>
-    <script src="rsvp-config.js?v=20260326b"></script>
-    <script src="script.js?v=20260326b"></script>
+    <script src="guest-data.js?v=20260326c"></script>
+    <script src="accommodation-data.js?v=20260326c"></script>
+    <script src="rsvp-config.js?v=20260326c"></script>
+    <script src="script.js?v=20260326c"></script>
   </body>
 </html>

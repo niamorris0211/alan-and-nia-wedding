@@ -255,7 +255,8 @@ h3,
 .rsvp-personalised[hidden],
 .guest-welcome[hidden],
 #rsvp-generic-copy[hidden],
-#rsvp-generic-card[hidden] {
+#rsvp-generic-card[hidden],
+.rsvp-success-state[hidden] {
   display: none;
 }
 
@@ -312,6 +313,67 @@ h3,
   margin: 0.25rem 0 0;
   text-align: center;
   color: var(--moss);
+}
+
+.rsvp-success-state {
+  max-width: 620px;
+  margin: 0.5rem auto 0;
+  padding: 2.4rem 2rem;
+  text-align: center;
+  border-radius: 28px;
+  border: 1px solid rgba(127, 150, 124, 0.2);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.88), transparent 46%),
+    linear-gradient(180deg, rgba(250, 252, 247, 0.98), rgba(236, 244, 232, 0.96));
+  box-shadow: 0 22px 48px rgba(52, 62, 52, 0.1);
+}
+
+.rsvp-success-icon {
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.95), rgba(219, 233, 212, 0.9));
+  box-shadow: 0 14px 30px rgba(77, 102, 80, 0.16);
+}
+
+.rsvp-success-icon svg {
+  width: 50px;
+  height: 50px;
+}
+
+.rsvp-success-icon circle {
+  fill: rgba(127, 150, 124, 0.16);
+  stroke: rgba(127, 150, 124, 0.24);
+  stroke-width: 1;
+}
+
+.rsvp-success-icon path {
+  fill: none;
+  stroke: var(--moss);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.rsvp-success-state h3 {
+  margin: 0 0 0.75rem;
+  font-size: clamp(2rem, 4vw, 2.7rem);
+}
+
+.rsvp-success-copy,
+.rsvp-success-signoff {
+  max-width: 29rem;
+  margin: 0 auto;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.rsvp-success-signoff {
+  margin-top: 0.85rem;
+  color: var(--text);
 }
 
 .hero-copy {
