@@ -209,8 +209,13 @@ h3,
     radial-gradient(circle at 82% 18%, rgba(251, 248, 242, 0.92), rgba(251, 248, 242, 0.46) 36%, transparent 64%);
 }
 
+.hero > * {
+  min-width: 0;
+}
+
 .hero-content {
   display: block;
+  min-width: 0;
 }
 
 .guest-welcome {
@@ -387,6 +392,7 @@ h3,
   z-index: 2;
   padding: 0;
   max-width: 500px;
+  min-width: 0;
 }
 
 .section-heading {
@@ -1341,7 +1347,8 @@ h3 {
 
   .hero {
     gap: 24px;
-    padding: 24px;
+    padding: 20px 16px 24px;
+    width: calc(100% - 1rem);
   }
 
   .guest-welcome {
@@ -1372,9 +1379,28 @@ h3 {
   }
 
   .hero-image img {
-    height: 360px;
+    height: 300px;
     aspect-ratio: auto;
     object-position: center 30%;
+  }
+
+  h1 {
+    font-size: clamp(3rem, 14vw, 4rem);
+    line-height: 0.95;
+  }
+
+  .hero-intro {
+    max-width: 100%;
+    font-size: 0.98rem;
+    margin: 14px 0;
+  }
+
+  .hero-venue-link-wrap {
+    margin: 6px 0 18px;
+  }
+
+  .hero-actions {
+    gap: 10px;
   }
 
   .hero-flower-left {
