@@ -5,7 +5,6 @@ window.FAQ_ITEMS = [
       "Address:\nBirtsmorton Court,\nBirtsmorton, Near Malvern,\nWorcestershire, WR13 6JS",
       "Parking:\nThere is plenty of parking available on-site, so no need to worry about finding a space.",
       "Taxis:\nThere are local taxis available, but we’d recommend booking in advance - especially for the evening.",
-      "Getting here:\nNearest stations are Great Malvern and Gloucester, with a short taxi ride to the venue.",
     ],
   },
   {
