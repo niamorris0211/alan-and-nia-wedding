@@ -2,6 +2,7 @@ const navLinks = document.querySelectorAll('a[href^="#"]');
 const faqButtons = document.querySelectorAll(".faq-question");
 const guestWelcomeSection = document.getElementById("guest-welcome");
 const guestWelcomeHeading = document.getElementById("guest-welcome-heading");
+const scheduleWeekendOverview = document.getElementById("schedule-weekend-overview");
 const genericRsvpCopy = document.getElementById("rsvp-generic-copy");
 const genericRsvpCard = document.getElementById("rsvp-generic-card");
 const personalisedRsvpCard = document.getElementById("rsvp-personalised");
@@ -10,9 +11,100 @@ const attendingList = document.getElementById("rsvp-attending-list");
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
 const rsvpHouseholdNameInput = document.getElementById("rsvp-household-name");
+const stayGenericHeading = document.getElementById("stay-generic-heading");
+const stayGenericContent = document.getElementById("stay-generic-content");
+const stayPersonalised = document.getElementById("stay-personalised");
+const stayPersonalisedLine = document.getElementById("stay-personalised-line");
+const stayAccommodationTitle = document.getElementById("stay-accommodation-title");
+const stayAccommodationLabel = document.getElementById("stay-accommodation-label");
+const staySummary = document.getElementById("stay-summary");
+const staySleeps = document.getElementById("stay-sleeps");
+const stayTiming = document.getElementById("stay-timing");
+const stayCheckoutRow = document.getElementById("stay-checkout-row");
+const stayCheckout = document.getElementById("stay-checkout");
+const stayLocation = document.getElementById("stay-location");
+const stayNote = document.getElementById("stay-note");
+const stayCarousel = document.getElementById("stay-carousel");
+const stayCarouselPrev = document.getElementById("stay-carousel-prev");
+const stayCarouselNext = document.getElementById("stay-carousel-next");
+const ACCOMMODATION_NAME_ALIASES = {
+  "Malvern Chase Shepherds Hut": "Malvern Chase Shepherd’s Hut",
+  "Midsummer Shepherds Hut": "Midsummer Shepherd's Hut",
+  "Sugarloaf Shepherds Hut": "Sugarloaf Shepherd's Hut",
+};
+
+function slugifyGuestName(name) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function splitHouseholdNames(household) {
+  if (!household) {
+    return [];
+  }
+
+  return household
+    .replace(/\s*&\s*/g, ",")
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
+}
+
+function normaliseAccommodationName(stayName) {
+  if (!stayName) {
+    return null;
+  }
+
+  return ACCOMMODATION_NAME_ALIASES[stayName] || stayName;
+}
+
+function normaliseGuestHousehold(guest, index) {
+  const displayName = guest.displayName || guest.household || "";
+  const inviteType = guest.inviteType || guest.type || "day";
+  const accommodationName = normaliseAccommodationName(
+    guest.accommodationName || guest.stay || null
+  );
+  const guestNames = Array.isArray(guest.guests) && guest.guests.length
+    ? guest.guests.map((householdGuest, guestIndex) => {
+        const guestName =
+          typeof householdGuest === "string"
+            ? householdGuest
+            : householdGuest.name || householdGuest.displayName || "";
+
+        return {
+          id:
+            (typeof householdGuest === "object" && householdGuest.id) ||
+            `${guest.slug || `guest-${index + 1}`}-${slugifyGuestName(guestName) || guestIndex + 1}`,
+          name: guestName,
+        };
+      })
+    : splitHouseholdNames(displayName).map((name, guestIndex) => ({
+        id: `${guest.slug || `guest-${index + 1}`}-${slugifyGuestName(name) || guestIndex + 1}`,
+        name,
+      }));
+
+  return {
+    slug: guest.slug,
+    displayName,
+    inviteType,
+    isStayingOnsite: Boolean(accommodationName),
+    accommodationName,
+    guests: guestNames,
+  };
+}
 
 function getGuestHouseholds() {
-  return Array.isArray(window.GUEST_HOUSEHOLDS) ? window.GUEST_HOUSEHOLDS : [];
+  if (!Array.isArray(window.GUEST_HOUSEHOLDS)) {
+    return [];
+  }
+
+  return window.GUEST_HOUSEHOLDS.map(normaliseGuestHousehold);
+}
+
+function getAccommodationData() {
+  return window.ACCOMMODATION_DATA || {};
 }
 
 function getRsvpEndpoint() {
@@ -83,6 +175,160 @@ function renderPersonalisedRsvp(guest) {
   genericRsvpCopy.hidden = true;
   genericRsvpCard.hidden = true;
   personalisedRsvpCard.hidden = false;
+}
+
+function renderPersonalisedSchedule(guest) {
+  if (!scheduleWeekendOverview) {
+    return;
+  }
+
+  scheduleWeekendOverview.hidden = !guest || guest.inviteType !== "weekend";
+}
+
+function buildStayPlaceholder(title, index) {
+  const placeholder = document.createElement("article");
+  placeholder.className = "stay-carousel-slide stay-carousel-placeholder";
+  placeholder.innerHTML = `
+    <span>Photo ${index + 1}</span>
+    <strong>${title}</strong>
+  `;
+  return placeholder;
+}
+
+function buildStayImageSlide(accommodation, src, index) {
+  const figure = document.createElement("figure");
+  figure.className = "stay-carousel-slide stay-carousel-image";
+  figure.innerHTML = `
+    <img src="${src}" alt="${accommodation.title} photo ${index + 1}" />
+  `;
+
+  const image = figure.querySelector("img");
+
+  image.addEventListener("error", () => {
+    figure.replaceWith(buildStayPlaceholder(accommodation.title, index));
+  });
+
+  return figure;
+}
+
+function updateStayCarouselControls() {
+  if (!stayCarouselPrev || !stayCarouselNext || !stayCarousel) {
+    return;
+  }
+
+  const hasSlides = stayCarousel.children.length > 1;
+  stayCarouselPrev.hidden = !hasSlides;
+  stayCarouselNext.hidden = !hasSlides;
+}
+
+function renderStayCarousel(accommodation) {
+  if (!stayCarousel) {
+    return;
+  }
+
+  stayCarousel.innerHTML = "";
+
+  const imagePaths = Array.isArray(accommodation.images) ? accommodation.images : [];
+
+  if (imagePaths.length) {
+    imagePaths.forEach((src, index) => {
+      stayCarousel.appendChild(buildStayImageSlide(accommodation, src, index));
+    });
+  } else {
+    for (let index = 0; index < 3; index += 1) {
+      stayCarousel.appendChild(buildStayPlaceholder(accommodation.title, index));
+    }
+  }
+
+  stayCarousel.scrollTo({ left: 0, behavior: "auto" });
+  updateStayCarouselControls();
+}
+
+function scrollStayCarousel(direction) {
+  if (!stayCarousel) {
+    return;
+  }
+
+  const amount = Math.max(stayCarousel.clientWidth * 0.84, 260);
+  stayCarousel.scrollBy({
+    left: direction * amount,
+    behavior: "smooth",
+  });
+}
+
+function renderPersonalisedStay(guest) {
+  if (
+    !guest ||
+    !guest.accommodationName ||
+    !stayPersonalised ||
+    !stayGenericHeading ||
+    !stayGenericContent
+  ) {
+    return;
+  }
+
+  const accommodation = getAccommodationData()[guest.accommodationName];
+
+  if (!accommodation) {
+    return;
+  }
+
+  stayGenericHeading.hidden = true;
+  stayGenericContent.hidden = true;
+  stayPersonalised.hidden = false;
+
+  if (stayPersonalisedLine) {
+    stayPersonalisedLine.textContent = `For the wedding weekend, you’ll be staying in ${accommodation.title}.`;
+  }
+
+  if (stayAccommodationTitle) {
+    stayAccommodationTitle.textContent = accommodation.displayTitle || accommodation.title;
+  }
+
+  if (stayAccommodationLabel) {
+    if (accommodation.secondaryLabel) {
+      stayAccommodationLabel.textContent = accommodation.secondaryLabel;
+      stayAccommodationLabel.hidden = false;
+    } else {
+      stayAccommodationLabel.hidden = true;
+    }
+  }
+
+  if (staySummary) {
+    staySummary.textContent = accommodation.shortSummary;
+  }
+
+  if (staySleeps) {
+    staySleeps.textContent = accommodation.sleepsLabel;
+  }
+
+  if (stayTiming) {
+    stayTiming.textContent = accommodation.timingLabel;
+  }
+
+  if (stayCheckoutRow && stayCheckout) {
+    if (accommodation.checkoutLabel) {
+      stayCheckout.textContent = accommodation.checkoutLabel;
+      stayCheckoutRow.hidden = false;
+    } else {
+      stayCheckoutRow.hidden = true;
+    }
+  }
+
+  if (stayLocation) {
+    stayLocation.textContent = accommodation.locationNote;
+  }
+
+  if (stayNote) {
+    if (accommodation.optionalNotes) {
+      stayNote.textContent = accommodation.optionalNotes;
+      stayNote.hidden = false;
+    } else {
+      stayNote.hidden = true;
+    }
+  }
+
+  renderStayCarousel(accommodation);
 }
 
 function buildSubmissionPayload(guest, form) {
@@ -184,11 +430,21 @@ faqButtons.forEach((button) => {
   });
 });
 
+if (stayCarouselPrev) {
+  stayCarouselPrev.addEventListener("click", () => scrollStayCarousel(-1));
+}
+
+if (stayCarouselNext) {
+  stayCarouselNext.addEventListener("click", () => scrollStayCarousel(1));
+}
+
 const guest = resolveGuestFromQuery();
 
 if (guest) {
   renderGuestWelcome(guest);
+  renderPersonalisedSchedule(guest);
   renderPersonalisedRsvp(guest);
+  renderPersonalisedStay(guest);
 }
 
 if (personalisedRsvpForm && rsvpFeedback) {
