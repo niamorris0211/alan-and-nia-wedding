@@ -10,10 +10,13 @@ const attendingList = document.getElementById("rsvp-attending-list");
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
 const rsvpHouseholdNameInput = document.getElementById("rsvp-household-name");
-const rsvpAttendingGuestsInput = document.getElementById("rsvp-attending-guests");
 
 function getGuestHouseholds() {
   return Array.isArray(window.GUEST_HOUSEHOLDS) ? window.GUEST_HOUSEHOLDS : [];
+}
+
+function getRsvpEndpoint() {
+  return window.RSVP_CONFIG?.emailSubmitEndpoint?.trim() || "";
 }
 
 function resolveGuestFromQuery() {
@@ -27,11 +30,6 @@ function resolveGuestFromQuery() {
   return (
     getGuestHouseholds().find((guest) => guest.slug === guestSlug.trim()) || null
   );
-}
-
-function hasSubmittedQueryFlag() {
-  const params = new URLSearchParams(window.location.search);
-  return params.get("submitted") === "true";
 }
 
 function renderGuestWelcome(guest) {
@@ -73,17 +71,15 @@ function renderPersonalisedRsvp(guest) {
   }
 
   renderGuestAttendanceOptions(guest);
-  if (personalisedRsvpForm) {
-    personalisedRsvpForm.action = `/?guest=${encodeURIComponent(
-      guest.slug
-    )}&submitted=true#rsvp`;
-  }
+
   if (rsvpGuestSlugInput) {
     rsvpGuestSlugInput.value = guest.slug;
   }
+
   if (rsvpHouseholdNameInput) {
     rsvpHouseholdNameInput.value = guest.displayName;
   }
+
   genericRsvpCopy.hidden = true;
   genericRsvpCard.hidden = true;
   personalisedRsvpCard.hidden = false;
@@ -98,32 +94,55 @@ function buildSubmissionPayload(guest, form) {
   const optionalNote = formData.get("optional_note")?.toString().trim() || "";
 
   return {
-    attendingGuests,
-    dietaryRequirements,
-    songRequest,
-    optionalNote,
-    record: {
-      guest_slug: guest.slug,
-      household_name: guest.displayName,
-      attending_guests: attendingGuests,
-      dietary_requirements: dietaryRequirements,
-      song_request: songRequest,
-      optional_note: optionalNote,
-      submitted_at: new Date().toISOString(),
-    },
+    guest_slug: guest.slug,
+    household_name: guest.displayName,
+    attending_guests: attendingGuests,
+    dietary_requirements: dietaryRequirements,
+    song_request: songRequest,
+    optional_note: optionalNote,
+    submitted_at: new Date().toISOString(),
   };
 }
 
-function syncRsvpHiddenFields(guest, attendingGuests) {
-  if (rsvpGuestSlugInput) {
-    rsvpGuestSlugInput.value = guest.slug;
+async function submitToEmailService(payload) {
+  const endpoint = getRsvpEndpoint();
+
+  if (!endpoint) {
+    throw new Error("Missing email endpoint.");
   }
-  if (rsvpHouseholdNameInput) {
-    rsvpHouseholdNameInput.value = guest.displayName;
-  }
-  if (rsvpAttendingGuestsInput) {
-    rsvpAttendingGuestsInput.value = JSON.stringify(attendingGuests);
-  }
+
+  const formData = new FormData();
+  formData.append("_subject", `Wedding RSVP: ${payload.household_name}`);
+  formData.append("_captcha", "false");
+  formData.append("_template", "table");
+  formData.append("household_name", payload.household_name);
+  formData.append("guest_slug", payload.guest_slug);
+  formData.append("attending_guests", payload.attending_guests.join(", "));
+  formData.append(
+    "dietary_requirements",
+    payload.dietary_requirements || "None given"
+  );
+  formData.append("song_request", payload.song_request || "None given");
+  formData.append("optional_note", payload.optional_note || "None given");
+  formData.append("submitted_at", payload.submitted_at);
+
+  await fetch(endpoint, {
+    method: "POST",
+    body: formData,
+  });
+}
+
+function savePreviewSubmission(payload) {
+  const localSubmissions = JSON.parse(
+    window.localStorage.getItem("rsvpPreviewSubmissions") || "[]"
+  );
+
+  localSubmissions.push(payload);
+
+  window.localStorage.setItem(
+    "rsvpPreviewSubmissions",
+    JSON.stringify(localSubmissions)
+  );
 }
 
 navLinks.forEach((link) => {
@@ -165,50 +184,45 @@ const guest = resolveGuestFromQuery();
 if (guest) {
   renderGuestWelcome(guest);
   renderPersonalisedRsvp(guest);
-  if (hasSubmittedQueryFlag() && rsvpFeedback) {
-    rsvpFeedback.textContent = "Thank you — your RSVP has been received.";
-  }
 }
 
 if (personalisedRsvpForm && rsvpFeedback) {
-  personalisedRsvpForm.addEventListener("submit", (event) => {
+  personalisedRsvpForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
     const activeGuest = resolveGuestFromQuery();
 
     if (!activeGuest) {
-      event.preventDefault();
       return;
     }
 
-    const submission = buildSubmissionPayload(activeGuest, personalisedRsvpForm);
-    syncRsvpHiddenFields(activeGuest, submission.attendingGuests);
+    const payload = buildSubmissionPayload(activeGuest, personalisedRsvpForm);
 
     if (
       window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1"
     ) {
-      event.preventDefault();
-
-      const localSubmissions = JSON.parse(
-        window.localStorage.getItem("rsvpPreviewSubmissions") || "[]"
-      );
-
-      localSubmissions.push(submission.record);
-
-      window.localStorage.setItem(
-        "rsvpPreviewSubmissions",
-        JSON.stringify(localSubmissions)
-      );
-
+      savePreviewSubmission(payload);
       rsvpFeedback.textContent =
-        "Preview saved locally. Live submissions will appear in Netlify.";
+        "Preview saved locally. Live submissions will go to your email.";
       personalisedRsvpForm.reset();
-      if (rsvpAttendingGuestsInput) {
-        rsvpAttendingGuestsInput.value = "";
-      }
-      syncRsvpHiddenFields(activeGuest, []);
+      return;
+    }
+
+    if (!getRsvpEndpoint()) {
+      rsvpFeedback.textContent =
+        "RSVP email is almost ready. Add your email endpoint in rsvp-config.js.";
       return;
     }
 
     rsvpFeedback.textContent = "Sending your RSVP...";
+
+    try {
+      await submitToEmailService(payload);
+      rsvpFeedback.textContent = "Thank you — your RSVP has been received.";
+      personalisedRsvpForm.reset();
+    } catch (error) {
+      rsvpFeedback.textContent = "Sorry, something went wrong. Please try again.";
+    }
   });
 }
