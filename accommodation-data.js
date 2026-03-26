@@ -46,7 +46,7 @@ window.ACCOMMODATION_DATA = {
       "A peaceful shepherd’s hut with a cosy king-sized bed and space for children on the sofa bed.",
     timingLabel: "Sunday 2nd - Tuesday 4th August",
     checkoutLabel: "10am, Tuesday 4 August",
-    sleepsLabel: "Sleeps 2–4",
+    sleepsLabel: "Sleeps 2-4",
     locationNote: "On-site at Birtsmorton Court in a quiet countryside spot.",
     optionalNotes: "Includes a shower room and an optional hot tub.",
     images: [
