@@ -5,8 +5,8 @@ window.ACCOMMODATION_DATA = {
     displayTitle: "Hideaway Cottage",
     shortSummary:
       "A cosy on-site cottage with plenty of room for a relaxed night-before stay.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 10",
     locationNote: "On the Birtsmorton Court estate and close to the wedding setting.",
     optionalNotes:
@@ -44,8 +44,8 @@ window.ACCOMMODATION_DATA = {
     secondaryLabel: "Malvern Chase Shepherd’s Hut",
     shortSummary:
       "A peaceful shepherd’s hut with a cosy king-sized bed and space for children on the sofa bed.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 2–4",
     locationNote: "On-site at Birtsmorton Court in a quiet countryside spot.",
     optionalNotes: "Includes a shower room and an optional hot tub.",
@@ -73,8 +73,8 @@ window.ACCOMMODATION_DATA = {
     secondaryLabel: "Midsummer Shepherd's Hut",
     shortSummary:
       "A calm, compact shepherd’s hut that’s perfect for a comfortable overnight stay.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 2",
     locationNote: "On-site and close to the main wedding areas.",
     optionalNotes: "Includes a shower room and optional hot tub access.",
@@ -98,8 +98,8 @@ window.ACCOMMODATION_DATA = {
     secondaryLabel: "Sugarloaf Shepherd's Hut",
     shortSummary:
       "A warm, tucked-away shepherd’s hut with a simple, private feel for the night.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 2",
     locationNote: "On-site at Birtsmorton Court.",
     optionalNotes: "Includes a shower room.",
@@ -122,8 +122,8 @@ window.ACCOMMODATION_DATA = {
     displayTitle: "Berrow Lodge",
     shortSummary:
       "A spacious lodge with room to settle in comfortably after the celebrations.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 6",
     locationNote: "Off the estate, around 0.5 miles from the venue.",
     optionalNotes:
@@ -147,8 +147,8 @@ window.ACCOMMODATION_DATA = {
     displayTitle: "Swinyard Lodge",
     shortSummary:
       "A roomy single-level lodge that works beautifully for a relaxed family stay.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 8",
     locationNote: "Close to the venue and easy for a comfortable overnight stay.",
     optionalNotes:
@@ -190,8 +190,8 @@ window.ACCOMMODATION_DATA = {
     displayTitle: "Georgian Wing",
     shortSummary:
       "A lovely room in the Georgian Wing, perfect for staying close to the heart of the wedding weekend.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 2",
     locationNote: "Located within the main house and close to the main wedding areas.",
     optionalNotes: "Ideal for a couple wanting to be right near the celebrations.",
@@ -216,8 +216,8 @@ window.ACCOMMODATION_DATA = {
     displayTitle: "Georgian Suite",
     shortSummary:
       "A lovely option for a couple staying close to the heart of the wedding weekend.",
-    timingLabel: "2nd-4th August",
-    checkoutLabel: "10am, Monday 4 August",
+    timingLabel: "Sunday 2nd - Tuesday 4th August",
+    checkoutLabel: "10am, Tuesday 4 August",
     sleepsLabel: "Sleeps 2",
     locationNote: "Located within the main house and close to the main wedding areas.",
     optionalNotes: "Ideal for a couple wanting to be right near the celebrations.",

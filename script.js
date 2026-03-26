@@ -2,6 +2,7 @@ const navLinks = document.querySelectorAll('a[href^="#"]');
 const faqButtons = document.querySelectorAll(".faq-question");
 const guestWelcomeSection = document.getElementById("guest-welcome");
 const guestWelcomeHeading = document.getElementById("guest-welcome-heading");
+const guestWelcomeCopy = document.getElementById("guest-welcome-copy");
 const scheduleWeekendOverview = document.getElementById("schedule-weekend-overview");
 const genericRsvpCopy = document.getElementById("rsvp-generic-copy");
 const genericRsvpCard = document.getElementById("rsvp-generic-card");
@@ -130,6 +131,12 @@ function renderGuestWelcome(guest) {
   }
 
   guestWelcomeHeading.textContent = `Hi ${guest.displayName} 🤍`;
+
+  if (guestWelcomeCopy) {
+    const visitLabel = guest.inviteType === "weekend" ? "weekend" : "day";
+    guestWelcomeCopy.textContent = `We’re so excited to celebrate with you. Everything you need for the ${visitLabel} is here.`;
+  }
+
   guestWelcomeSection.hidden = false;
   guestWelcomeSection.removeAttribute("hidden");
   guestWelcomeSection.style.display = "block";
