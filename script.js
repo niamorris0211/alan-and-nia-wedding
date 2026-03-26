@@ -212,8 +212,8 @@ function showRsvpSuccessState(guest) {
 
   if (rsvpSuccessHeading) {
     rsvpSuccessHeading.textContent = householdName
-      ? `Thanks ${householdName} - we’ve got your RSVP`
-      : "Thanks - we’ve got your RSVP";
+      ? `Thanks, ${householdName}. We’ve got your RSVP.`
+      : "Thanks. We’ve got your RSVP.";
   }
 
   if (rsvpSuccessCopy) {
