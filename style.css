@@ -1348,10 +1348,13 @@ h3 {
   }
 
   .hero {
+    grid-template-columns: minmax(0, 1fr);
     gap: 24px;
     padding: 20px 16px 24px;
     width: auto;
     margin-inline: 0.5rem;
+    max-width: calc(100vw - 1rem);
+    overflow: hidden;
   }
 
   .guest-welcome {
@@ -1378,6 +1381,7 @@ h3 {
   }
 
   .hero-image {
+    width: 100%;
     max-width: 100%;
   }
 
@@ -1396,6 +1400,7 @@ h3 {
     max-width: 100%;
     font-size: 0.98rem;
     margin: 14px 0;
+    overflow-wrap: anywhere;
   }
 
   .hero-venue-link-wrap {
