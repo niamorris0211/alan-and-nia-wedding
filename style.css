@@ -1357,6 +1357,16 @@ h3 {
     overflow: hidden;
   }
 
+  .hero-content,
+  .hero-copy,
+  .hero-actions,
+  .hero-venue-link-wrap,
+  .hero-intro {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
   .guest-welcome {
     padding: 1.15rem 0 0;
   }
@@ -1383,6 +1393,7 @@ h3 {
   .hero-image {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
   }
 
   .hero-image img {
@@ -1394,6 +1405,7 @@ h3 {
   h1 {
     font-size: clamp(3rem, 14vw, 4rem);
     line-height: 0.95;
+    overflow-wrap: anywhere;
   }
 
   .hero-intro {
@@ -1409,6 +1421,11 @@ h3 {
 
   .hero-actions {
     gap: 10px;
+  }
+
+  .hero-actions .button {
+    width: 100%;
+    max-width: 100%;
   }
 
   .hero-flower-left {
