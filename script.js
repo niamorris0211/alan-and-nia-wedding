@@ -205,16 +205,34 @@ function renderGuestAttendanceOptions(guest) {
   attendingList.innerHTML = "";
 
   guest.guests.forEach((householdGuest) => {
-    const item = document.createElement("label");
-    item.className = "rsvp-attending-item";
-    item.innerHTML = `
-      <input
-        type="checkbox"
-        name="attendingGuests"
-        value="${householdGuest.name}"
-      />
-      <span>${householdGuest.name}</span>
-    `;
+    const item = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    const options = document.createElement("div");
+
+    item.className = "rsvp-response-choice";
+    legend.textContent = householdGuest.name;
+    options.className = "rsvp-response-choice-options";
+
+    [
+      ["attending", "Coming"],
+      ["declined", "Can't make it"],
+    ].forEach(([value, labelText]) => {
+      const option = document.createElement("label");
+      const input = document.createElement("input");
+      const label = document.createElement("span");
+
+      option.className = "rsvp-response-choice-option";
+      input.type = "radio";
+      input.name = `attendanceStatus-${householdGuest.id}`;
+      input.value = value;
+      input.required = true;
+      label.textContent = labelText;
+
+      option.append(input, label);
+      options.appendChild(option);
+    });
+
+    item.append(legend, options);
     attendingList.appendChild(item);
   });
 }
@@ -244,17 +262,34 @@ function renderBreakfastOptions(guest) {
   }
 
   eligibleGuests.forEach((householdGuest) => {
-    const item = document.createElement("label");
-    const checkbox = document.createElement("input");
-    const label = document.createElement("span");
+    const item = document.createElement("fieldset");
+    const legend = document.createElement("legend");
+    const options = document.createElement("div");
 
-    item.className = "rsvp-attending-item";
-    checkbox.type = "checkbox";
-    checkbox.name = "breakfastAttending";
-    checkbox.value = householdGuest.name;
-    label.textContent = `${householdGuest.name} is coming to breakfast`;
+    item.className = "rsvp-breakfast-choice";
+    legend.textContent = householdGuest.name;
+    options.className = "rsvp-breakfast-choice-options";
 
-    item.append(checkbox, label);
+    [
+      ["attending", "Coming"],
+      ["declined", "Not coming"],
+    ].forEach(([value, labelText]) => {
+      const option = document.createElement("label");
+      const input = document.createElement("input");
+      const label = document.createElement("span");
+
+      option.className = "rsvp-breakfast-choice-option";
+      input.type = "radio";
+      input.name = `breakfastStatus-${householdGuest.id}`;
+      input.value = value;
+      input.required = true;
+      label.textContent = labelText;
+
+      option.append(input, label);
+      options.appendChild(option);
+    });
+
+    item.append(legend, options);
     breakfastAttendingList.appendChild(item);
   });
 
@@ -606,8 +641,31 @@ function renderPersonalisedStay(guest) {
 
 function buildSubmissionPayload(guest, form) {
   const formData = new FormData(form);
-  const attendingGuests = formData.getAll("attendingGuests");
-  const breakfastAttending = formData.getAll("breakfastAttending");
+  const attendingGuests = guest.guests
+    .filter(
+      (householdGuest) =>
+        formData.get(`attendanceStatus-${householdGuest.id}`) === "attending"
+    )
+    .map((householdGuest) => householdGuest.name);
+  const notAttendingGuests = guest.guests
+    .filter(
+      (householdGuest) =>
+        formData.get(`attendanceStatus-${householdGuest.id}`) === "declined"
+    )
+    .map((householdGuest) => householdGuest.name);
+  const breakfastEligibleGuests = getBreakfastEligibleGuests(guest);
+  const breakfastAttending = breakfastEligibleGuests
+    .filter(
+      (householdGuest) =>
+        formData.get(`breakfastStatus-${householdGuest.id}`) === "attending"
+    )
+    .map((householdGuest) => householdGuest.name);
+  const breakfastNotAttending = breakfastEligibleGuests
+    .filter(
+      (householdGuest) =>
+        formData.get(`breakfastStatus-${householdGuest.id}`) === "declined"
+    )
+    .map((householdGuest) => householdGuest.name);
   const dietaryRequirements =
     formData.get("dietary_requirements")?.toString().trim() || "";
   const songRequest = formData.get("song_request")?.toString().trim() || "";
@@ -619,13 +677,59 @@ function buildSubmissionPayload(guest, form) {
     guest_slug: guest.slug,
     household_name: guest.displayName,
     attending_guests: attendingGuests,
+    not_attending_guests: notAttendingGuests,
     breakfastAttending,
+    breakfastNotAttending,
     breakfastDietaryRequirements,
     dietary_requirements: dietaryRequirements,
     song_request: songRequest,
     optional_note: optionalNote,
     submitted_at: new Date().toISOString(),
   };
+}
+
+function formatEmailList(names) {
+  return names.length ? names.join(", ") : "No one";
+}
+
+function formatSubmittedAt(submittedAt) {
+  return new Date(submittedAt).toLocaleString("en-GB", {
+    dateStyle: "full",
+    timeStyle: "short",
+  });
+}
+
+function buildRsvpEmailMessage(payload) {
+  const breakfastLines =
+    payload.breakfastAttending.length || payload.breakfastNotAttending.length
+      ? [
+          "",
+          "BREAKFAST AT THE DUKE OF YORK",
+          `Coming: ${formatEmailList(payload.breakfastAttending)}`,
+          `Not coming: ${formatEmailList(payload.breakfastNotAttending)}`,
+          `Breakfast dietary requirements: ${
+            payload.breakfastDietaryRequirements || "None given"
+          }`,
+        ]
+      : [];
+
+  return [
+    "Nia & Alan Wedding RSVP",
+    "",
+    payload.household_name,
+    "",
+    "WEDDING DAY",
+    `Coming: ${formatEmailList(payload.attending_guests)}`,
+    `Can't make it: ${formatEmailList(payload.not_attending_guests)}`,
+    `Dietary requirements: ${payload.dietary_requirements || "None given"}`,
+    `Song request: ${payload.song_request || "None given"}`,
+    ...breakfastLines,
+    "",
+    `Optional note: ${payload.optional_note || "None given"}`,
+    "",
+    `Guest link: ${payload.guest_slug}`,
+    `Submitted: ${formatSubmittedAt(payload.submitted_at)}`,
+  ].join("\n");
 }
 
 async function submitToEmailService(payload) {
@@ -636,34 +740,10 @@ async function submitToEmailService(payload) {
   }
 
   const formData = new FormData();
-  formData.append("_subject", `Wedding RSVP: ${payload.household_name}`);
+  formData.append("_subject", `Wedding RSVP from ${payload.household_name}`);
   formData.append("_captcha", "false");
-  formData.append("_template", "table");
-  formData.append("Household", payload.household_name);
-  formData.append("Guest Link", payload.guest_slug);
-  formData.append(
-    "Attending",
-    payload.attending_guests.length
-      ? payload.attending_guests.join(", ")
-      : "No one selected"
-  );
-  formData.append(
-    "Dietary Requirements",
-    payload.dietary_requirements || "None given"
-  );
-  formData.append("Song Request", payload.song_request || "None given");
-  formData.append(
-    "Breakfast Attending",
-    payload.breakfastAttending.length
-      ? payload.breakfastAttending.join(", ")
-      : "No one selected"
-  );
-  formData.append(
-    "Breakfast Dietary Requirements",
-    payload.breakfastDietaryRequirements || "None given"
-  );
-  formData.append("Note", payload.optional_note || "None given");
-  formData.append("Submitted At", payload.submitted_at);
+  formData.append("_template", "box");
+  formData.append("RSVP", buildRsvpEmailMessage(payload));
 
   const response = await fetch(endpoint, {
     method: "POST",

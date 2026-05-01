@@ -24,8 +24,14 @@ exports.handler = async (event) => {
       attending_guests: Array.isArray(payload.attending_guests)
         ? payload.attending_guests
         : [],
+      not_attending_guests: Array.isArray(payload.not_attending_guests)
+        ? payload.not_attending_guests
+        : [],
       breakfast_attending: Array.isArray(payload.breakfastAttending)
         ? payload.breakfastAttending
+        : [],
+      breakfast_not_attending: Array.isArray(payload.breakfastNotAttending)
+        ? payload.breakfastNotAttending
         : [],
       breakfast_dietary_requirements:
         payload.breakfastDietaryRequirements || "",
