@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260326h" />
+    <link rel="stylesheet" href="style.css?v=20260501a" />
   </head>
   <body>
     <header class="site-header">
@@ -51,6 +51,7 @@
         <div class="flower hero-flower-left" aria-hidden="true"></div>
         <div class="flower hero-flower-right" aria-hidden="true"></div>
         <div class="hero">
+          <div class="hero-monogram" aria-hidden="true">N&amp;A</div>
           <div class="hero-image">
             <img
               src="images/574062329_10164750919700979_4938779791068548409_n.jpg"
@@ -62,6 +63,11 @@
             <div class="hero-copy">
               <p class="eyebrow">August 3, 2026</p>
               <h1>Nia &amp; Alan</h1>
+              <div class="hero-date-strip" aria-label="Wedding details">
+                <span>Birtsmorton Court</span>
+                <span>Monday 3 August</span>
+                <span>Malvern</span>
+              </div>
               <p class="hero-intro">
                 Join us as we celebrate our wedding at Birtsmorton Court, a
                 countryside venue surrounded by gardens, water, and open space.
@@ -537,6 +543,43 @@
                 placeholder="A song you’d love to hear on the dance floor"
               />
 
+              <section class="rsvp-breakfast-section" id="rsvp-breakfast-section" hidden>
+                <div class="rsvp-breakfast-copy">
+                  <h3>Breakfast at The Duke of York</h3>
+                  <p>
+                    Join us for a relaxed breakfast at 9:30am the morning after
+                    the wedding at The Duke of York pub, 1.6 miles from the venue.
+                    It’s £13 per person and includes a Full English, continental
+                    breakfast, tea and juice.
+                  </p>
+                </div>
+
+                <div class="rsvp-breakfast-images" aria-label="The Duke of York pub">
+                  <img
+                    src="images/Duke of York/duke-of-york-exterior.jpg"
+                    alt="The Duke of York pub exterior"
+                    loading="lazy"
+                  />
+                  <img
+                    src="images/Duke of York/duke-of-york-terrace.webp"
+                    alt="The Duke of York pub terrace"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div class="rsvp-attending-list" id="rsvp-breakfast-attending-list"></div>
+
+                <label class="rsvp-label" for="breakfast-dietary-requirements"
+                  >Dietary requirements (for breakfast)</label
+                >
+                <textarea
+                  id="breakfast-dietary-requirements"
+                  name="breakfast_dietary_requirements"
+                  rows="4"
+                  placeholder="Let us know about any breakfast dietary requirements"
+                ></textarea>
+              </section>
+
               <label class="rsvp-label" for="optional-note">Optional note</label>
               <textarea
                 id="optional-note"
@@ -583,6 +626,6 @@
     <script src="accommodation-data.js?v=20260326h"></script>
     <script src="faq-data.js?v=20260326h"></script>
     <script src="rsvp-config.js?v=20260326h"></script>
-    <script src="script.js?v=20260326h"></script>
+    <script src="script.js?v=20260501a"></script>
   </body>
 </html>

@@ -13,6 +13,10 @@ const rsvpSuccessHeading = document.getElementById("rsvp-success-heading");
 const rsvpSuccessCopy = document.getElementById("rsvp-success-copy");
 const rsvpSuccessReset = document.getElementById("rsvp-success-reset");
 const attendingList = document.getElementById("rsvp-attending-list");
+const breakfastSection = document.getElementById("rsvp-breakfast-section");
+const breakfastAttendingList = document.getElementById(
+  "rsvp-breakfast-attending-list"
+);
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
 const rsvpHouseholdNameInput = document.getElementById("rsvp-household-name");
@@ -37,6 +41,35 @@ const ACCOMMODATION_NAME_ALIASES = {
   "Midsummer Shepherds Hut": "Midsummer Shepherd's Hut",
   "Sugarloaf Shepherds Hut": "Sugarloaf Shepherd's Hut",
 };
+const BREAKFAST_ELIGIBLE_GUESTS = new Set([
+  "Debby",
+  "Kai",
+  "Ruby",
+  "Lisa",
+  "Anthony",
+  "Holly",
+  "Katie",
+  "Ben",
+  "Amber",
+  "Mark",
+  "Andy",
+  "Amy",
+  "Sofi",
+  "George",
+  "Pippa",
+  "Steve",
+  "Nicole",
+  "Ali",
+  "Sarah",
+  "Dan",
+  "Greg",
+  "Lailly",
+  "Diane",
+  "Graham",
+  "Andrea",
+  "Alan",
+  "Nia",
+]);
 
 function slugifyGuestName(name) {
   return name
@@ -186,12 +219,55 @@ function renderGuestAttendanceOptions(guest) {
   });
 }
 
+function getBreakfastEligibleGuests(guest) {
+  if (!guest || !guest.isStayingOnsite || !Array.isArray(guest.guests)) {
+    return [];
+  }
+
+  return guest.guests.filter((householdGuest) =>
+    BREAKFAST_ELIGIBLE_GUESTS.has(householdGuest.name.trim())
+  );
+}
+
+function renderBreakfastOptions(guest) {
+  if (!breakfastSection || !breakfastAttendingList) {
+    return;
+  }
+
+  breakfastAttendingList.innerHTML = "";
+
+  const eligibleGuests = getBreakfastEligibleGuests(guest);
+
+  if (!eligibleGuests.length) {
+    breakfastSection.hidden = true;
+    return;
+  }
+
+  eligibleGuests.forEach((householdGuest) => {
+    const item = document.createElement("label");
+    const checkbox = document.createElement("input");
+    const label = document.createElement("span");
+
+    item.className = "rsvp-attending-item";
+    checkbox.type = "checkbox";
+    checkbox.name = "breakfastAttending";
+    checkbox.value = householdGuest.name;
+    label.textContent = `${householdGuest.name} is coming to breakfast`;
+
+    item.append(checkbox, label);
+    breakfastAttendingList.appendChild(item);
+  });
+
+  breakfastSection.hidden = false;
+}
+
 function renderPersonalisedRsvp(guest) {
   if (!guest || !personalisedRsvpCard || !genericRsvpCopy || !genericRsvpCard) {
     return;
   }
 
   renderGuestAttendanceOptions(guest);
+  renderBreakfastOptions(guest);
 
   if (rsvpGuestSlugInput) {
     rsvpGuestSlugInput.value = guest.slug;
@@ -420,6 +496,39 @@ function scrollStayCarousel(direction) {
   });
 }
 
+function setupScrollReveals() {
+  const revealItems = document.querySelectorAll(
+    ".section-heading, .hero-image, .hero-copy, .weekend-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .rsvp-card, .faq-item, .bottom-image-card"
+  );
+
+  if (!revealItems.length) {
+    return;
+  }
+
+  revealItems.forEach((item) => item.classList.add("reveal"));
+
+  if (!("IntersectionObserver" in window)) {
+    revealItems.forEach((item) => item.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { rootMargin: "0px 0px -12% 0px", threshold: 0.14 }
+  );
+
+  revealItems.forEach((item) => observer.observe(item));
+}
+
 function renderPersonalisedStay(guest) {
   if (
     !guest ||
@@ -498,15 +607,20 @@ function renderPersonalisedStay(guest) {
 function buildSubmissionPayload(guest, form) {
   const formData = new FormData(form);
   const attendingGuests = formData.getAll("attendingGuests");
+  const breakfastAttending = formData.getAll("breakfastAttending");
   const dietaryRequirements =
     formData.get("dietary_requirements")?.toString().trim() || "";
   const songRequest = formData.get("song_request")?.toString().trim() || "";
+  const breakfastDietaryRequirements =
+    formData.get("breakfast_dietary_requirements")?.toString().trim() || "";
   const optionalNote = formData.get("optional_note")?.toString().trim() || "";
 
   return {
     guest_slug: guest.slug,
     household_name: guest.displayName,
     attending_guests: attendingGuests,
+    breakfastAttending,
+    breakfastDietaryRequirements,
     dietary_requirements: dietaryRequirements,
     song_request: songRequest,
     optional_note: optionalNote,
@@ -538,6 +652,16 @@ async function submitToEmailService(payload) {
     payload.dietary_requirements || "None given"
   );
   formData.append("Song Request", payload.song_request || "None given");
+  formData.append(
+    "Breakfast Attending",
+    payload.breakfastAttending.length
+      ? payload.breakfastAttending.join(", ")
+      : "No one selected"
+  );
+  formData.append(
+    "Breakfast Dietary Requirements",
+    payload.breakfastDietaryRequirements || "None given"
+  );
   formData.append("Note", payload.optional_note || "None given");
   formData.append("Submitted At", payload.submitted_at);
 
@@ -629,6 +753,8 @@ if (guest) {
   renderPersonalisedRsvp(guest);
   renderPersonalisedStay(guest);
 }
+
+setupScrollReveals();
 
 if (personalisedRsvpForm && rsvpFeedback) {
   personalisedRsvpForm.addEventListener("submit", async (event) => {
