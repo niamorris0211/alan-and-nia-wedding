@@ -296,6 +296,7 @@ window.GUEST_HOUSEHOLDS = [
   },
   {
     slug: "amy-henry",
+    displayName: "Amy & Henry",
     household: "Amy & Henry",
     type: "evening",
     guests: ["Amy", "Henry"],

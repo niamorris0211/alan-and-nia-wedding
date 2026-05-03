@@ -1088,15 +1088,15 @@ h3 {
 
 .evening-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+  grid-template-columns: 1fr;
   gap: 1.1rem;
   align-items: start;
-  max-width: 1080px;
+  max-width: 960px;
   margin: 0 auto;
 }
 
 .evening-timeline {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .evening-timeline .timeline-card h3,
@@ -1106,7 +1106,9 @@ h3 {
 
 .evening-info-stack {
   display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(280px, 0.92fr);
   gap: 1rem;
+  align-items: start;
 }
 
 .evening-info-card {
@@ -1905,6 +1907,11 @@ h3 {
   }
 
   .rsvp-breakfast-images {
+    grid-template-columns: 1fr;
+  }
+
+  .evening-timeline,
+  .evening-info-stack {
     grid-template-columns: 1fr;
   }
 
