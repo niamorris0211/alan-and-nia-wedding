@@ -1121,22 +1121,44 @@ h3 {
   line-height: 1.65;
 }
 
-.taxi-placeholder {
+.taxi-list {
+  display: grid;
+  gap: 0.7rem;
   margin-top: 1rem;
+}
+
+.taxi-group {
   padding: 0.9rem 1rem;
   border-radius: 18px;
-  border: 1px dashed rgba(77, 102, 80, 0.22);
+  border: 1px solid rgba(77, 102, 80, 0.12);
   background: rgba(255, 253, 249, 0.68);
 }
 
-.taxi-placeholder span {
-  display: block;
-  margin-bottom: 0.15rem;
+.taxi-group h4 {
+  margin: 0 0 0.35rem;
   color: var(--moss);
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.taxi-group p {
+  margin: 0.22rem 0 0;
+  font-size: 0.95rem;
+}
+
+.taxi-group a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: rgba(77, 102, 80, 0.2);
+  text-underline-offset: 0.16em;
+}
+
+.taxi-group a:hover,
+.taxi-group a:focus-visible {
+  color: var(--moss);
+  text-decoration-color: rgba(77, 102, 80, 0.45);
 }
 
 .evening-map-wrap {
