@@ -224,10 +224,7 @@ function renderGuestWelcome(guest) {
   }
 
   if (guest.inviteType === "evening") {
-    const isCouple = guest.guests.length > 1;
-    guestWelcomeHeading.textContent = isCouple
-      ? `${guest.displayName}, you’re invited to celebrate with us in the evening`
-      : "You’re invited to celebrate with us in the evening";
+    guestWelcomeHeading.textContent = `${guest.displayName}, you’re invited to celebrate with us in the evening`;
   } else {
     guestWelcomeHeading.textContent = `Hi ${guest.displayName} 🤍`;
   }
