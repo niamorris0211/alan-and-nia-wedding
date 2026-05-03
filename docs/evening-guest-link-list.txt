@@ -4,12 +4,12 @@ Shared Lidl Invite
 Shared Lidl invite - lidl-evening-invite - https://www.alanandnia.co.uk/lidl-evening-invite/
 
 Personalised Evening Guest Links
-Amy Henry - amy-henry - https://www.alanandnia.co.uk/?guest=amy-henry
-Natalie & Bob Wells - bob-natalie-wells - https://www.alanandnia.co.uk/?guest=bob-natalie-wells
-Elly & Henry Thorne - elly-henry-thorne - https://www.alanandnia.co.uk/?guest=elly-henry-thorne
-Jane Knapp - jane-knapp - https://www.alanandnia.co.uk/?guest=jane-knapp
-Leeanne Smith - leeanne-smith - https://www.alanandnia.co.uk/?guest=leeanne-smith
-Nita Keeler - nita-keeler - https://www.alanandnia.co.uk/?guest=nita-keeler
-Simon Roberston - simon-robertson - https://www.alanandnia.co.uk/?guest=simon-robertson
-Steph Dutson - steph-dutson - https://www.alanandnia.co.uk/?guest=steph-dutson
-Victoria Power - victoria-power - https://www.alanandnia.co.uk/?guest=victoria-power
+Amy - amy-henry - https://www.alanandnia.co.uk/?guest=amy-henry
+Natalie & Bob - bob-natalie-wells - https://www.alanandnia.co.uk/?guest=bob-natalie-wells
+Elly & Henry - elly-henry-thorne - https://www.alanandnia.co.uk/?guest=elly-henry-thorne
+Jane - jane-knapp - https://www.alanandnia.co.uk/?guest=jane-knapp
+Leeanne - leeanne-smith - https://www.alanandnia.co.uk/?guest=leeanne-smith
+Nita - nita-keeler - https://www.alanandnia.co.uk/?guest=nita-keeler
+Simon - simon-robertson - https://www.alanandnia.co.uk/?guest=simon-robertson
+Steph - steph-dutson - https://www.alanandnia.co.uk/?guest=steph-dutson
+Victoria - victoria-power - https://www.alanandnia.co.uk/?guest=victoria-power
