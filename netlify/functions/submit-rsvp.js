@@ -21,6 +21,7 @@ exports.handler = async (event) => {
     const record = {
       guest_slug: payload.guest_slug,
       household_name: payload.household_name,
+      invite_type: payload.invite_type || "day",
       attending_guests: Array.isArray(payload.attending_guests)
         ? payload.attending_guests
         : [],

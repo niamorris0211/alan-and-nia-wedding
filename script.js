@@ -4,6 +4,10 @@ const guestWelcomeSection = document.getElementById("guest-welcome");
 const guestWelcomeHeading = document.getElementById("guest-welcome-heading");
 const guestWelcomeCopy = document.getElementById("guest-welcome-copy");
 const scheduleWeekendOverview = document.getElementById("schedule-weekend-overview");
+const scheduleSection = document.getElementById("schedule");
+const eveningDetailsSection = document.getElementById("evening-details");
+const venueGallerySection = document.getElementById("venue-gallery");
+const staySection = document.getElementById("stay");
 const genericRsvpCopy = document.getElementById("rsvp-generic-copy");
 const genericRsvpCard = document.getElementById("rsvp-generic-card");
 const personalisedRsvpCard = document.getElementById("rsvp-personalised");
@@ -20,6 +24,9 @@ const breakfastAttendingList = document.getElementById(
 const rsvpFeedback = document.getElementById("rsvp-form-feedback");
 const rsvpGuestSlugInput = document.getElementById("rsvp-guest-slug");
 const rsvpHouseholdNameInput = document.getElementById("rsvp-household-name");
+const songRequestLabel = document.getElementById("song-request-label");
+const songRequestInput = document.getElementById("song-request");
+const optionalNoteLabel = document.getElementById("optional-note-label");
 const stayGenericHeading = document.getElementById("stay-generic-heading");
 const stayGenericContent = document.getElementById("stay-generic-content");
 const stayPersonalised = document.getElementById("stay-personalised");
@@ -70,6 +77,31 @@ const BREAKFAST_ELIGIBLE_GUESTS = new Set([
   "Alan",
   "Nia",
 ]);
+const EVENING_FAQ_ITEMS = [
+  {
+    question: "What time should I arrive?",
+    answer:
+      "Please arrive from 7:00pm. The first dance is at 7:30pm, so you’ll have time to get settled and grab a drink.",
+  },
+  {
+    question: "Is there evening food?",
+    answer:
+      "Yes - sausage and bacon baps will be served around 9:00pm. Very necessary after dancing.",
+  },
+  {
+    question: "What time does the party finish?",
+    answer: "The party will finish at midnight.",
+  },
+  {
+    question: "Should I book a taxi?",
+    answer:
+      "Yes, we recommend booking transport in advance as taxis may be limited late at night.",
+  },
+  {
+    question: "Where is the venue?",
+    answer: "Birtsmorton Court. Please use the map section above for directions.",
+  },
+];
 
 function slugifyGuestName(name) {
   return name
@@ -146,6 +178,12 @@ function getAccommodationData() {
 }
 
 function getFaqItems() {
+  const activeGuest = resolveGuestFromQuery();
+
+  if (activeGuest?.inviteType === "evening") {
+    return EVENING_FAQ_ITEMS;
+  }
+
   return Array.isArray(window.FAQ_ITEMS) ? window.FAQ_ITEMS : [];
 }
 
@@ -185,11 +223,23 @@ function renderGuestWelcome(guest) {
     return;
   }
 
-  guestWelcomeHeading.textContent = `Hi ${guest.displayName} 🤍`;
+  if (guest.inviteType === "evening") {
+    const isCouple = guest.guests.length > 1;
+    guestWelcomeHeading.textContent = isCouple
+      ? `${guest.displayName}, you’re invited to celebrate with us in the evening`
+      : "You’re invited to celebrate with us in the evening";
+  } else {
+    guestWelcomeHeading.textContent = `Hi ${guest.displayName} 🤍`;
+  }
 
   if (guestWelcomeCopy) {
-    const visitLabel = guest.inviteType === "weekend" ? "weekend" : "day";
-    guestWelcomeCopy.textContent = `We’re so excited to celebrate with you. Everything you need for the ${visitLabel} is here.`;
+    if (guest.inviteType === "evening") {
+      guestWelcomeCopy.textContent =
+        "We’d love you to join us for drinks, dancing, evening food and a very happy party.";
+    } else {
+      const visitLabel = guest.inviteType === "weekend" ? "weekend" : "day";
+      guestWelcomeCopy.textContent = `We’re so excited to celebrate with you. Everything you need for the ${visitLabel} is here.`;
+    }
   }
 
   guestWelcomeSection.hidden = false;
@@ -304,6 +354,13 @@ function renderPersonalisedRsvp(guest) {
   renderGuestAttendanceOptions(guest);
   renderBreakfastOptions(guest);
 
+  if (songRequestLabel && songRequestInput) {
+    const hideSongRequest = guest.inviteType === "evening";
+    songRequestLabel.hidden = hideSongRequest;
+    songRequestInput.hidden = hideSongRequest;
+    songRequestInput.disabled = hideSongRequest;
+  }
+
   if (rsvpGuestSlugInput) {
     rsvpGuestSlugInput.value = guest.slug;
   }
@@ -326,6 +383,104 @@ function renderPersonalisedRsvp(guest) {
 
   if (rsvpFeedback) {
     rsvpFeedback.textContent = "";
+  }
+
+  if (guest.inviteType === "evening") {
+    const heading = personalisedRsvpCard.querySelector(".rsvp-copy-personalised h2");
+    const intro = personalisedRsvpCard.querySelector(
+      ".rsvp-copy-personalised .section-intro"
+    );
+
+    if (heading) {
+      heading.textContent = "Evening RSVP";
+    }
+
+    if (intro) {
+      intro.textContent =
+        "Please let us know who will be joining us for the evening.";
+    }
+
+    if (optionalNoteLabel) {
+      optionalNoteLabel.textContent = "Optional message";
+    }
+  }
+}
+
+function renderEveningGuestPage(guest) {
+  const isEveningGuest = guest?.inviteType === "evening";
+
+  if (scheduleSection) {
+    scheduleSection.hidden = isEveningGuest;
+  }
+
+  if (eveningDetailsSection) {
+    eveningDetailsSection.hidden = !isEveningGuest;
+  }
+
+  if (venueGallerySection) {
+    venueGallerySection.hidden = isEveningGuest;
+  }
+
+  if (stayGenericHeading) {
+    stayGenericHeading.hidden = isEveningGuest;
+  }
+
+  if (stayGenericContent) {
+    stayGenericContent.hidden = isEveningGuest;
+  }
+
+  if (stayPersonalised) {
+    stayPersonalised.hidden = true;
+  }
+
+  if (staySection) {
+    staySection.hidden = isEveningGuest;
+  }
+
+  if (!isEveningGuest) {
+    return;
+  }
+
+  const scheduleNavLink = document.querySelector('.site-nav a[href="#schedule"]');
+  const stayNavLink = document.querySelector('.site-nav a[href="#stay"]');
+  const venueNavLink = document.querySelector('.site-nav a[href="#venue-gallery"]');
+  const heroScheduleButton = document.querySelector('.hero-actions a[href="#schedule"]');
+  const heroEyebrow = document.querySelector(".hero-copy .eyebrow");
+  const heroIntro = document.querySelector(".hero-intro");
+
+  if (scheduleNavLink) {
+    scheduleNavLink.href = "#evening-details";
+    scheduleNavLink.textContent = "Evening";
+  }
+
+  if (heroScheduleButton) {
+    heroScheduleButton.href = "#evening-details";
+    heroScheduleButton.textContent = "Evening Details";
+  }
+
+  if (heroEyebrow) {
+    heroEyebrow.textContent = "Evening invitation · Monday 3 August 2026";
+  }
+
+  if (heroIntro) {
+    heroIntro.textContent =
+      "Join us in the evening at Birtsmorton Court for drinks, dancing, food and a very happy celebration.";
+  }
+
+  if (stayNavLink) {
+    stayNavLink.hidden = true;
+  }
+
+  if (venueNavLink) {
+    venueNavLink.hidden = true;
+  }
+
+  if (genericRsvpCopy) {
+    const intro = genericRsvpCopy.querySelector(".section-intro");
+    if (intro) {
+      intro.textContent =
+        "Use your personalised evening RSVP link to let us know if you can make it.";
+    }
   }
 }
 
@@ -377,7 +532,8 @@ function renderPersonalisedSchedule(guest) {
     return;
   }
 
-  scheduleWeekendOverview.hidden = !guest || guest.inviteType !== "weekend";
+  scheduleWeekendOverview.hidden =
+    !guest || guest.inviteType !== "weekend";
 }
 
 function buildStayPlaceholder(title, index) {
@@ -533,7 +689,7 @@ function scrollStayCarousel(direction) {
 
 function setupScrollReveals() {
   const revealItems = document.querySelectorAll(
-    ".section-heading, .hero-image, .hero-copy, .weekend-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .rsvp-card, .faq-item, .bottom-image-card"
+    ".section-heading, .hero-image, .hero-copy, .weekend-card, .evening-detail-card, .evening-info-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .rsvp-card, .faq-item, .bottom-image-card"
   );
 
   if (!revealItems.length) {
@@ -567,6 +723,7 @@ function setupScrollReveals() {
 function renderPersonalisedStay(guest) {
   if (
     !guest ||
+    guest.inviteType === "evening" ||
     !guest.accommodationName ||
     !stayPersonalised ||
     !stayGenericHeading ||
@@ -676,6 +833,7 @@ function buildSubmissionPayload(guest, form) {
   return {
     guest_slug: guest.slug,
     household_name: guest.displayName,
+    invite_type: guest.inviteType,
     attending_guests: attendingGuests,
     not_attending_guests: notAttendingGuests,
     breakfastAttending,
@@ -700,8 +858,10 @@ function formatSubmittedAt(submittedAt) {
 }
 
 function buildRsvpEmailMessage(payload) {
+  const isEveningRsvp = payload.invite_type === "evening";
   const breakfastLines =
-    payload.breakfastAttending.length || payload.breakfastNotAttending.length
+    !isEveningRsvp &&
+    (payload.breakfastAttending.length || payload.breakfastNotAttending.length)
       ? [
           "",
           "BREAKFAST AT THE DUKE OF YORK",
@@ -714,15 +874,17 @@ function buildRsvpEmailMessage(payload) {
       : [];
 
   return [
-    "Nia & Alan Wedding RSVP",
+    isEveningRsvp ? "Nia & Alan Evening RSVP" : "Nia & Alan Wedding RSVP",
     "",
     payload.household_name,
     "",
-    "WEDDING DAY",
+    isEveningRsvp ? "EVENING PARTY" : "WEDDING DAY",
     `Coming: ${formatEmailList(payload.attending_guests)}`,
     `Can't make it: ${formatEmailList(payload.not_attending_guests)}`,
     `Dietary requirements: ${payload.dietary_requirements || "None given"}`,
-    `Song request: ${payload.song_request || "None given"}`,
+    ...(isEveningRsvp
+      ? []
+      : [`Song request: ${payload.song_request || "None given"}`]),
     ...breakfastLines,
     "",
     `Optional note: ${payload.optional_note || "None given"}`,
@@ -740,7 +902,12 @@ async function submitToEmailService(payload) {
   }
 
   const formData = new FormData();
-  formData.append("_subject", `Wedding RSVP from ${payload.household_name}`);
+  formData.append(
+    "_subject",
+    `${
+      payload.invite_type === "evening" ? "Evening RSVP" : "Wedding RSVP"
+    } from ${payload.household_name}`
+  );
   formData.append("_captcha", "false");
   formData.append("_template", "box");
   formData.append("RSVP", buildRsvpEmailMessage(payload));
@@ -828,6 +995,7 @@ if (stayCarouselNext) {
 const guest = resolveGuestFromQuery();
 
 if (guest) {
+  renderEveningGuestPage(guest);
   renderGuestWelcome(guest);
   renderPersonalisedSchedule(guest);
   renderPersonalisedRsvp(guest);

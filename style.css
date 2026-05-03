@@ -894,6 +894,16 @@ h3 {
     linear-gradient(180deg, rgba(244, 246, 239, 0.68), rgba(225, 235, 221, 0.92));
 }
 
+.evening-section {
+  background:
+    radial-gradient(circle at top left, rgba(216, 179, 148, 0.13), transparent 26%),
+    linear-gradient(180deg, rgba(250, 247, 239, 0.78), rgba(231, 239, 226, 0.88));
+}
+
+.evening-section[hidden] {
+  display: none;
+}
+
 .faq-section {
   background:
     linear-gradient(180deg, rgba(249, 248, 242, 0.5), rgba(232, 238, 228, 0.66));
@@ -1005,6 +1015,108 @@ h3 {
 
 .weekend-copy-secondary {
   margin-top: 0.85rem;
+}
+
+.evening-container {
+  overflow: hidden;
+}
+
+.evening-details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0 auto 1.4rem;
+  max-width: 1040px;
+}
+
+.evening-detail-card,
+.evening-info-card {
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.96), rgba(239, 245, 236, 0.84));
+  box-shadow: var(--shadow-soft);
+}
+
+.evening-detail-card {
+  padding: 1.25rem 1.15rem;
+  text-align: center;
+}
+
+.evening-detail-label {
+  margin: 0 0 0.3rem;
+  color: var(--berry);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.evening-detail-card h3 {
+  font-size: clamp(1.45rem, 3vw, 1.95rem);
+}
+
+.evening-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+  gap: 1.1rem;
+  align-items: start;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.evening-timeline {
+  grid-template-columns: 1fr;
+}
+
+.evening-timeline .timeline-card h3,
+.evening-timeline .timeline-copy {
+  max-width: 24rem;
+}
+
+.evening-info-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.evening-info-card {
+  padding: 1.3rem;
+}
+
+.evening-info-card h3 {
+  margin-bottom: 0.55rem;
+}
+
+.evening-info-card p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.taxi-placeholder {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(77, 102, 80, 0.22);
+  background: rgba(255, 253, 249, 0.68);
+}
+
+.taxi-placeholder span {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--moss);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.evening-map-wrap {
+  margin: 0.9rem 0 0;
+  box-shadow: var(--shadow-soft);
+}
+
+.evening-map-wrap iframe {
+  height: 300px;
 }
 
 .schedule-illustration {
@@ -1657,6 +1769,11 @@ h3 {
   }
 
   .weekend-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .evening-details-grid,
+  .evening-layout {
     grid-template-columns: 1fr;
   }
 

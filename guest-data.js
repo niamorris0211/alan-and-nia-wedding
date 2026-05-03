@@ -294,4 +294,58 @@ window.GUEST_HOUSEHOLDS = [
     type: "day",
     guests: ["Jo"],
   },
+  {
+    slug: "amy-henry",
+    household: "Amy Henry",
+    type: "evening",
+    guests: ["Amy Henry"],
+  },
+  {
+    slug: "bob-natalie-wells",
+    household: "Natalie & Bob Wells",
+    type: "evening",
+    guests: ["Natalie Wells", "Bob Wells"],
+  },
+  {
+    slug: "elly-henry-thorne",
+    household: "Elly & Henry Thorne",
+    type: "evening",
+    guests: ["Elly Thorne", "Henry Thorne"],
+  },
+  {
+    slug: "jane-knapp",
+    household: "Jane Knapp",
+    type: "evening",
+    guests: ["Jane Knapp"],
+  },
+  {
+    slug: "leeanne-smith",
+    household: "Leeanne Smith",
+    type: "evening",
+    guests: ["Leeanne Smith"],
+  },
+  {
+    slug: "nita-keeler",
+    household: "Nita Keeler",
+    type: "evening",
+    guests: ["Nita Keeler"],
+  },
+  {
+    slug: "simon-robertson",
+    household: "Simon Roberston",
+    type: "evening",
+    guests: ["Simon Roberston"],
+  },
+  {
+    slug: "steph-dutson",
+    household: "Steph Dutson",
+    type: "evening",
+    guests: ["Steph Dutson"],
+  },
+  {
+    slug: "victoria-power",
+    household: "Victoria Power",
+    type: "evening",
+    guests: ["Victoria Power"],
+  },
 ];
