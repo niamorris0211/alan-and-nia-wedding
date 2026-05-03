@@ -394,7 +394,7 @@ function renderPersonalisedRsvp(guest) {
 
     if (intro) {
       intro.textContent =
-        "Please let us know who will be joining us for the evening.";
+        "Please let us know who will be joining us for the evening. Please RSVP by 30th June.";
     }
 
     if (optionalNoteLabel) {
