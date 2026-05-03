@@ -50,9 +50,9 @@ window.GUEST_HOUSEHOLDS = [
   },
   {
     slug: "malcolm-beverley",
-    household: "Malcolm & Beverley",
+    household: "Beverley, Malcolm, Alex & Megan",
     type: "day",
-    guests: ["Malcolm", "Beverley"],
+    guests: ["Beverley", "Malcolm", "Alex", "Megan"],
   },
   {
     slug: "jeff-christine",
