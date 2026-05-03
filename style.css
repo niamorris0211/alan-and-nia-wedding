@@ -532,7 +532,8 @@ h3,
 }
 
 .rsvp-form-live textarea,
-.rsvp-form-live input[type="text"] {
+.rsvp-form-live input[type="text"],
+.rsvp-form-live input[type="email"] {
   width: 100%;
   padding: 0.95rem 1rem;
   border-radius: 16px;
@@ -1172,6 +1173,87 @@ h3 {
 
 .evening-map-wrap iframe {
   height: 300px;
+}
+
+.lidl-page .site-header {
+  position: relative;
+}
+
+.lidl-hero {
+  min-height: auto;
+  padding-top: 1.5rem;
+}
+
+.lidl-hero-card {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: clamp(2rem, 6vw, 4.5rem);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background:
+    linear-gradient(rgba(42, 48, 40, 0.28), rgba(42, 48, 40, 0.24)),
+    url("../images/Emily-Nick-688-1-1024x683.jpg") center / cover;
+  box-shadow: var(--shadow);
+  color: #fffdf9;
+}
+
+.lidl-hero-card .eyebrow,
+.lidl-hero-card h1,
+.lidl-hero-card p {
+  color: #fffdf9;
+}
+
+.lidl-hero-card h1 {
+  max-width: 11ch;
+  margin: 0.3rem 0 0.85rem;
+  font-size: clamp(3.2rem, 10vw, 6.4rem);
+  line-height: 0.94;
+}
+
+.lidl-hero-card p {
+  max-width: 30rem;
+  margin: 0;
+  font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.24);
+}
+
+.lidl-event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  max-width: 760px;
+  margin: 0 auto 1.25rem;
+}
+
+.lidl-note-card {
+  max-width: 760px;
+  margin: 1rem auto 0;
+  padding: 1rem 1.15rem;
+  border-radius: 20px;
+  border: 1px solid rgba(77, 102, 80, 0.13);
+  background: rgba(255, 253, 249, 0.72);
+  color: var(--muted);
+}
+
+.lidl-note-card p {
+  margin: 0;
+}
+
+.lidl-form-note {
+  margin: 0 0 -0.15rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: rgba(232, 239, 229, 0.7);
+  color: var(--muted);
+}
+
+.lidl-page .rsvp-response-choice-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lidl-deadline-placeholder {
+  color: var(--berry);
+  font-weight: 700;
 }
 
 .schedule-illustration {
@@ -1910,6 +1992,7 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .lidl-page .rsvp-response-choice-options,
   .evening-timeline,
   .evening-info-stack {
     grid-template-columns: 1fr;

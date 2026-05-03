@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lidl Evening Invite | Nia &amp; Alan</title>
+    <meta
+      name="description"
+      content="Lidl evening RSVP for Alan and Nia's wedding celebration at Birtsmorton Court."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../style.css?v=20260503f" />
+  </head>
+  <body class="lidl-page">
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="#home">Nia &amp; Alan</a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="#details">Details</a>
+          <a href="#rsvp">RSVP</a>
+          <a href="#transport">Transport</a>
+          <a href="#faq">FAQ</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-section lidl-hero" id="home">
+        <div class="flower hero-flower-left" aria-hidden="true"></div>
+        <div class="flower hero-flower-right" aria-hidden="true"></div>
+        <div class="container">
+          <div class="lidl-hero-card">
+            <p class="eyebrow">Evening invitation</p>
+            <h1>Lidl crew, you&rsquo;re invited</h1>
+            <p>
+              Alan &amp; Nia would love you to join them for the evening
+              celebration.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section evening-section" id="details">
+        <div class="container evening-container">
+          <div class="section-heading">
+            <p class="eyebrow">The party bit</p>
+            <h2>Evening Details</h2>
+            <p class="section-intro">
+              Come along for drinks, dancing and something hot to eat later on.
+            </p>
+          </div>
+
+          <div class="lidl-event-grid">
+            <article class="evening-detail-card">
+              <p class="evening-detail-label">Where</p>
+              <h3>Birtsmorton Court</h3>
+            </article>
+            <article class="evening-detail-card">
+              <p class="evening-detail-label">When</p>
+              <h3>Monday 3rd August 2026</h3>
+            </article>
+          </div>
+
+          <div class="timeline-grid evening-timeline">
+            <article class="timeline-card">
+              <p class="timeline-time">7:00pm</p>
+              <h3>Arrive, mingle &amp; grab a drink</h3>
+            </article>
+            <article class="timeline-card">
+              <p class="timeline-time">7:30pm</p>
+              <h3>First dance &amp; party begins</h3>
+            </article>
+            <article class="timeline-card">
+              <p class="timeline-time">9:00pm</p>
+              <h3>Sausage &amp; bacon baps</h3>
+              <p class="timeline-copy">
+                Absolutely necessary after a few trips to the dancefloor.
+              </p>
+            </article>
+            <article class="timeline-card">
+              <p class="timeline-time">Midnight</p>
+              <h3>Party ends</h3>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section rsvp-section" id="rsvp">
+        <div class="container rsvp-shell">
+          <div class="rsvp-card rsvp-card-static">
+            <div class="rsvp-copy rsvp-copy-centered">
+              <p class="eyebrow">RSVP</p>
+              <h2>Let Us Know</h2>
+              <p class="section-intro">
+                Pop your details in below so we can keep an eye on numbers.
+              </p>
+            </div>
+
+            <form class="rsvp-form-live" id="lidl-rsvp-form" method="POST">
+              <label class="rsvp-label" for="full-name">Full name *</label>
+              <input
+                id="full-name"
+                name="full_name"
+                type="text"
+                autocomplete="name"
+                required
+              />
+
+              <label class="rsvp-label" for="email-address">Email address *</label>
+              <input
+                id="email-address"
+                name="email_address"
+                type="email"
+                autocomplete="email"
+                required
+              />
+
+              <fieldset class="rsvp-response-choice">
+                <legend>Are you attending? *</legend>
+                <div class="rsvp-response-choice-options">
+                  <label class="rsvp-response-choice-option">
+                    <input type="radio" name="attending" value="Yes" required />
+                    <span>Yes</span>
+                  </label>
+                  <label class="rsvp-response-choice-option">
+                    <input type="radio" name="attending" value="No" required />
+                    <span>No</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <label class="rsvp-label" for="dietary-requirements">
+                Any dietary requirements?
+              </label>
+              <textarea
+                id="dietary-requirements"
+                name="dietary_requirements"
+                rows="4"
+                placeholder="Only if we need to know"
+              ></textarea>
+
+              <p class="lidl-form-note">
+                I&rsquo;m looking into possible minibus options depending on
+                numbers, so this helps me work out interest.
+              </p>
+
+              <fieldset class="rsvp-response-choice">
+                <legend>Are you interested in a possible minibus?</legend>
+                <div class="rsvp-response-choice-options">
+                  <label class="rsvp-response-choice-option">
+                    <input type="radio" name="minibus_interest" value="Yes" />
+                    <span>Yes</span>
+                  </label>
+                  <label class="rsvp-response-choice-option">
+                    <input type="radio" name="minibus_interest" value="No" />
+                    <span>No</span>
+                  </label>
+                  <label class="rsvp-response-choice-option">
+                    <input type="radio" name="minibus_interest" value="Maybe" />
+                    <span>Maybe</span>
+                  </label>
+                </div>
+              </fieldset>
+
+              <label class="rsvp-label" for="optional-message">Optional message</label>
+              <textarea
+                id="optional-message"
+                name="optional_message"
+                rows="4"
+                placeholder="Anything else you'd like us to know"
+              ></textarea>
+
+              <button class="button button-primary" type="submit">Submit RSVP</button>
+              <p class="rsvp-form-feedback" id="lidl-rsvp-feedback" aria-live="polite"></p>
+            </form>
+
+            <div class="rsvp-success-state" id="lidl-rsvp-success" hidden aria-live="polite">
+              <div class="rsvp-success-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" role="presentation" focusable="false">
+                  <circle cx="24" cy="24" r="23"></circle>
+                  <path d="M16 24.5 21.5 30 33 18.5"></path>
+                </svg>
+              </div>
+              <p class="eyebrow">RSVP sent</p>
+              <h3>Thank you - your RSVP has been sent.</h3>
+              <p class="rsvp-success-copy">
+                We&rsquo;ll keep you posted about transport once we know numbers.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section evening-section" id="transport">
+        <div class="container evening-container">
+          <div class="section-heading">
+            <p class="eyebrow">Getting there</p>
+            <h2>Transport</h2>
+            <p class="section-intro">
+              We recommend arranging transport in advance. We&rsquo;re also
+              looking into a possible minibus depending on numbers.
+            </p>
+          </div>
+
+          <article class="lidl-note-card">
+            <p>
+              Please tick your minibus interest on the RSVP form so we can see
+              whether it&rsquo;s worth organising.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section stay-section" id="map">
+        <div class="container stay-container">
+          <div class="section-heading">
+            <p class="eyebrow">Map</p>
+            <h2>Birtsmorton Court</h2>
+            <p class="section-intro">
+              Use the map below for directions to the venue.
+            </p>
+          </div>
+
+          <div class="stay-map-wrap">
+            <iframe
+              title="Map showing Birtsmorton Court"
+              src="https://www.google.com/maps?q=Birtsmorton%20Court%2C%20Malvern&z=12&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+        </div>
+      </section>
+
+      <section class="section faq-section" id="faq">
+        <div class="container faq-container">
+          <div class="section-heading">
+            <p class="eyebrow">Questions</p>
+            <h2>FAQ</h2>
+          </div>
+
+          <div class="faq-list">
+            <article class="faq-item">
+              <button class="faq-question" type="button">Can I bring a plus one?</button>
+              <div class="faq-answer">
+                <p>Please only add your own name for now while we work out numbers.</p>
+              </div>
+            </article>
+            <article class="faq-item">
+              <button class="faq-question" type="button">What time should I arrive?</button>
+              <div class="faq-answer">
+                <p>Please arrive from 7:00pm. The first dance is at 7:30pm.</p>
+              </div>
+            </article>
+            <article class="faq-item">
+              <button class="faq-question" type="button">Is there food?</button>
+              <div class="faq-answer">
+                <p>Yes - sausage and bacon baps will be served around 9:00pm.</p>
+              </div>
+            </article>
+            <article class="faq-item">
+              <button class="faq-question" type="button">Is there a minibus?</button>
+              <div class="faq-answer">
+                <p>
+                  We&rsquo;re looking into this depending on numbers. Please tick
+                  your interest on the form.
+                </p>
+              </div>
+            </article>
+            <article class="faq-item">
+              <button class="faq-question" type="button">When do I need to RSVP by?</button>
+              <div class="faq-answer">
+                <p>
+                  Please RSVP by
+                  <span class="lidl-deadline-placeholder">[INSERT RSVP DEADLINE]</span>.
+                  <!-- EDIT LIDL RSVP DEADLINE HERE -->
+                </p>
+              </div>
+            </article>
+            <article class="faq-item">
+              <button class="faq-question" type="button">Where is the venue?</button>
+              <div class="faq-answer">
+                <p>Birtsmorton Court. Please use the map section above for directions.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <p>Nia &amp; Alan</p>
+        <p>August 3, 2026</p>
+        <p>Birtsmorton Court, Malvern</p>
+      </div>
+    </footer>
+
+    <script src="../rsvp-config.js?v=20260326h"></script>
+    <script src="lidl-evening-invite.js?v=20260503a"></script>
+  </body>
+</html>
