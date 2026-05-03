@@ -2021,6 +2021,96 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .lidl-page .nav-wrap {
+    padding-bottom: 0.65rem;
+  }
+
+  .lidl-page .site-nav {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .lidl-page .site-nav a {
+    padding: 0.42rem 0.32rem;
+    font-size: 0.78rem;
+  }
+
+  .lidl-hero {
+    padding: 0.35rem 0 1rem;
+  }
+
+  .lidl-hero .container {
+    padding: 0;
+    width: min(calc(100% - 1rem), var(--container));
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .lidl-hero-card {
+    min-height: 420px;
+    display: grid;
+    align-content: end;
+    padding: 1.35rem 1rem;
+    border-radius: 24px;
+    background-position: center;
+  }
+
+  .lidl-hero-card h1 {
+    max-width: 9.5ch;
+    margin-bottom: 0.65rem;
+    font-size: clamp(3rem, 17vw, 4.4rem);
+  }
+
+  .lidl-hero-card p {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .lidl-hero-card .lidl-hero-tagline {
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 1rem;
+    padding: 0.48rem 0.68rem;
+    font-size: 0.86rem;
+    line-height: 1.25;
+  }
+
+  .lidl-event-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .lidl-page .evening-detail-card,
+  .lidl-page .timeline-card,
+  .lidl-page .rsvp-card,
+  .lidl-page .lidl-note-card,
+  .lidl-page .faq-item {
+    border-radius: 18px;
+  }
+
+  .lidl-page .rsvp-card {
+    padding: 1.15rem 0.9rem;
+  }
+
+  .lidl-page .rsvp-response-choice {
+    padding: 0.8rem;
+  }
+
+  .lidl-page .rsvp-response-choice-option {
+    justify-content: flex-start;
+    min-height: 42px;
+  }
+
+  .lidl-page .rsvp-deadline {
+    width: 100%;
+    text-align: center;
+  }
+
+  .lidl-page .stay-map-wrap iframe {
+    height: 260px;
+  }
+
   .hero-section {
     padding: 0.5rem 0 1.5rem;
   }
