@@ -34,7 +34,7 @@ function buildLidlEmailMessage(payload) {
     "Lidl shared evening invite RSVP",
     "",
     `Full name: ${payload.full_name}`,
-    `Email address: ${payload.email_address}`,
+    `Email address: ${payload.email_address || "Not given"}`,
     `Attending: ${payload.attending}`,
     `Dietary requirements: ${payload.dietary_requirements || "None given"}`,
     `Minibus interest: ${payload.minibus_interest || "Not answered"}`,
