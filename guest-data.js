@@ -296,9 +296,9 @@ window.GUEST_HOUSEHOLDS = [
   },
   {
     slug: "amy-henry",
-    household: "Amy Henry",
+    household: "Amy & Henry",
     type: "evening",
-    guests: ["Amy Henry"],
+    guests: ["Amy", "Henry"],
   },
   {
     slug: "bob-natalie-wells",
