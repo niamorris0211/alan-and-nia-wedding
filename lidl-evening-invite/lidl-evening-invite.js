@@ -6,6 +6,10 @@ function getLidlRsvpEndpoint() {
   return window.RSVP_CONFIG?.emailSubmitEndpoint || "";
 }
 
+function getLidlGoogleAppsScriptEndpoint() {
+  return window.RSVP_CONFIG?.googleAppsScriptUrl?.trim() || "";
+}
+
 function getLidlFallbackEmail() {
   const configuredEmail = window.RSVP_CONFIG?.fallbackEmail?.trim();
 
@@ -20,12 +24,9 @@ function getLidlFallbackEmail() {
 }
 
 function buildLidlMailtoLink(emailAddress, subject, body) {
-  const params = new URLSearchParams({
-    subject,
-    body,
-  });
-
-  return `mailto:${emailAddress}?${params.toString()}`;
+  return `mailto:${emailAddress}?subject=${encodeURIComponent(
+    subject
+  )}&body=${encodeURIComponent(body)}`;
 }
 
 function showLidlEmailFallback(feedbackElement, subject, message) {
@@ -118,6 +119,36 @@ async function submitLidlRsvp(payload) {
   }
 }
 
+async function submitLidlToGoogleAppsScript(payload) {
+  const endpoint = getLidlGoogleAppsScriptEndpoint();
+
+  if (!endpoint) {
+    throw new Error("Missing Google Apps Script endpoint.");
+  }
+
+  await fetch(endpoint, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      ...payload,
+      email_subject: getLidlEmailSubject(payload),
+      email_message: buildLidlEmailMessage(payload),
+    }),
+  });
+}
+
+async function submitLidlRsvpWithConfiguredService(payload) {
+  if (getLidlGoogleAppsScriptEndpoint()) {
+    await submitLidlToGoogleAppsScript(payload);
+    return;
+  }
+
+  await submitLidlRsvp(payload);
+}
+
 function saveLidlPreviewSubmission(payload) {
   const localSubmissions = JSON.parse(
     window.localStorage.getItem("lidlRsvpPreviewSubmissions") || "[]"
@@ -199,7 +230,7 @@ if (lidlRsvpForm && lidlRsvpFeedback) {
     lidlRsvpFeedback.textContent = "Sending your RSVP...";
 
     try {
-      await submitLidlRsvp(payload);
+      await submitLidlRsvpWithConfiguredService(payload);
       lidlRsvpForm.reset();
       lidlRsvpForm.hidden = true;
       lidlRsvpSuccess.hidden = false;

@@ -191,6 +191,10 @@ function getRsvpEndpoint() {
   return window.RSVP_CONFIG?.emailSubmitEndpoint?.trim() || "";
 }
 
+function getGoogleAppsScriptEndpoint() {
+  return window.RSVP_CONFIG?.googleAppsScriptUrl?.trim() || "";
+}
+
 function getFallbackRsvpEmail() {
   const configuredEmail = window.RSVP_CONFIG?.fallbackEmail?.trim();
 
@@ -219,12 +223,9 @@ function getRsvpSubmissionEndpoint() {
 }
 
 function buildMailtoLink(emailAddress, subject, body) {
-  const params = new URLSearchParams({
-    subject,
-    body,
-  });
-
-  return `mailto:${emailAddress}?${params.toString()}`;
+  return `mailto:${emailAddress}?subject=${encodeURIComponent(
+    subject
+  )}&body=${encodeURIComponent(body)}`;
 }
 
 function showRsvpEmailFallback(feedbackElement, subject, message) {
@@ -982,6 +983,36 @@ async function submitToEmailService(payload) {
   return responseData;
 }
 
+async function submitToGoogleAppsScript(payload) {
+  const endpoint = getGoogleAppsScriptEndpoint();
+
+  if (!endpoint) {
+    throw new Error("Missing Google Apps Script endpoint.");
+  }
+
+  await fetch(endpoint, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8",
+    },
+    body: JSON.stringify({
+      ...payload,
+      email_subject: getRsvpEmailSubject(payload),
+      email_message: buildRsvpEmailMessage(payload),
+    }),
+  });
+}
+
+async function submitRsvp(payload) {
+  if (getGoogleAppsScriptEndpoint()) {
+    await submitToGoogleAppsScript(payload);
+    return;
+  }
+
+  await submitToEmailService(payload);
+}
+
 function savePreviewSubmission(payload) {
   const localSubmissions = JSON.parse(
     window.localStorage.getItem("rsvpPreviewSubmissions") || "[]"
@@ -1077,7 +1108,7 @@ if (personalisedRsvpForm && rsvpFeedback) {
     rsvpFeedback.textContent = "Sending your RSVP...";
 
     try {
-      await submitToEmailService(payload);
+      await submitRsvp(payload);
       personalisedRsvpForm.reset();
       showRsvpSuccessState(activeGuest);
     } catch (error) {
