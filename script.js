@@ -195,6 +195,10 @@ function getGoogleAppsScriptEndpoint() {
   return window.RSVP_CONFIG?.googleAppsScriptUrl?.trim() || "";
 }
 
+function getFormspreeEndpoint() {
+  return window.RSVP_CONFIG?.formspreeEndpoint?.trim() || "";
+}
+
 function getFallbackRsvpEmail() {
   const configuredEmail = window.RSVP_CONFIG?.fallbackEmail?.trim();
 
@@ -1004,9 +1008,51 @@ async function submitToGoogleAppsScript(payload) {
   });
 }
 
+function appendFormspreeField(formData, key, value) {
+  if (Array.isArray(value)) {
+    formData.append(key, value.join(", "));
+    return;
+  }
+
+  formData.append(key, value || "");
+}
+
+async function submitToFormspree(payload) {
+  const endpoint = getFormspreeEndpoint();
+
+  if (!endpoint) {
+    throw new Error("Missing Formspree endpoint.");
+  }
+
+  const formData = new FormData();
+  formData.append("subject", getRsvpEmailSubject(payload));
+  formData.append("RSVP", buildRsvpEmailMessage(payload));
+
+  Object.entries(payload).forEach(([key, value]) => {
+    appendFormspreeField(formData, key, value);
+  });
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Formspree RSVP submission was not accepted.");
+  }
+}
+
 async function submitRsvp(payload) {
   if (getGoogleAppsScriptEndpoint()) {
     await submitToGoogleAppsScript(payload);
+    return;
+  }
+
+  if (getFormspreeEndpoint()) {
+    await submitToFormspree(payload);
     return;
   }
 

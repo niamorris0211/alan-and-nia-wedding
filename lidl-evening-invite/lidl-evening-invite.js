@@ -10,6 +10,10 @@ function getLidlGoogleAppsScriptEndpoint() {
   return window.RSVP_CONFIG?.googleAppsScriptUrl?.trim() || "";
 }
 
+function getLidlFormspreeEndpoint() {
+  return window.RSVP_CONFIG?.formspreeEndpoint?.trim() || "";
+}
+
 function getLidlFallbackEmail() {
   const configuredEmail = window.RSVP_CONFIG?.fallbackEmail?.trim();
 
@@ -140,9 +144,42 @@ async function submitLidlToGoogleAppsScript(payload) {
   });
 }
 
+async function submitLidlToFormspree(payload) {
+  const endpoint = getLidlFormspreeEndpoint();
+
+  if (!endpoint) {
+    throw new Error("Missing Formspree endpoint.");
+  }
+
+  const formData = new FormData();
+  formData.append("subject", getLidlEmailSubject(payload));
+  formData.append("RSVP", buildLidlEmailMessage(payload));
+
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, value || "");
+  });
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Formspree Lidl RSVP submission was not accepted.");
+  }
+}
+
 async function submitLidlRsvpWithConfiguredService(payload) {
   if (getLidlGoogleAppsScriptEndpoint()) {
     await submitLidlToGoogleAppsScript(payload);
+    return;
+  }
+
+  if (getLidlFormspreeEndpoint()) {
+    await submitLidlToFormspree(payload);
     return;
   }
 
