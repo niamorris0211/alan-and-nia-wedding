@@ -191,6 +191,19 @@ function getRsvpEndpoint() {
   return window.RSVP_CONFIG?.emailSubmitEndpoint?.trim() || "";
 }
 
+function getFallbackRsvpEmail() {
+  const configuredEmail = window.RSVP_CONFIG?.fallbackEmail?.trim();
+
+  if (configuredEmail) {
+    return configuredEmail;
+  }
+
+  const endpoint = getRsvpEndpoint();
+  const match = endpoint.match(/formsubmit\.co\/(?:ajax\/)?([^/?#]+)/);
+
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
 function getRsvpSubmissionEndpoint() {
   const endpoint = getRsvpEndpoint();
 
@@ -203,6 +216,37 @@ function getRsvpSubmissionEndpoint() {
   }
 
   return endpoint;
+}
+
+function buildMailtoLink(emailAddress, subject, body) {
+  const params = new URLSearchParams({
+    subject,
+    body,
+  });
+
+  return `mailto:${emailAddress}?${params.toString()}`;
+}
+
+function showRsvpEmailFallback(feedbackElement, subject, message) {
+  const fallbackEmail = getFallbackRsvpEmail();
+
+  if (!feedbackElement || !fallbackEmail) {
+    return;
+  }
+
+  const intro = document.createElement("span");
+  intro.textContent =
+    "Sorry, the automatic RSVP sender is having trouble. Please tap below to send your RSVP by email instead.";
+
+  const fallbackLink = document.createElement("a");
+  fallbackLink.className = "button button-secondary rsvp-email-fallback";
+  fallbackLink.href = buildMailtoLink(fallbackEmail, subject, message);
+  fallbackLink.textContent = "Send RSVP by email";
+
+  const note = document.createElement("span");
+  note.textContent = "Your RSVP details will be filled in for you.";
+
+  feedbackElement.replaceChildren(intro, fallbackLink, note);
 }
 
 function resolveGuestFromQuery() {
@@ -891,6 +935,12 @@ function buildRsvpEmailMessage(payload) {
   ].join("\n");
 }
 
+function getRsvpEmailSubject(payload) {
+  return `${
+    payload.invite_type === "evening" ? "Evening RSVP" : "Wedding RSVP"
+  } from ${payload.household_name}`;
+}
+
 async function submitToEmailService(payload) {
   const endpoint = getRsvpSubmissionEndpoint();
 
@@ -899,12 +949,7 @@ async function submitToEmailService(payload) {
   }
 
   const formData = new FormData();
-  formData.append(
-    "_subject",
-    `${
-      payload.invite_type === "evening" ? "Evening RSVP" : "Wedding RSVP"
-    } from ${payload.household_name}`
-  );
+  formData.append("_subject", getRsvpEmailSubject(payload));
   formData.append("_captcha", "false");
   formData.append("_template", "box");
   formData.append("RSVP", buildRsvpEmailMessage(payload));
@@ -1036,8 +1081,11 @@ if (personalisedRsvpForm && rsvpFeedback) {
       personalisedRsvpForm.reset();
       showRsvpSuccessState(activeGuest);
     } catch (error) {
-      rsvpFeedback.textContent =
-        "Sorry, that didn’t send properly. If this is your first test, check Hotmail for a FormSubmit activation email, then try again.";
+      showRsvpEmailFallback(
+        rsvpFeedback,
+        getRsvpEmailSubject(payload),
+        buildRsvpEmailMessage(payload)
+      );
     }
   });
 }

@@ -561,6 +561,18 @@ h3,
   color: var(--moss);
 }
 
+.rsvp-form-feedback:has(.rsvp-email-fallback) {
+  display: grid;
+  gap: 0.85rem;
+  justify-items: center;
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.rsvp-email-fallback {
+  width: min(100%, 260px);
+}
+
 .rsvp-success-state {
   max-width: 620px;
   margin: 0.5rem auto 0;

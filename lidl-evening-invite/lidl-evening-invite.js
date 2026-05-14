@@ -6,6 +6,50 @@ function getLidlRsvpEndpoint() {
   return window.RSVP_CONFIG?.emailSubmitEndpoint || "";
 }
 
+function getLidlFallbackEmail() {
+  const configuredEmail = window.RSVP_CONFIG?.fallbackEmail?.trim();
+
+  if (configuredEmail) {
+    return configuredEmail;
+  }
+
+  const endpoint = getLidlRsvpEndpoint();
+  const match = endpoint.match(/formsubmit\.co\/(?:ajax\/)?([^/?#]+)/);
+
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function buildLidlMailtoLink(emailAddress, subject, body) {
+  const params = new URLSearchParams({
+    subject,
+    body,
+  });
+
+  return `mailto:${emailAddress}?${params.toString()}`;
+}
+
+function showLidlEmailFallback(feedbackElement, subject, message) {
+  const fallbackEmail = getLidlFallbackEmail();
+
+  if (!feedbackElement || !fallbackEmail) {
+    return;
+  }
+
+  const intro = document.createElement("span");
+  intro.textContent =
+    "Sorry, the automatic RSVP sender is having trouble. Please tap below to send your RSVP by email instead.";
+
+  const fallbackLink = document.createElement("a");
+  fallbackLink.className = "button button-secondary rsvp-email-fallback";
+  fallbackLink.href = buildLidlMailtoLink(fallbackEmail, subject, message);
+  fallbackLink.textContent = "Send RSVP by email";
+
+  const note = document.createElement("span");
+  note.textContent = "Your RSVP details will be filled in for you.";
+
+  feedbackElement.replaceChildren(intro, fallbackLink, note);
+}
+
 function formatLidlSubmittedAt(submittedAt) {
   return new Date(submittedAt).toLocaleString("en-GB", {
     dateStyle: "full",
@@ -44,6 +88,10 @@ function buildLidlEmailMessage(payload) {
   ].join("\n");
 }
 
+function getLidlEmailSubject(payload) {
+  return `Lidl Evening RSVP — ${payload.full_name}`;
+}
+
 async function submitLidlRsvp(payload) {
   const endpoint = getLidlRsvpEndpoint();
 
@@ -52,7 +100,7 @@ async function submitLidlRsvp(payload) {
   }
 
   const formData = new FormData();
-  formData.append("_subject", `Lidl Evening RSVP — ${payload.full_name}`);
+  formData.append("_subject", getLidlEmailSubject(payload));
   formData.append("_captcha", "false");
   formData.append("_template", "box");
   formData.append("RSVP", buildLidlEmailMessage(payload));
@@ -156,8 +204,11 @@ if (lidlRsvpForm && lidlRsvpFeedback) {
       lidlRsvpForm.hidden = true;
       lidlRsvpSuccess.hidden = false;
     } catch (error) {
-      lidlRsvpFeedback.textContent =
-        "Sorry, that didn't send properly. Please try again in a moment.";
+      showLidlEmailFallback(
+        lidlRsvpFeedback,
+        getLidlEmailSubject(payload),
+        buildLidlEmailMessage(payload)
+      );
     }
   });
 }
