@@ -813,6 +813,7 @@ h3 {
 .timeline-card,
 .gallery-card,
 .stay-card,
+.gift-card,
 .rsvp-card,
 .faq-item {
   background: var(--surface);
@@ -1822,6 +1823,265 @@ h3 {
   display: block;
 }
 
+.gift-section {
+  position: relative;
+}
+
+.gift-container {
+  max-width: 1060px;
+}
+
+.gift-note-card {
+  max-width: 760px;
+  margin: -0.4rem auto 1.4rem;
+  padding: 1.2rem 1.35rem;
+  border: 1px solid rgba(77, 102, 80, 0.13);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 249, 0.92), rgba(239, 245, 236, 0.78));
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.gift-note-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gift-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.gift-card {
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(248, 243, 234, 0.9));
+}
+
+.gift-image-placeholder {
+  min-height: 154px;
+  display: grid;
+  place-items: center;
+  padding: 1.2rem;
+  color: rgba(47, 52, 45, 0.58);
+  text-align: center;
+  background:
+    radial-gradient(circle at 24% 18%, rgba(207, 176, 177, 0.45), transparent 28%),
+    radial-gradient(circle at 78% 28%, rgba(182, 197, 176, 0.55), transparent 30%),
+    linear-gradient(135deg, rgba(216, 179, 148, 0.24), rgba(255, 253, 249, 0.86));
+}
+
+.gift-image-placeholder span {
+  min-width: 132px;
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background: rgba(255, 253, 249, 0.68);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.gift-card-body {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+}
+
+.gift-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.gift-card h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(1.6rem, 4vw, 2.05rem);
+  line-height: 1;
+}
+
+.gift-price {
+  margin: 0.35rem 0 0;
+  color: var(--berry);
+  font-weight: 700;
+}
+
+.gift-status-badge {
+  flex: 0 0 auto;
+  padding: 0.32rem 0.62rem;
+  border-radius: 999px;
+  background: rgba(77, 102, 80, 0.1);
+  color: var(--moss);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gift-status-badge.status-gifted {
+  background: rgba(207, 176, 177, 0.3);
+  color: var(--berry);
+}
+
+.gift-status-badge.status-part-funded {
+  background: rgba(216, 179, 148, 0.28);
+  color: #76533f;
+}
+
+.gift-description {
+  margin: 0;
+  color: var(--muted);
+}
+
+.gift-actions {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.gift-button {
+  width: 100%;
+}
+
+.gift-button:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.gift-modal[hidden] {
+  display: none;
+}
+
+.gift-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.gift-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(47, 52, 45, 0.38);
+  backdrop-filter: blur(8px);
+}
+
+.gift-modal-panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 560px);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  padding: 1.6rem;
+  border: 1px solid rgba(77, 102, 80, 0.14);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.99), rgba(239, 245, 236, 0.94));
+  box-shadow: 0 28px 90px rgba(30, 36, 28, 0.24);
+}
+
+.gift-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 253, 249, 0.82);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.gift-modal-panel h2 {
+  margin: 0;
+  padding-right: 2.4rem;
+  font-size: clamp(2.35rem, 7vw, 3.4rem);
+  line-height: 0.98;
+}
+
+.gift-modal-amount {
+  width: fit-content;
+  margin: 0.8rem 0 0;
+  padding: 0.35rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(207, 176, 177, 0.2);
+  color: var(--berry);
+  font-weight: 800;
+}
+
+.gift-modal-thanks {
+  margin: 1rem 0 1.2rem;
+  color: var(--muted);
+}
+
+.gift-note-form {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.gift-note-form[hidden],
+.gift-note-success[hidden] {
+  display: none;
+}
+
+.gift-note-form input,
+.gift-note-form textarea {
+  width: 100%;
+  border: 1px solid rgba(77, 102, 80, 0.15);
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.88);
+  color: var(--text);
+  padding: 0.95rem 1rem;
+  outline: none;
+}
+
+.gift-note-form input:focus,
+.gift-note-form textarea:focus {
+  border-color: rgba(77, 102, 80, 0.42);
+  box-shadow: 0 0 0 4px rgba(77, 102, 80, 0.08);
+}
+
+.gift-note-feedback {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--moss);
+  text-align: center;
+}
+
+.gift-note-success {
+  display: grid;
+  justify-items: center;
+  gap: 0.8rem;
+  padding: 1rem 0 0.4rem;
+  text-align: center;
+}
+
+.gift-note-success h3 {
+  margin: 0;
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  line-height: 1;
+}
+
+.gift-note-success p {
+  margin: 0;
+  color: var(--muted);
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(22px);
@@ -1976,6 +2236,10 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .gift-grid {
+    grid-template-columns: 1fr;
+  }
+
   .stay-carousel {
     grid-auto-columns: 100%;
   }
@@ -2021,6 +2285,40 @@ h3 {
     border: 1px solid rgba(77, 102, 80, 0.08);
     text-align: center;
     font-size: 0.92rem;
+  }
+
+  .gift-note-card {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .gift-card-body {
+    padding: 1rem;
+  }
+
+  .gift-card-header {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .gift-image-placeholder {
+    min-height: 128px;
+  }
+
+  .gift-modal {
+    padding: 0.75rem;
+    align-items: end;
+  }
+
+  .gift-modal-panel {
+    padding: 1.25rem 1rem;
+    border-radius: 24px;
+    max-height: calc(100vh - 1.5rem);
+  }
+
+  .gift-modal-close {
+    top: 0.75rem;
+    right: 0.75rem;
   }
 
   .rsvp-breakfast-images {

@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260514a" />
+    <link rel="stylesheet" href="style.css?v=20260520a" />
   </head>
   <body>
     <header class="site-header">
@@ -25,6 +25,7 @@
           <a href="#schedule">Schedule</a>
           <a href="#venue-gallery">Venue</a>
           <a href="#stay">Stay</a>
+          <a href="#gift-list">Gift List</a>
           <a href="#rsvp">RSVP</a>
         </nav>
       </div>
@@ -592,6 +593,36 @@
         </div>
       </section>
 
+      <section class="section gift-section" id="gift-list">
+        <div class="flower venue-flower-right" aria-hidden="true"></div>
+        <div class="container gift-container">
+          <div class="section-heading">
+            <p class="eyebrow">Gift List</p>
+            <h2>Our Honeymoon Adventures</h2>
+            <p class="section-intro">
+              Your presence at our wedding is honestly more than enough. But if
+              you’d like to gift something extra, we’ve put together a few little
+              honeymoon adventures we’d love to do together. Think of it as
+              helping us make memories, not buying us another toaster.
+            </p>
+          </div>
+
+          <aside class="gift-note-card">
+            <p>
+              No pressure at all — this is completely optional. We’ll organise
+              the bookings ourselves, so any contribution simply helps us enjoy
+              a few special moments on our honeymoon.
+            </p>
+          </aside>
+
+          <div
+            class="gift-grid"
+            id="gift-grid"
+            aria-label="Honeymoon gift experiences"
+          ></div>
+        </div>
+      </section>
+
       <section class="section rsvp-section" id="rsvp">
         <div class="container rsvp-shell">
           <div class="rsvp-copy rsvp-copy-centered" id="rsvp-generic-copy">
@@ -741,6 +772,94 @@
       </section>
     </main>
 
+    <div class="gift-modal" id="gift-modal" hidden>
+      <div class="gift-modal-backdrop" data-gift-close></div>
+      <section
+        class="gift-modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="gift-modal-title"
+      >
+        <button
+          class="gift-modal-close"
+          id="gift-modal-close"
+          type="button"
+          aria-label="Close gift note"
+        >
+          ×
+        </button>
+
+        <div class="gift-modal-content" id="gift-modal-content">
+          <p class="eyebrow">Gift note</p>
+          <h2 id="gift-modal-title">Gift title</h2>
+          <p class="gift-modal-amount" id="gift-modal-amount">£0</p>
+          <p class="gift-modal-thanks">
+            Thank you so much. We’re so grateful.
+          </p>
+
+          <form class="gift-note-form" id="gift-note-form">
+            <input type="hidden" id="gift-note-id" name="gift_id" />
+            <input type="hidden" id="gift-note-title" name="gift_title" />
+            <input type="hidden" id="gift-note-amount" name="gift_amount" />
+
+            <label class="rsvp-label" for="gift-guest-name">Your name</label>
+            <input
+              id="gift-guest-name"
+              name="guest_name"
+              type="text"
+              autocomplete="name"
+              required
+            />
+
+            <label class="rsvp-label" for="gift-guest-email">Email address</label>
+            <input
+              id="gift-guest-email"
+              name="guest_email"
+              type="email"
+              autocomplete="email"
+              required
+            />
+
+            <label class="rsvp-label" for="gift-message">Optional message</label>
+            <textarea
+              id="gift-message"
+              name="gift_message"
+              rows="4"
+              placeholder="A little note for us"
+            ></textarea>
+
+            <button class="button button-primary" type="submit">
+              Send gift note
+            </button>
+            <p
+              class="gift-note-feedback"
+              id="gift-note-feedback"
+              aria-live="polite"
+            ></p>
+          </form>
+
+          <div
+            class="gift-note-success"
+            id="gift-note-success"
+            hidden
+            aria-live="polite"
+          >
+            <div class="rsvp-success-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="presentation" focusable="false">
+                <circle cx="24" cy="24" r="23"></circle>
+                <path d="M16 24.5 21.5 30 33 18.5"></path>
+              </svg>
+            </div>
+            <h3>Thank you — we’ve received your gift note.</h3>
+            <p>
+              We’ll keep this ready while we sort the proper contribution
+              details.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
     <footer class="site-footer">
       <div class="container footer-inner">
         <p>Nia &amp; Alan</p>
@@ -753,6 +872,6 @@
     <script src="accommodation-data.js?v=20260326h"></script>
     <script src="faq-data.js?v=20260326h"></script>
     <script src="rsvp-config.js?v=20260514c"></script>
-    <script src="script.js?v=20260514c"></script>
+    <script src="script.js?v=20260520a"></script>
   </body>
 </html>

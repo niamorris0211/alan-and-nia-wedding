@@ -43,11 +43,71 @@ const stayNote = document.getElementById("stay-note");
 const stayCarousel = document.getElementById("stay-carousel");
 const stayCarouselPrev = document.getElementById("stay-carousel-prev");
 const stayCarouselNext = document.getElementById("stay-carousel-next");
+const giftGrid = document.getElementById("gift-grid");
+const giftModal = document.getElementById("gift-modal");
+const giftModalClose = document.getElementById("gift-modal-close");
+const giftModalTitle = document.getElementById("gift-modal-title");
+const giftModalAmount = document.getElementById("gift-modal-amount");
+const giftNoteForm = document.getElementById("gift-note-form");
+const giftNoteSuccess = document.getElementById("gift-note-success");
+const giftNoteFeedback = document.getElementById("gift-note-feedback");
+const giftGuestNameInput = document.getElementById("gift-guest-name");
+const giftNoteIdInput = document.getElementById("gift-note-id");
+const giftNoteTitleInput = document.getElementById("gift-note-title");
+const giftNoteAmountInput = document.getElementById("gift-note-amount");
 const ACCOMMODATION_NAME_ALIASES = {
   "Malvern Chase Shepherds Hut": "Malvern Chase Shepherd’s Hut",
   "Midsummer Shepherds Hut": "Midsummer Shepherd's Hut",
   "Sugarloaf Shepherds Hut": "Sugarloaf Shepherd's Hut",
 };
+const HONEYMOON_GIFTS = [
+  {
+    id: "whisky-research",
+    title: "Alan’s Very Serious Whisky Research",
+    priceLabel: "£44",
+    description:
+      "Apparently sampling Scottish whisky is an important cultural activity and definitely not just Alan having the time of his life.",
+    status: "Available",
+    imagePlaceholder: "Whisky research",
+    options: [{ label: "Gift this experience", amount: "£44" }],
+  },
+  {
+    id: "staffa-adventure",
+    title: "Staffa Adventure",
+    priceLabel: "£90",
+    description:
+      "Help send us off to explore dramatic cliffs, sea air, caves, and the kind of scenery that makes you say “wow” every five minutes.",
+    status: "Available",
+    imagePlaceholder: "Staffa cliffs",
+    options: [{ label: "Send us to Staffa", amount: "£90" }],
+  },
+  {
+    id: "otter-detective-mission",
+    title: "Otter Detective Mission",
+    priceLabel: "£180 total / £90 each",
+    description:
+      "Fund our deeply important investigation into whether we can actually spot wild otters without getting wildly overexcited too early.",
+    status: "Available",
+    imagePlaceholder: "Otter mission",
+    options: [
+      { label: "Gift one place — £90", amount: "£90" },
+      { label: "Gift both places — £180", amount: "£180" },
+    ],
+  },
+  {
+    id: "wildlife-sea-safari",
+    title: "Wildlife Sea Safari",
+    priceLabel: "£222 total / £111 each",
+    description:
+      "Whales, dolphins, sea eagles, seals… basically the honeymoon version of Planet Earth, but wetter and with less David Attenborough.",
+    status: "Available",
+    imagePlaceholder: "Sea safari",
+    options: [
+      { label: "Gift one place — £111", amount: "£111" },
+      { label: "Gift both places — £222", amount: "£222" },
+    ],
+  },
+];
 const BREAKFAST_ELIGIBLE_GUESTS = new Set([
   "Debby",
   "Kai",
@@ -733,9 +793,241 @@ function scrollStayCarousel(direction) {
   });
 }
 
+function getGiftStatusClass(status) {
+  return `status-${status.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
+
+function isGiftAvailable(gift) {
+  return gift.status.toLowerCase() !== "gifted";
+}
+
+function renderGiftList() {
+  if (!giftGrid) {
+    return;
+  }
+
+  giftGrid.innerHTML = "";
+
+  HONEYMOON_GIFTS.forEach((gift) => {
+    const isAvailable = isGiftAvailable(gift);
+    const card = document.createElement("article");
+    card.className = `gift-card ${isAvailable ? "" : "is-gifted"}`.trim();
+
+    card.innerHTML = `
+      <div class="gift-image-placeholder" aria-hidden="true">
+        <span>${gift.imagePlaceholder}</span>
+      </div>
+      <div class="gift-card-body">
+        <div class="gift-card-header">
+          <div>
+            <h3>${gift.title}</h3>
+            <p class="gift-price">${gift.priceLabel}</p>
+          </div>
+          <span class="gift-status-badge ${getGiftStatusClass(gift.status)}">
+            ${gift.status}
+          </span>
+        </div>
+        <p class="gift-description">${gift.description}</p>
+        <div class="gift-actions"></div>
+      </div>
+    `;
+
+    const giftActions = card.querySelector(".gift-actions");
+
+    gift.options.forEach((option, optionIndex) => {
+      const button = document.createElement("button");
+      button.className = "button button-primary gift-button";
+      button.type = "button";
+      button.textContent = option.label;
+      button.dataset.giftId = gift.id;
+      button.dataset.optionIndex = optionIndex.toString();
+      button.disabled = !isAvailable;
+
+      giftActions.appendChild(button);
+    });
+
+    giftGrid.appendChild(card);
+  });
+}
+
+function getSelectedGift(giftId, optionIndex) {
+  const gift = HONEYMOON_GIFTS.find((item) => item.id === giftId);
+
+  if (!gift) {
+    return null;
+  }
+
+  const option = gift.options[optionIndex];
+
+  if (!option) {
+    return null;
+  }
+
+  return { gift, option };
+}
+
+function openGiftModal(giftId, optionIndex) {
+  const selectedGift = getSelectedGift(giftId, optionIndex);
+
+  if (!selectedGift || !giftModal || !giftNoteForm) {
+    return;
+  }
+
+  const { gift, option } = selectedGift;
+
+  if (giftModalTitle) {
+    giftModalTitle.textContent = gift.title;
+  }
+
+  if (giftModalAmount) {
+    giftModalAmount.textContent = option.amount;
+  }
+
+  giftNoteForm.reset();
+
+  if (giftNoteIdInput) {
+    giftNoteIdInput.value = gift.id;
+  }
+
+  if (giftNoteTitleInput) {
+    giftNoteTitleInput.value = gift.title;
+  }
+
+  if (giftNoteAmountInput) {
+    giftNoteAmountInput.value = option.amount;
+  }
+
+  giftNoteForm.hidden = false;
+
+  if (giftNoteFeedback) {
+    giftNoteFeedback.textContent = "";
+  }
+
+  if (giftNoteSuccess) {
+    giftNoteSuccess.hidden = true;
+  }
+
+  giftModal.hidden = false;
+  document.body.classList.add("modal-open");
+
+  window.setTimeout(() => {
+    giftGuestNameInput?.focus();
+  }, 80);
+}
+
+function closeGiftModal() {
+  if (!giftModal) {
+    return;
+  }
+
+  giftModal.hidden = true;
+  document.body.classList.remove("modal-open");
+}
+
+function saveGiftNotePreview(payload) {
+  const giftNotes = JSON.parse(
+    window.localStorage.getItem("honeymoonGiftNotes") || "[]"
+  );
+
+  giftNotes.push(payload);
+
+  window.localStorage.setItem("honeymoonGiftNotes", JSON.stringify(giftNotes));
+}
+
+function buildGiftNoteEmailMessage(payload) {
+  return [
+    "Nia & Alan Honeymoon Gift Note",
+    "",
+    `Gift: ${payload.gift_title}`,
+    `Amount selected: ${payload.gift_amount}`,
+    "",
+    `Guest name: ${payload.guest_name}`,
+    `Email address: ${payload.guest_email}`,
+    `Message: ${payload.gift_message || "None given"}`,
+    "",
+    `Submitted: ${formatSubmittedAt(payload.submitted_at)}`,
+  ].join("\n");
+}
+
+function getGiftNoteEmailSubject(payload) {
+  return `Honeymoon Gift Note - ${payload.guest_name}`;
+}
+
+async function submitGiftNote(payload) {
+  const endpoint = getFormspreeEndpoint();
+
+  if (!endpoint) {
+    saveGiftNotePreview(payload);
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("subject", getGiftNoteEmailSubject(payload));
+  formData.append("Gift Note", buildGiftNoteEmailMessage(payload));
+
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, value || "");
+  });
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Gift note submission was not accepted.");
+  }
+}
+
+async function handleGiftNoteSubmit(event) {
+  event.preventDefault();
+
+  if (!giftNoteForm || !giftNoteSuccess) {
+    return;
+  }
+
+  const formData = new FormData(giftNoteForm);
+  const payload = {
+    gift_id: formData.get("gift_id")?.toString() || "",
+    gift_title: formData.get("gift_title")?.toString() || "",
+    gift_amount: formData.get("gift_amount")?.toString() || "",
+    guest_name: formData.get("guest_name")?.toString().trim() || "",
+    guest_email: formData.get("guest_email")?.toString().trim() || "",
+    gift_message: formData.get("gift_message")?.toString().trim() || "",
+    submitted_at: new Date().toISOString(),
+  };
+
+  if (giftNoteFeedback) {
+    giftNoteFeedback.textContent = "Sending your gift note...";
+  }
+
+  try {
+    if (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    ) {
+      saveGiftNotePreview(payload);
+    } else {
+      await submitGiftNote(payload);
+    }
+
+    giftNoteForm.reset();
+    giftNoteForm.hidden = true;
+    giftNoteSuccess.hidden = false;
+  } catch (error) {
+    if (giftNoteFeedback) {
+      giftNoteFeedback.textContent =
+        "Sorry, that didn’t send properly. Please message us and we’ll sort it.";
+    }
+  }
+}
+
 function setupScrollReveals() {
   const revealItems = document.querySelectorAll(
-    ".section-heading, .hero-image, .hero-copy, .weekend-card, .evening-detail-card, .evening-info-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .rsvp-card, .faq-item, .bottom-image-card"
+    ".section-heading, .hero-image, .hero-copy, .weekend-card, .evening-detail-card, .evening-info-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .gift-note-card, .gift-card, .rsvp-card, .faq-item, .bottom-image-card"
   );
 
   if (!revealItems.length) {
@@ -1096,6 +1388,45 @@ navLinks.forEach((link) => {
 
 renderFaqSection();
 setupFaqAccordion();
+renderGiftList();
+
+if (giftGrid) {
+  giftGrid.addEventListener("click", (event) => {
+    const target = event.target;
+    const button =
+      target instanceof Element ? target.closest(".gift-button") : null;
+
+    if (!button || button.disabled) {
+      return;
+    }
+
+    openGiftModal(button.dataset.giftId, Number(button.dataset.optionIndex));
+  });
+}
+
+if (giftModal) {
+  giftModal.addEventListener("click", (event) => {
+    const target = event.target;
+
+    if (target instanceof Element && target.matches("[data-gift-close]")) {
+      closeGiftModal();
+    }
+  });
+}
+
+if (giftModalClose) {
+  giftModalClose.addEventListener("click", closeGiftModal);
+}
+
+if (giftNoteForm) {
+  giftNoteForm.addEventListener("submit", handleGiftNoteSubmit);
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && giftModal && !giftModal.hidden) {
+    closeGiftModal();
+  }
+});
 
 if (rsvpSuccessReset) {
   rsvpSuccessReset.addEventListener("click", () => {
