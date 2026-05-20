@@ -67,6 +67,7 @@ const ACCOMMODATION_NAME_ALIASES = {
 };
 const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
 const PAYMENT_LINKS = {
+  testOnePenny: "PASTE_1P_STRIPE_LINK_HERE",
   whisky: "PASTE_FIXED_STRIPE_LINK_FOR_WHISKY",
   staffa: "PASTE_FIXED_STRIPE_LINK_FOR_STAFFA",
   otter: "PASTE_FIXED_STRIPE_LINK_FOR_OTTER",
@@ -74,6 +75,20 @@ const PAYMENT_LINKS = {
   flexibleContribution: "PASTE_ONE_FLEXIBLE_STRIPE_LINK_HERE",
 };
 const HONEYMOON_GIFTS = [
+  {
+    id: "test-biscuit",
+    fixedPaymentLinkKey: "testOnePenny",
+    fullGiftAmount: "£0.01",
+    allowFlexibleContribution: true,
+    title: "Emergency Biscuit Fund",
+    priceLabel: "£0.01",
+    description:
+      "In case wedding planning gets too much and we require immediate emergency biscuit intervention.",
+    status: "Available",
+    imagePlaceholder: "TEST ITEM",
+    isTestItem: true,
+    badgeLabel: "Testing only",
+  },
   {
     id: "whisky-research",
     fixedPaymentLinkKey: "whisky",
@@ -955,10 +970,18 @@ function renderGiftList() {
   HONEYMOON_GIFTS.forEach((gift) => {
     const isAvailable = isGiftAvailable(gift);
     const card = document.createElement("article");
-    card.className = `gift-card ${isAvailable ? "" : "is-gifted"}`.trim();
+    card.className = `gift-card ${isAvailable ? "" : "is-gifted"} ${
+      gift.isTestItem ? "gift-card-test" : ""
+    }`.trim();
     const statusNote = isGiftAvailable(gift)
       ? ""
       : `<p class="gift-status-note">This one has been kindly gifted.</p>`;
+    const testBadge = gift.badgeLabel
+      ? `<span class="gift-test-badge">${gift.badgeLabel}</span>`
+      : "";
+    const testLabel = gift.isTestItem
+      ? `<p class="gift-test-label">TEST ITEM</p>`
+      : "";
 
     card.innerHTML = `
       <div class="gift-image-placeholder" aria-hidden="true">
@@ -967,12 +990,16 @@ function renderGiftList() {
       <div class="gift-card-body">
         <div class="gift-card-header">
           <div>
+            ${testLabel}
             <h3>${gift.title}</h3>
             <p class="gift-price">${gift.priceLabel}</p>
           </div>
-          <span class="gift-status-badge ${getGiftStatusClass(gift.status)}">
-            ${isGiftPartFunded(gift) ? "Part-funded" : gift.status}
-          </span>
+          <div class="gift-card-badges">
+            ${testBadge}
+            <span class="gift-status-badge ${getGiftStatusClass(gift.status)}">
+              ${isGiftPartFunded(gift) ? "Part-funded" : gift.status}
+            </span>
+          </div>
         </div>
         <p class="gift-description">${gift.description}</p>
         ${statusNote}

@@ -1927,6 +1927,12 @@ h3 {
     linear-gradient(180deg, rgba(255, 253, 249, 0.98), rgba(248, 243, 234, 0.9));
 }
 
+.gift-card-test {
+  border-color: rgba(138, 102, 106, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.99), rgba(246, 236, 232, 0.9));
+}
+
 .gift-image-placeholder {
   min-height: 154px;
   display: grid;
@@ -1965,6 +1971,21 @@ h3 {
   gap: 1rem;
 }
 
+.gift-card-badges {
+  display: grid;
+  justify-items: end;
+  gap: 0.4rem;
+}
+
+.gift-test-label {
+  margin: 0 0 0.25rem;
+  color: var(--berry);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .gift-card h3 {
   margin: 0;
   color: var(--text);
@@ -1985,6 +2006,19 @@ h3 {
   background: rgba(77, 102, 80, 0.1);
   color: var(--moss);
   font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.gift-test-badge {
+  width: fit-content;
+  padding: 0.28rem 0.56rem;
+  border-radius: 999px;
+  border: 1px solid rgba(138, 102, 106, 0.3);
+  background: rgba(255, 253, 249, 0.72);
+  color: var(--berry);
+  font-size: 0.7rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
