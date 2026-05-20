@@ -2116,8 +2116,7 @@ body.modal-open {
 }
 
 .gift-note-form[hidden],
-.gift-note-success[hidden],
-.gift-custom-amount-wrap[hidden] {
+.gift-note-success[hidden] {
   display: none;
 }
 

@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260520b" />
+    <link rel="stylesheet" href="style.css?v=20260520c" />
   </head>
   <body>
     <header class="site-header">
@@ -821,21 +821,11 @@
             <input type="hidden" id="gift-note-id" name="gift_id" />
             <input type="hidden" id="gift-note-title" name="gift_title" />
             <input type="hidden" id="gift-note-amount" name="gift_amount" />
-
-            <div class="gift-custom-amount-wrap" id="gift-custom-amount-wrap" hidden>
-              <label class="rsvp-label" for="gift-custom-amount"
-                >Gift amount</label
-              >
-              <input
-                id="gift-custom-amount"
-                name="gift_custom_amount"
-                type="number"
-                min="1"
-                step="1"
-                inputmode="numeric"
-                placeholder="Enter an amount"
-              />
-            </div>
+            <input
+              type="hidden"
+              id="gift-payment-link-key"
+              name="payment_link_key"
+            />
 
             <label class="rsvp-label" for="gift-guest-name">Your name</label>
             <input
@@ -910,6 +900,6 @@
     <script src="accommodation-data.js?v=20260326h"></script>
     <script src="faq-data.js?v=20260326h"></script>
     <script src="rsvp-config.js?v=20260514c"></script>
-    <script src="script.js?v=20260520b"></script>
+    <script src="script.js?v=20260520c"></script>
   </body>
 </html>

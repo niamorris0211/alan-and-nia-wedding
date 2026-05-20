@@ -57,78 +57,82 @@ const giftGuestNameInput = document.getElementById("gift-guest-name");
 const giftNoteIdInput = document.getElementById("gift-note-id");
 const giftNoteTitleInput = document.getElementById("gift-note-title");
 const giftNoteAmountInput = document.getElementById("gift-note-amount");
-const giftCustomAmountWrap = document.getElementById("gift-custom-amount-wrap");
-const giftCustomAmountInput = document.getElementById("gift-custom-amount");
+const giftPaymentLinkKeyInput = document.getElementById(
+  "gift-payment-link-key"
+);
 const ACCOMMODATION_NAME_ALIASES = {
   "Malvern Chase Shepherds Hut": "Malvern Chase Shepherd’s Hut",
   "Midsummer Shepherds Hut": "Midsummer Shepherd's Hut",
   "Sugarloaf Shepherds Hut": "Sugarloaf Shepherd's Hut",
 };
 const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
-// Replace this with the real Stripe, PayPal, or bank-transfer instruction page.
-const PAYMENT_LINK = "https://www.alanandnia.co.uk/#gift-list";
+const PAYMENT_LINKS = {
+  whisky: "PASTE_FIXED_STRIPE_LINK_FOR_WHISKY",
+  staffa: "PASTE_FIXED_STRIPE_LINK_FOR_STAFFA",
+  otter: "PASTE_FIXED_STRIPE_LINK_FOR_OTTER",
+  safari: "PASTE_FIXED_STRIPE_LINK_FOR_SAFARI",
+  flexibleContribution: "PASTE_ONE_FLEXIBLE_STRIPE_LINK_HERE",
+};
 const HONEYMOON_GIFTS = [
   {
     id: "whisky-research",
+    fixedPaymentLinkKey: "whisky",
+    fullGiftAmount: "£44",
+    allowFlexibleContribution: true,
     title: "Alan’s Very Serious Whisky Research",
     priceLabel: "£44",
     description:
       "Apparently sampling Scottish whisky is an important cultural activity and definitely not just Alan having the time of his life.",
     status: "Available",
     imagePlaceholder: "Whisky research",
-    options: [{ label: "Gift this experience", amount: "£44" }],
   },
   {
     id: "staffa-adventure",
+    fixedPaymentLinkKey: "staffa",
+    fullGiftAmount: "£90",
+    allowFlexibleContribution: true,
     title: "Staffa Adventure",
     priceLabel: "£90",
     description:
       "Help send us off to explore dramatic cliffs, sea air, caves, and the kind of scenery that makes you say “wow” every five minutes.",
     status: "Available",
     imagePlaceholder: "Staffa cliffs",
-    options: [{ label: "Send us to Staffa", amount: "£90" }],
   },
   {
     id: "otter-detective-mission",
+    fixedPaymentLinkKey: "otter",
+    fullGiftAmount: "£180",
+    allowFlexibleContribution: true,
     title: "Otter Detective Mission",
     priceLabel: "£180 total / £90 each",
     description:
       "Fund our deeply important investigation into whether we can actually spot wild otters without getting wildly overexcited too early.",
     status: "Available",
     imagePlaceholder: "Otter mission",
-    options: [
-      { label: "Gift one place — £90", amount: "£90" },
-      { label: "Gift both places — £180", amount: "£180" },
-    ],
   },
   {
     id: "wildlife-sea-safari",
+    fixedPaymentLinkKey: "safari",
+    fullGiftAmount: "£222",
+    allowFlexibleContribution: true,
     title: "Wildlife Sea Safari",
     priceLabel: "£222 total / £111 each",
     description:
       "Whales, dolphins, sea eagles, seals… basically the honeymoon version of Planet Earth, but wetter and with less David Attenborough.",
     status: "Available",
     imagePlaceholder: "Sea safari",
-    options: [
-      { label: "Gift one place — £111", amount: "£111" },
-      { label: "Gift both places — £222", amount: "£222" },
-    ],
   },
   {
     id: "honeymoon-pot",
+    fixedPaymentLinkKey: null,
+    fullGiftAmount: null,
+    allowFlexibleContribution: true,
     title: "Honeymoon Pot",
     priceLabel: "Any amount",
     description:
       "A little pot for anything from coffees with a view to an extra special dinner while we’re away.",
     status: "Available",
     imagePlaceholder: "Honeymoon pot",
-    options: [
-      {
-        label: "Choose an amount",
-        amount: "Custom amount",
-        allowsCustomAmount: true,
-      },
-    ],
   },
 ];
 const BREAKFAST_ELIGIBLE_GUESTS = new Set([
@@ -828,6 +832,45 @@ function isGiftPartFunded(gift) {
   return gift.status.toLowerCase() === "part-funded";
 }
 
+function isPlaceholderPaymentLink(link) {
+  return !link || link.startsWith("PASTE_");
+}
+
+function getPaymentLink(paymentLinkKey) {
+  return PAYMENT_LINKS[paymentLinkKey] || "";
+}
+
+function getGiftActions(gift) {
+  if (gift.id === "honeymoon-pot") {
+    return [
+      {
+        type: "flexible",
+        label: "Contribute to honeymoon pot",
+        selectedAmount: "General honeymoon contribution",
+        paymentLinkKey: "flexibleContribution",
+        disabled: !gift.allowFlexibleContribution,
+      },
+    ];
+  }
+
+  return [
+    {
+      type: "full",
+      label: `Gift the full experience — ${gift.fullGiftAmount}`,
+      selectedAmount: gift.fullGiftAmount,
+      paymentLinkKey: gift.fixedPaymentLinkKey,
+      disabled: gift.status.toLowerCase() === "gifted",
+    },
+    {
+      type: "flexible",
+      label: "Contribute towards this",
+      selectedAmount: `Contribution towards ${gift.title}`,
+      paymentLinkKey: "flexibleContribution",
+      disabled: !gift.allowFlexibleContribution,
+    },
+  ];
+}
+
 function getSavedGiftNotes() {
   try {
     const savedNotes = JSON.parse(
@@ -939,17 +982,14 @@ function renderGiftList() {
 
     const giftActions = card.querySelector(".gift-actions");
 
-    gift.options.forEach((option, optionIndex) => {
+    getGiftActions(gift).forEach((option) => {
       const button = document.createElement("button");
       button.className = "button button-primary gift-button";
       button.type = "button";
       button.textContent = option.label;
       button.dataset.giftId = gift.id;
-      button.dataset.optionIndex = optionIndex.toString();
-      button.dataset.allowsCustomAmount = option.allowsCustomAmount
-        ? "true"
-        : "false";
-      button.disabled = !isAvailable;
+      button.dataset.actionType = option.type;
+      button.disabled = option.disabled;
 
       giftActions.appendChild(button);
     });
@@ -958,14 +998,16 @@ function renderGiftList() {
   });
 }
 
-function getSelectedGift(giftId, optionIndex) {
+function getSelectedGift(giftId, actionType) {
   const gift = HONEYMOON_GIFTS.find((item) => item.id === giftId);
 
   if (!gift) {
     return null;
   }
 
-  const option = gift.options[optionIndex];
+  const option = getGiftActions(gift).find(
+    (action) => action.type === actionType
+  );
 
   if (!option) {
     return null;
@@ -974,8 +1016,8 @@ function getSelectedGift(giftId, optionIndex) {
   return { gift, option };
 }
 
-function openGiftModal(giftId, optionIndex) {
-  const selectedGift = getSelectedGift(giftId, optionIndex);
+function openGiftModal(giftId, actionType) {
+  const selectedGift = getSelectedGift(giftId, actionType);
 
   if (!selectedGift || !giftModal || !giftNoteForm) {
     return;
@@ -988,7 +1030,7 @@ function openGiftModal(giftId, optionIndex) {
   }
 
   if (giftModalAmount) {
-    giftModalAmount.textContent = option.amount;
+    giftModalAmount.textContent = option.selectedAmount;
   }
 
   giftNoteForm.reset();
@@ -1002,13 +1044,11 @@ function openGiftModal(giftId, optionIndex) {
   }
 
   if (giftNoteAmountInput) {
-    giftNoteAmountInput.value = option.amount;
+    giftNoteAmountInput.value = option.selectedAmount;
   }
 
-  if (giftCustomAmountWrap && giftCustomAmountInput) {
-    giftCustomAmountWrap.hidden = !option.allowsCustomAmount;
-    giftCustomAmountInput.required = Boolean(option.allowsCustomAmount);
-    giftCustomAmountInput.value = "";
+  if (giftPaymentLinkKeyInput) {
+    giftPaymentLinkKeyInput.value = option.paymentLinkKey;
   }
 
   giftNoteForm.hidden = false;
@@ -1044,6 +1084,7 @@ function buildGiftNoteEmailMessage(payload) {
     "",
     `Gift: ${payload.gift_title}`,
     `Amount selected: ${payload.selected_amount}`,
+    `Payment link key: ${payload.payment_link_key}`,
     "",
     `Guest name: ${payload.guest_name}`,
     `Email address: ${payload.guest_email}`,
@@ -1094,12 +1135,13 @@ async function handleGiftNoteSubmit(event) {
 
   const formData = new FormData(giftNoteForm);
   const storedAmount = formData.get("gift_amount")?.toString() || "";
-  const customAmount = formData.get("gift_custom_amount")?.toString().trim() || "";
-  const selectedAmount = customAmount ? `£${customAmount}` : storedAmount;
+  const paymentLinkKey = formData.get("payment_link_key")?.toString() || "";
+  const paymentLink = getPaymentLink(paymentLinkKey);
   const payload = {
     gift_id: formData.get("gift_id")?.toString() || "",
     gift_title: formData.get("gift_title")?.toString() || "",
-    selected_amount: selectedAmount,
+    selected_amount: storedAmount,
+    payment_link_key: paymentLinkKey,
     guest_name: formData.get("guest_name")?.toString().trim() || "",
     guest_email: formData.get("guest_email")?.toString().trim() || "",
     optional_message: formData.get("gift_message")?.toString().trim() || "",
@@ -1126,8 +1168,11 @@ async function handleGiftNoteSubmit(event) {
   giftNoteForm.hidden = true;
   giftNoteSuccess.hidden = false;
 
-  if (PAYMENT_LINK) {
-    window.open(PAYMENT_LINK, "_blank", "noopener,noreferrer");
+  if (paymentLink && !isPlaceholderPaymentLink(paymentLink)) {
+    window.open(paymentLink, "_blank", "noopener,noreferrer");
+  } else if (giftNoteFeedback) {
+    giftNoteFeedback.textContent =
+      "Gift note saved. Add the Stripe payment link in script.js when it’s ready.";
   }
 }
 
@@ -1507,7 +1552,7 @@ if (giftGrid) {
       return;
     }
 
-    openGiftModal(button.dataset.giftId, Number(button.dataset.optionIndex));
+    openGiftModal(button.dataset.giftId, button.dataset.actionType);
   });
 }
 
