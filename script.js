@@ -43,6 +43,7 @@ const stayNote = document.getElementById("stay-note");
 const stayCarousel = document.getElementById("stay-carousel");
 const stayCarouselPrev = document.getElementById("stay-carousel-prev");
 const stayCarouselNext = document.getElementById("stay-carousel-next");
+const giftSection = document.getElementById("gift-list");
 const giftGrid = document.getElementById("gift-grid");
 const giftPrivateNotes = document.getElementById("gift-private-notes");
 const giftPrivateNotesList = document.getElementById("gift-private-notes-list");
@@ -67,7 +68,7 @@ const ACCOMMODATION_NAME_ALIASES = {
 };
 const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
 const PAYMENT_LINKS = {
-  testOnePenny: "PASTE_1P_STRIPE_LINK_HERE",
+  testOnePenny: "https://buy.stripe.com/aFa9AU4voc5U7TB9HEfrW00",
   whisky: "PASTE_FIXED_STRIPE_LINK_FOR_WHISKY",
   staffa: "PASTE_FIXED_STRIPE_LINK_FOR_STAFFA",
   otter: "PASTE_FIXED_STRIPE_LINK_FOR_OTTER",
@@ -689,6 +690,23 @@ function renderPersonalisedSchedule(guest) {
     !guest || guest.inviteType !== "weekend";
 }
 
+function hideGiftListForPersonalisedGuest(guest) {
+  const shouldHideGiftList = Boolean(guest);
+  const giftNavLink = document.querySelector('.site-nav a[href="#gift-list"]');
+
+  if (giftSection) {
+    giftSection.hidden = shouldHideGiftList;
+  }
+
+  if (giftNavLink) {
+    giftNavLink.hidden = shouldHideGiftList;
+  }
+
+  if (shouldHideGiftList && giftModal) {
+    closeGiftModal();
+  }
+}
+
 function buildStayPlaceholder(title, index) {
   const placeholder = document.createElement("article");
   placeholder.className = "stay-carousel-slide stay-carousel-placeholder";
@@ -1207,7 +1225,7 @@ async function handleGiftNoteSubmit(event) {
   giftNoteSuccess.hidden = false;
 
   if (paymentLink && !isPlaceholderPaymentLink(paymentLink)) {
-    window.open(paymentLink, "_blank", "noopener,noreferrer");
+    window.location.assign(paymentLink);
   } else if (giftNoteFeedback) {
     giftNoteFeedback.textContent =
       "Payment link not added yet. Paste the Stripe link in script.js when it’s ready.";
@@ -1575,12 +1593,18 @@ navLinks.forEach((link) => {
   });
 });
 
+const guest = resolveGuestFromQuery();
+hideGiftListForPersonalisedGuest(guest);
+
 renderFaqSection();
 setupFaqAccordion();
-renderGiftList();
-renderPrivateGiftNotes();
 
-if (giftGrid) {
+if (!guest) {
+  renderGiftList();
+  renderPrivateGiftNotes();
+}
+
+if (!guest && giftGrid) {
   giftGrid.addEventListener("click", (event) => {
     const target = event.target;
     const button =
@@ -1594,7 +1618,7 @@ if (giftGrid) {
   });
 }
 
-if (giftModal) {
+if (!guest && giftModal) {
   giftModal.addEventListener("click", (event) => {
     const target = event.target;
 
@@ -1604,16 +1628,16 @@ if (giftModal) {
   });
 }
 
-if (giftModalClose) {
+if (!guest && giftModalClose) {
   giftModalClose.addEventListener("click", closeGiftModal);
 }
 
-if (giftNoteForm) {
+if (!guest && giftNoteForm) {
   giftNoteForm.addEventListener("submit", handleGiftNoteSubmit);
 }
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && giftModal && !giftModal.hidden) {
+  if (!guest && event.key === "Escape" && giftModal && !giftModal.hidden) {
     closeGiftModal();
   }
 });
@@ -1631,8 +1655,6 @@ if (stayCarouselPrev) {
 if (stayCarouselNext) {
   stayCarouselNext.addEventListener("click", () => scrollStayCarousel(1));
 }
-
-const guest = resolveGuestFromQuery();
 
 if (guest) {
   renderEveningGuestPage(guest);
