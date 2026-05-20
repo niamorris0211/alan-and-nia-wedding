@@ -100,6 +100,7 @@ const HONEYMOON_GIFTS = [
       "Apparently sampling Scottish whisky is an important cultural activity and definitely not just Alan having the time of his life.",
     status: "Available",
     imagePlaceholder: "Whisky research",
+    imageUrl: "images/whisky tour.jpeg",
   },
   {
     id: "staffa-adventure",
@@ -112,6 +113,7 @@ const HONEYMOON_GIFTS = [
       "Help send us off to explore dramatic cliffs, sea air, caves, and the kind of scenery that makes you say “wow” every five minutes.",
     status: "Available",
     imagePlaceholder: "Staffa cliffs",
+    imageUrl: "images/staffa tour.jpeg",
   },
   {
     id: "otter-detective-mission",
@@ -124,6 +126,7 @@ const HONEYMOON_GIFTS = [
       "Fund our deeply important investigation into whether we can actually spot wild otters without getting wildly overexcited too early.",
     status: "Available",
     imagePlaceholder: "Otter mission",
+    imageUrl: "images/otter detective walk.jpg",
   },
   {
     id: "wildlife-sea-safari",
@@ -136,6 +139,7 @@ const HONEYMOON_GIFTS = [
       "Whales, dolphins, sea eagles, seals… basically the honeymoon version of Planet Earth, but wetter and with less David Attenborough.",
     status: "Available",
     imagePlaceholder: "Sea safari",
+    imageUrl: "images/wildlife tour.jpeg",
   },
   {
     id: "honeymoon-pot",
@@ -148,6 +152,7 @@ const HONEYMOON_GIFTS = [
       "A little pot for anything from coffees with a view to an extra special dinner while we’re away.",
     status: "Available",
     imagePlaceholder: "Honeymoon pot",
+    imageUrl: "images/honeymoon fund.jpeg",
   },
 ];
 const BREAKFAST_ELIGIBLE_GUESTS = new Set([
@@ -983,10 +988,16 @@ function renderGiftList() {
       ? `<p class="gift-test-label">TEST ITEM</p>`
       : "";
 
+    const giftImage = gift.imageUrl
+      ? `<figure class="gift-card-image">
+          <img src="${gift.imageUrl}" alt="${gift.title}" loading="lazy" />
+        </figure>`
+      : `<div class="gift-image-placeholder" aria-hidden="true">
+          <span>${gift.imagePlaceholder}</span>
+        </div>`;
+
     card.innerHTML = `
-      <div class="gift-image-placeholder" aria-hidden="true">
-        <span>${gift.imagePlaceholder}</span>
-      </div>
+      ${giftImage}
       <div class="gift-card-body">
         <div class="gift-card-header">
           <div>
