@@ -1848,6 +1848,71 @@ h3 {
   color: var(--muted);
 }
 
+.gift-private-notes {
+  display: grid;
+  gap: 0.95rem;
+  margin: 0 auto 1.45rem;
+  padding: 1.15rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(138, 102, 106, 0.14);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 249, 0.94), rgba(246, 236, 232, 0.76));
+  box-shadow: var(--shadow-soft);
+}
+
+.gift-private-notes[hidden] {
+  display: none;
+}
+
+.gift-private-notes-heading {
+  text-align: center;
+}
+
+.gift-private-notes-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  line-height: 1;
+}
+
+.gift-private-notes-heading p:last-child {
+  margin: 0.45rem 0 0;
+  color: var(--muted);
+}
+
+.gift-private-notes-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.gift-private-note-card {
+  padding: 0.95rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(77, 102, 80, 0.11);
+  background: rgba(255, 253, 249, 0.78);
+}
+
+.gift-private-note-card p {
+  margin: 0;
+}
+
+.gift-private-choice {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.gift-private-message {
+  margin-top: 0.45rem;
+  color: var(--muted);
+}
+
+.gift-private-date {
+  margin-top: 0.55rem !important;
+  color: rgba(101, 112, 96, 0.82);
+  font-size: 0.88rem;
+}
+
 .gift-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1940,6 +2005,12 @@ h3 {
   color: var(--muted);
 }
 
+.gift-status-note {
+  margin: -0.25rem 0 0;
+  color: var(--berry);
+  font-weight: 700;
+}
+
 .gift-actions {
   display: grid;
   gap: 0.65rem;
@@ -2029,13 +2100,24 @@ body.modal-open {
   color: var(--muted);
 }
 
+.gift-modal-reassurance {
+  margin: -0.75rem 0 1.2rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.68);
+  color: var(--moss);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .gift-note-form {
   display: grid;
   gap: 0.7rem;
 }
 
 .gift-note-form[hidden],
-.gift-note-success[hidden] {
+.gift-note-success[hidden],
+.gift-custom-amount-wrap[hidden] {
   display: none;
 }
 
@@ -2240,6 +2322,10 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
+  .gift-private-notes-list {
+    grid-template-columns: 1fr;
+  }
+
   .stay-carousel {
     grid-auto-columns: 100%;
   }
@@ -2288,6 +2374,11 @@ body.modal-open {
   }
 
   .gift-note-card {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .gift-private-notes {
     padding: 1rem;
     border-radius: 20px;
   }

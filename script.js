@@ -44,6 +44,8 @@ const stayCarousel = document.getElementById("stay-carousel");
 const stayCarouselPrev = document.getElementById("stay-carousel-prev");
 const stayCarouselNext = document.getElementById("stay-carousel-next");
 const giftGrid = document.getElementById("gift-grid");
+const giftPrivateNotes = document.getElementById("gift-private-notes");
+const giftPrivateNotesList = document.getElementById("gift-private-notes-list");
 const giftModal = document.getElementById("gift-modal");
 const giftModalClose = document.getElementById("gift-modal-close");
 const giftModalTitle = document.getElementById("gift-modal-title");
@@ -55,11 +57,16 @@ const giftGuestNameInput = document.getElementById("gift-guest-name");
 const giftNoteIdInput = document.getElementById("gift-note-id");
 const giftNoteTitleInput = document.getElementById("gift-note-title");
 const giftNoteAmountInput = document.getElementById("gift-note-amount");
+const giftCustomAmountWrap = document.getElementById("gift-custom-amount-wrap");
+const giftCustomAmountInput = document.getElementById("gift-custom-amount");
 const ACCOMMODATION_NAME_ALIASES = {
   "Malvern Chase Shepherds Hut": "Malvern Chase Shepherd’s Hut",
   "Midsummer Shepherds Hut": "Midsummer Shepherd's Hut",
   "Sugarloaf Shepherds Hut": "Sugarloaf Shepherd's Hut",
 };
+const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
+// Replace this with the real Stripe, PayPal, or bank-transfer instruction page.
+const PAYMENT_LINK = "https://www.alanandnia.co.uk/#gift-list";
 const HONEYMOON_GIFTS = [
   {
     id: "whisky-research",
@@ -105,6 +112,22 @@ const HONEYMOON_GIFTS = [
     options: [
       { label: "Gift one place — £111", amount: "£111" },
       { label: "Gift both places — £222", amount: "£222" },
+    ],
+  },
+  {
+    id: "honeymoon-pot",
+    title: "Honeymoon Pot",
+    priceLabel: "Any amount",
+    description:
+      "A little pot for anything from coffees with a view to an extra special dinner while we’re away.",
+    status: "Available",
+    imagePlaceholder: "Honeymoon pot",
+    options: [
+      {
+        label: "Choose an amount",
+        amount: "Custom amount",
+        allowsCustomAmount: true,
+      },
     ],
   },
 ];
@@ -801,6 +824,84 @@ function isGiftAvailable(gift) {
   return gift.status.toLowerCase() !== "gifted";
 }
 
+function isGiftPartFunded(gift) {
+  return gift.status.toLowerCase() === "part-funded";
+}
+
+function getSavedGiftNotes() {
+  try {
+    const savedNotes = JSON.parse(
+      window.localStorage.getItem(GIFT_NOTES_STORAGE_KEY) || "[]"
+    );
+
+    return Array.isArray(savedNotes) ? savedNotes : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveGiftNoteLocally(payload) {
+  try {
+    const localGiftNote = {
+      giftId: payload.gift_id,
+      giftTitle: payload.gift_title,
+      selectedAmount: payload.selected_amount,
+      guestName: payload.guest_name,
+      optionalMessage: payload.optional_message,
+      submittedAt: payload.submitted_at,
+    };
+    const giftNotes = getSavedGiftNotes();
+
+    giftNotes.unshift(localGiftNote);
+
+    window.localStorage.setItem(
+      GIFT_NOTES_STORAGE_KEY,
+      JSON.stringify(giftNotes)
+    );
+  } catch (error) {
+    console.warn("Gift note could not be saved locally.", error);
+  }
+}
+
+function renderPrivateGiftNotes() {
+  if (!giftPrivateNotes || !giftPrivateNotesList) {
+    return;
+  }
+
+  const giftNotes = getSavedGiftNotes();
+
+  giftPrivateNotes.hidden = !giftNotes.length;
+  giftPrivateNotesList.innerHTML = "";
+
+  giftNotes.forEach((note) => {
+    const noteCard = document.createElement("article");
+    noteCard.className = "gift-private-note-card";
+
+    const submittedDate = note.submittedAt
+      ? formatSubmittedAt(note.submittedAt)
+      : "Date not saved";
+
+    const choice = document.createElement("p");
+    choice.className = "gift-private-choice";
+    choice.textContent = `You chose: ${note.giftTitle} — ${note.selectedAmount}`;
+    noteCard.appendChild(choice);
+
+    if (note.optionalMessage) {
+      const message = document.createElement("p");
+      message.className = "gift-private-message";
+      message.textContent = `Your note: ${note.optionalMessage}`;
+      noteCard.appendChild(message);
+    }
+
+    const date = document.createElement("p");
+    date.className = "gift-private-date";
+    date.textContent = submittedDate;
+    noteCard.appendChild(date);
+
+    giftPrivateNotesList.appendChild(noteCard);
+  });
+}
+
 function renderGiftList() {
   if (!giftGrid) {
     return;
@@ -812,6 +913,9 @@ function renderGiftList() {
     const isAvailable = isGiftAvailable(gift);
     const card = document.createElement("article");
     card.className = `gift-card ${isAvailable ? "" : "is-gifted"}`.trim();
+    const statusNote = isGiftAvailable(gift)
+      ? ""
+      : `<p class="gift-status-note">This one has been kindly gifted.</p>`;
 
     card.innerHTML = `
       <div class="gift-image-placeholder" aria-hidden="true">
@@ -824,10 +928,11 @@ function renderGiftList() {
             <p class="gift-price">${gift.priceLabel}</p>
           </div>
           <span class="gift-status-badge ${getGiftStatusClass(gift.status)}">
-            ${gift.status}
+            ${isGiftPartFunded(gift) ? "Part-funded" : gift.status}
           </span>
         </div>
         <p class="gift-description">${gift.description}</p>
+        ${statusNote}
         <div class="gift-actions"></div>
       </div>
     `;
@@ -841,6 +946,9 @@ function renderGiftList() {
       button.textContent = option.label;
       button.dataset.giftId = gift.id;
       button.dataset.optionIndex = optionIndex.toString();
+      button.dataset.allowsCustomAmount = option.allowsCustomAmount
+        ? "true"
+        : "false";
       button.disabled = !isAvailable;
 
       giftActions.appendChild(button);
@@ -897,6 +1005,12 @@ function openGiftModal(giftId, optionIndex) {
     giftNoteAmountInput.value = option.amount;
   }
 
+  if (giftCustomAmountWrap && giftCustomAmountInput) {
+    giftCustomAmountWrap.hidden = !option.allowsCustomAmount;
+    giftCustomAmountInput.required = Boolean(option.allowsCustomAmount);
+    giftCustomAmountInput.value = "";
+  }
+
   giftNoteForm.hidden = false;
 
   if (giftNoteFeedback) {
@@ -924,26 +1038,16 @@ function closeGiftModal() {
   document.body.classList.remove("modal-open");
 }
 
-function saveGiftNotePreview(payload) {
-  const giftNotes = JSON.parse(
-    window.localStorage.getItem("honeymoonGiftNotes") || "[]"
-  );
-
-  giftNotes.push(payload);
-
-  window.localStorage.setItem("honeymoonGiftNotes", JSON.stringify(giftNotes));
-}
-
 function buildGiftNoteEmailMessage(payload) {
   return [
     "Nia & Alan Honeymoon Gift Note",
     "",
     `Gift: ${payload.gift_title}`,
-    `Amount selected: ${payload.gift_amount}`,
+    `Amount selected: ${payload.selected_amount}`,
     "",
     `Guest name: ${payload.guest_name}`,
     `Email address: ${payload.guest_email}`,
-    `Message: ${payload.gift_message || "None given"}`,
+    `Message: ${payload.optional_message || "None given"}`,
     "",
     `Submitted: ${formatSubmittedAt(payload.submitted_at)}`,
   ].join("\n");
@@ -957,7 +1061,6 @@ async function submitGiftNote(payload) {
   const endpoint = getFormspreeEndpoint();
 
   if (!endpoint) {
-    saveGiftNotePreview(payload);
     return;
   }
 
@@ -990,38 +1093,41 @@ async function handleGiftNoteSubmit(event) {
   }
 
   const formData = new FormData(giftNoteForm);
+  const storedAmount = formData.get("gift_amount")?.toString() || "";
+  const customAmount = formData.get("gift_custom_amount")?.toString().trim() || "";
+  const selectedAmount = customAmount ? `£${customAmount}` : storedAmount;
   const payload = {
     gift_id: formData.get("gift_id")?.toString() || "",
     gift_title: formData.get("gift_title")?.toString() || "",
-    gift_amount: formData.get("gift_amount")?.toString() || "",
+    selected_amount: selectedAmount,
     guest_name: formData.get("guest_name")?.toString().trim() || "",
     guest_email: formData.get("guest_email")?.toString().trim() || "",
-    gift_message: formData.get("gift_message")?.toString().trim() || "",
+    optional_message: formData.get("gift_message")?.toString().trim() || "",
     submitted_at: new Date().toISOString(),
   };
+
+  saveGiftNoteLocally(payload);
+  renderPrivateGiftNotes();
 
   if (giftNoteFeedback) {
     giftNoteFeedback.textContent = "Sending your gift note...";
   }
 
-  try {
-    if (
-      window.location.hostname === "localhost" ||
-      window.location.hostname === "127.0.0.1"
-    ) {
-      saveGiftNotePreview(payload);
-    } else {
-      await submitGiftNote(payload);
-    }
+  if (
+    window.location.hostname !== "localhost" &&
+    window.location.hostname !== "127.0.0.1"
+  ) {
+    submitGiftNote(payload).catch((error) => {
+      console.warn("Gift note email could not be sent.", error);
+    });
+  }
 
-    giftNoteForm.reset();
-    giftNoteForm.hidden = true;
-    giftNoteSuccess.hidden = false;
-  } catch (error) {
-    if (giftNoteFeedback) {
-      giftNoteFeedback.textContent =
-        "Sorry, that didn’t send properly. Please message us and we’ll sort it.";
-    }
+  giftNoteForm.reset();
+  giftNoteForm.hidden = true;
+  giftNoteSuccess.hidden = false;
+
+  if (PAYMENT_LINK) {
+    window.open(PAYMENT_LINK, "_blank", "noopener,noreferrer");
   }
 }
 
@@ -1389,6 +1495,7 @@ navLinks.forEach((link) => {
 renderFaqSection();
 setupFaqAccordion();
 renderGiftList();
+renderPrivateGiftNotes();
 
 if (giftGrid) {
   giftGrid.addEventListener("click", (event) => {

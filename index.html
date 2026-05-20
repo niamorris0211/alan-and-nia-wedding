@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260520a" />
+    <link rel="stylesheet" href="style.css?v=20260520b" />
   </head>
   <body>
     <header class="site-header">
@@ -615,6 +615,23 @@
             </p>
           </aside>
 
+          <section
+            class="gift-private-notes"
+            id="gift-private-notes"
+            hidden
+            aria-live="polite"
+          >
+            <div class="gift-private-notes-heading">
+              <p class="eyebrow">Private to this browser</p>
+              <h3>Your gift notes</h3>
+              <p>These are only visible to you on this device.</p>
+            </div>
+            <div
+              class="gift-private-notes-list"
+              id="gift-private-notes-list"
+            ></div>
+          </section>
+
           <div
             class="gift-grid"
             id="gift-grid"
@@ -796,11 +813,29 @@
           <p class="gift-modal-thanks">
             Thank you so much. We’re so grateful.
           </p>
+          <p class="gift-modal-reassurance">
+            Your gift amount and message will only be seen by us.
+          </p>
 
           <form class="gift-note-form" id="gift-note-form">
             <input type="hidden" id="gift-note-id" name="gift_id" />
             <input type="hidden" id="gift-note-title" name="gift_title" />
             <input type="hidden" id="gift-note-amount" name="gift_amount" />
+
+            <div class="gift-custom-amount-wrap" id="gift-custom-amount-wrap" hidden>
+              <label class="rsvp-label" for="gift-custom-amount"
+                >Gift amount</label
+              >
+              <input
+                id="gift-custom-amount"
+                name="gift_custom_amount"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+                placeholder="Enter an amount"
+              />
+            </div>
 
             <label class="rsvp-label" for="gift-guest-name">Your name</label>
             <input
@@ -850,7 +885,10 @@
                 <path d="M16 24.5 21.5 30 33 18.5"></path>
               </svg>
             </div>
-            <h3>Thank you — we’ve received your gift note.</h3>
+            <h3>
+              Thank you — we’ve saved your gift note. Your payment page should
+              open now.
+            </h3>
             <p>
               We’ll keep this ready while we sort the proper contribution
               details.
@@ -872,6 +910,6 @@
     <script src="accommodation-data.js?v=20260326h"></script>
     <script src="faq-data.js?v=20260326h"></script>
     <script src="rsvp-config.js?v=20260514c"></script>
-    <script src="script.js?v=20260520a"></script>
+    <script src="script.js?v=20260520b"></script>
   </body>
 </html>
