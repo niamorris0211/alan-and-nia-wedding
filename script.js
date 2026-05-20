@@ -1190,7 +1190,7 @@ async function handleGiftNoteSubmit(event) {
   renderPrivateGiftNotes();
 
   if (giftNoteFeedback) {
-    giftNoteFeedback.textContent = "Saving your details...";
+    giftNoteFeedback.textContent = "Preparing secure payment...";
   }
 
   if (
@@ -1210,7 +1210,7 @@ async function handleGiftNoteSubmit(event) {
     window.open(paymentLink, "_blank", "noopener,noreferrer");
   } else if (giftNoteFeedback) {
     giftNoteFeedback.textContent =
-      "Details saved. Add the Stripe payment link in script.js when it’s ready.";
+      "Payment link not added yet. Paste the Stripe link in script.js when it’s ready.";
   }
 }
 
