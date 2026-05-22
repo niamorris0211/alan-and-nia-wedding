@@ -71,13 +71,32 @@ function getSessionMetadata(session) {
     : {};
 }
 
+function getGiftDetailsFromSuccessUrl(session) {
+  if (!session.success_url) {
+    return { giftId: "", giftAction: "" };
+  }
+
+  try {
+    const successUrl = new URL(session.success_url);
+
+    return {
+      giftId: successUrl.searchParams.get("gift") || "",
+      giftAction: successUrl.searchParams.get("gift_action") || "",
+    };
+  } catch (error) {
+    return { giftId: "", giftAction: "" };
+  }
+}
+
 async function saveGiftPayment({ supabaseUrl, serviceRoleKey, stripeEvent }) {
   const session = stripeEvent.data.object;
   const metadata = getSessionMetadata(session);
-  const giftId = metadata.gift_id || metadata.giftId || "";
+  const urlGiftDetails = getGiftDetailsFromSuccessUrl(session);
+  const giftId = metadata.gift_id || metadata.giftId || urlGiftDetails.giftId;
   const giftAction =
     metadata.gift_action ||
     metadata.giftAction ||
+    urlGiftDetails.giftAction ||
     (giftId === "honeymoon-pot" ? "contribution" : "full");
 
   if (!giftId) {
