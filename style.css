@@ -808,6 +808,62 @@ h3 {
   border-color: rgba(77, 102, 80, 0.18);
 }
 
+.gift-thank-you-page .hero-intro {
+  font-size: 17px;
+}
+
+.gift-thank-you-note {
+  position: relative;
+  max-width: 31rem;
+  margin: 0 0 12px;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background: rgba(255, 253, 249, 0.72);
+  color: var(--moss);
+  font-weight: 700;
+  box-shadow: var(--shadow-soft);
+}
+
+.gift-thank-you-character:not([hidden]) + .gift-thank-you-note::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 42px;
+  width: 18px;
+  height: 18px;
+  border-left: 1px solid rgba(77, 102, 80, 0.12);
+  border-top: 1px solid rgba(77, 102, 80, 0.12);
+  background: rgba(255, 253, 249, 0.92);
+  transform: rotate(45deg);
+}
+
+.gift-thank-you-character {
+  width: min(260px, 70vw);
+  margin: 0 0 10px;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background: rgba(255, 253, 249, 0.72);
+  box-shadow: var(--shadow-soft);
+}
+
+.gift-thank-you-character[hidden] {
+  display: none;
+}
+
+.gift-thank-you-character img {
+  width: 100%;
+  display: block;
+}
+
+.gift-thank-you-small {
+  max-width: 30rem;
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
 .hero-visual-card,
 .card,
 .timeline-card,
@@ -1831,6 +1887,120 @@ h3 {
   max-width: 1060px;
 }
 
+.honeymoon-teaser {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(320px, 1.08fr);
+  gap: clamp(1.2rem, 3vw, 2.4rem);
+  align-items: center;
+}
+
+.honeymoon-copy {
+  display: grid;
+  gap: 1rem;
+  align-content: center;
+}
+
+.honeymoon-copy h2 {
+  max-width: 8ch;
+}
+
+.honeymoon-copy p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.honeymoon-copy .button {
+  justify-self: start;
+  margin-top: 0.4rem;
+}
+
+.honeymoon-photo-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-rows: repeat(2, minmax(160px, 1fr));
+  gap: 0.8rem;
+}
+
+.honeymoon-photo {
+  position: relative;
+  min-height: 170px;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(77, 102, 80, 0.12);
+  background: rgba(255, 253, 249, 0.7);
+  box-shadow: var(--shadow-soft);
+}
+
+.honeymoon-photo-large {
+  grid-row: span 2;
+}
+
+.honeymoon-photo img {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  display: block;
+  object-fit: cover;
+}
+
+.gift-list-hero {
+  position: relative;
+  min-height: clamp(280px, 42vw, 460px);
+  display: grid;
+  align-items: end;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.gift-list-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, rgba(47, 52, 45, 0.08), rgba(47, 52, 45, 0.48)),
+    linear-gradient(90deg, rgba(47, 52, 45, 0.48), rgba(47, 52, 45, 0.04));
+}
+
+.gift-list-hero img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.gift-list-hero-overlay {
+  width: min(var(--container), calc(100% - 40px));
+  margin: 0 auto;
+  padding: 8rem 0 3rem;
+}
+
+.gift-list-hero-overlay .eyebrow,
+.gift-list-hero-overlay h1 {
+  color: #fffdf9;
+  text-shadow: 0 3px 18px rgba(47, 52, 45, 0.34);
+}
+
+.gift-list-hero-overlay h1 {
+  max-width: 9ch;
+  font-size: clamp(3.2rem, 6.2vw, 5.4rem);
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+}
+
+.gift-list-hero-overlay h1::after {
+  content: none;
+}
+
+.gift-list-page {
+  padding-top: 3rem;
+}
+
 .gift-note-card {
   max-width: 760px;
   margin: -0.4rem auto 1.4rem;
@@ -1846,6 +2016,23 @@ h3 {
 .gift-note-card p {
   margin: 0;
   color: var(--muted);
+}
+
+.gift-note-card p + p {
+  margin-top: 0.65rem;
+  color: var(--moss);
+  font-weight: 700;
+}
+
+.gift-trial-controls {
+  display: flex;
+  justify-content: center;
+  margin: -0.4rem 0 1.4rem;
+}
+
+.gift-trial-controls .button {
+  font-size: 0.82rem;
+  padding: 0.55rem 0.85rem;
 }
 
 .gift-private-notes {
@@ -2364,6 +2551,14 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
+  .honeymoon-teaser {
+    grid-template-columns: 1fr;
+  }
+
+  .honeymoon-copy h2 {
+    max-width: none;
+  }
+
   .gift-grid {
     grid-template-columns: 1fr;
   }
@@ -2422,6 +2617,17 @@ body.modal-open {
   .gift-note-card {
     padding: 1rem;
     border-radius: 20px;
+  }
+
+  .honeymoon-photo-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  .honeymoon-photo,
+  .honeymoon-photo-large {
+    min-height: 210px;
+    grid-row: auto;
   }
 
   .gift-private-notes {

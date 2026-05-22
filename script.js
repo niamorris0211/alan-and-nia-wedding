@@ -47,6 +47,7 @@ const giftSection = document.getElementById("gift-list");
 const giftGrid = document.getElementById("gift-grid");
 const giftPrivateNotes = document.getElementById("gift-private-notes");
 const giftPrivateNotesList = document.getElementById("gift-private-notes-list");
+const giftStatusReset = document.getElementById("gift-status-reset");
 const giftModal = document.getElementById("gift-modal");
 const giftModalClose = document.getElementById("gift-modal-close");
 const giftModalTitle = document.getElementById("gift-modal-title");
@@ -58,6 +59,7 @@ const giftGuestNameInput = document.getElementById("gift-guest-name");
 const giftNoteIdInput = document.getElementById("gift-note-id");
 const giftNoteTitleInput = document.getElementById("gift-note-title");
 const giftNoteAmountInput = document.getElementById("gift-note-amount");
+const giftActionTypeInput = document.getElementById("gift-action-type");
 const giftPaymentLinkKeyInput = document.getElementById(
   "gift-payment-link-key"
 );
@@ -67,19 +69,27 @@ const ACCOMMODATION_NAME_ALIASES = {
   "Sugarloaf Shepherds Hut": "Sugarloaf Shepherd's Hut",
 };
 const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
+const GIFT_STATUS_STORAGE_KEY = "niaAlanGiftStatuses";
+const GIFT_STATUS_ENDPOINT = "/api/gift-status";
+let remoteGiftStatuses = {};
 const PAYMENT_LINKS = {
   testOnePenny: "https://buy.stripe.com/aFa9AU4voc5U7TB9HEfrW00",
-  whisky: "PASTE_FIXED_STRIPE_LINK_FOR_WHISKY",
-  staffa: "PASTE_FIXED_STRIPE_LINK_FOR_STAFFA",
-  otter: "PASTE_FIXED_STRIPE_LINK_FOR_OTTER",
-  safari: "PASTE_FIXED_STRIPE_LINK_FOR_SAFARI",
-  flexibleContribution: "PASTE_ONE_FLEXIBLE_STRIPE_LINK_HERE",
+  whisky: "https://buy.stripe.com/00w3cw4vob1Q3DlaLIfrW03",
+  whiskyContribution: "https://buy.stripe.com/fZudRa4vo5Hwgq74nkfrW07",
+  staffa: "https://buy.stripe.com/9B68wQge62vk2zhf1YfrW01",
+  staffaContribution: "https://buy.stripe.com/8x200k7HA6LAehZf1YfrW08",
+  lochLomond: "https://buy.stripe.com/6oU3cw8LEgmaddV3jgfrW06",
+  lochLomondContribution: "https://buy.stripe.com/eVq5kE0f8b1Q8XFf1YfrW09",
+  safari: "https://buy.stripe.com/5kQfZi4voee23Dlf1YfrW02",
+  safariContribution: "https://buy.stripe.com/4gMcN6d1U8TI5Lt3jgfrW0a",
+  flexibleContribution: "https://buy.stripe.com/4gM6oIfa21rg5Lt3jgfrW05",
 };
 const HONEYMOON_GIFTS = [
   {
     id: "test-biscuit",
     fixedPaymentLinkKey: "testOnePenny",
     fullGiftAmount: "£0.01",
+    targetAmountPence: 1,
     allowFlexibleContribution: true,
     title: "Emergency Biscuit Fund",
     priceLabel: "£0.01",
@@ -94,7 +104,9 @@ const HONEYMOON_GIFTS = [
     id: "whisky-research",
     fixedPaymentLinkKey: "whisky",
     fullGiftAmount: "£44",
+    targetAmountPence: 4400,
     allowFlexibleContribution: true,
+    flexiblePaymentLinkKey: "whiskyContribution",
     title: "Alan’s Very Serious Whisky Research",
     priceLabel: "£44",
     description:
@@ -107,7 +119,9 @@ const HONEYMOON_GIFTS = [
     id: "staffa-adventure",
     fixedPaymentLinkKey: "staffa",
     fullGiftAmount: "£90",
+    targetAmountPence: 9000,
     allowFlexibleContribution: true,
+    flexiblePaymentLinkKey: "staffaContribution",
     title: "Staffa Adventure",
     priceLabel: "£90",
     description:
@@ -117,23 +131,27 @@ const HONEYMOON_GIFTS = [
     imageUrl: "images/staffa tour.jpeg",
   },
   {
-    id: "otter-detective-mission",
-    fixedPaymentLinkKey: "otter",
-    fullGiftAmount: "£180",
+    id: "loch-lomond-boat-trip",
+    fixedPaymentLinkKey: "lochLomond",
+    fullGiftAmount: "£40",
+    targetAmountPence: 4000,
     allowFlexibleContribution: true,
-    title: "Otter Detective Mission",
-    priceLabel: "£180 total / £90 each",
+    flexiblePaymentLinkKey: "lochLomondContribution",
+    title: "Loch Lomond Boat Trip",
+    priceLabel: "£40 total / £20 each",
     description:
-      "Fund our deeply important investigation into whether we can actually spot wild otters without getting wildly overexcited too early.",
+      "Send us out onto Loch Lomond for calm water, big views, and the kind of boat trip where one of us will absolutely point at every hill.",
     status: "Available",
-    imagePlaceholder: "Otter mission",
-    imageUrl: "images/otter detective walk.jpg",
+    imagePlaceholder: "Loch Lomond",
+    imageUrl: "images/Loch-Lomond-Tours-02-800x360.jpg",
   },
   {
     id: "wildlife-sea-safari",
     fixedPaymentLinkKey: "safari",
     fullGiftAmount: "£222",
+    targetAmountPence: 22200,
     allowFlexibleContribution: true,
+    flexiblePaymentLinkKey: "safariContribution",
     title: "Wildlife Sea Safari",
     priceLabel: "£222 total / £111 each",
     description:
@@ -146,6 +164,7 @@ const HONEYMOON_GIFTS = [
     id: "honeymoon-pot",
     fixedPaymentLinkKey: null,
     fullGiftAmount: null,
+    targetAmountPence: null,
     allowFlexibleContribution: true,
     title: "Honeymoon Pot",
     priceLabel: "Any amount",
@@ -305,6 +324,13 @@ function getGoogleAppsScriptEndpoint() {
 
 function getFormspreeEndpoint() {
   return window.RSVP_CONFIG?.formspreeEndpoint?.trim() || "";
+}
+
+function isLocalPreview() {
+  return (
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+  );
 }
 
 function getFallbackRsvpEmail() {
@@ -690,20 +716,15 @@ function renderPersonalisedSchedule(guest) {
     !guest || guest.inviteType !== "weekend";
 }
 
-function hideGiftListForPersonalisedGuest(guest) {
-  const shouldHideGiftList = Boolean(guest);
+function showHoneymoonGiftTeaser() {
   const giftNavLink = document.querySelector('.site-nav a[href="#gift-list"]');
 
   if (giftSection) {
-    giftSection.hidden = shouldHideGiftList;
+    giftSection.hidden = false;
   }
 
   if (giftNavLink) {
-    giftNavLink.hidden = shouldHideGiftList;
-  }
-
-  if (shouldHideGiftList && giftModal) {
-    closeGiftModal();
+    giftNavLink.hidden = false;
   }
 }
 
@@ -858,18 +879,6 @@ function scrollStayCarousel(direction) {
   });
 }
 
-function getGiftStatusClass(status) {
-  return `status-${status.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
-}
-
-function isGiftAvailable(gift) {
-  return gift.status.toLowerCase() !== "gifted";
-}
-
-function isGiftPartFunded(gift) {
-  return gift.status.toLowerCase() === "part-funded";
-}
-
 function isPlaceholderPaymentLink(link) {
   return !link || link.startsWith("PASTE_");
 }
@@ -878,15 +887,216 @@ function getPaymentLink(paymentLinkKey) {
   return PAYMENT_LINKS[paymentLinkKey] || "";
 }
 
+function shouldShowGiftThankYou() {
+  const params = new URLSearchParams(window.location.search);
+
+  return params.get("gift") === "thank-you";
+}
+
+function cleanGiftThankYouUrl() {
+  if (!window.history?.replaceState) {
+    return;
+  }
+
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+function getSavedGiftStatuses() {
+  try {
+    const savedStatuses = JSON.parse(
+      window.localStorage.getItem(GIFT_STATUS_STORAGE_KEY) || "{}"
+    );
+
+    return savedStatuses && typeof savedStatuses === "object"
+      ? savedStatuses
+      : {};
+  } catch (error) {
+    return {};
+  }
+}
+
+function formatGiftMoney(pence) {
+  const pounds = Math.max(0, Number(pence) || 0) / 100;
+
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    minimumFractionDigits: pounds % 1 === 0 ? 0 : 2,
+  }).format(pounds);
+}
+
+function getRemoteGiftStatus(gift) {
+  return remoteGiftStatuses[gift.id] || null;
+}
+
+function getRemoteGiftPaidPence(gift) {
+  const remoteStatus = getRemoteGiftStatus(gift);
+
+  return Math.max(0, Number(remoteStatus?.totalPaidPence) || 0);
+}
+
+function getGiftStatus(gift) {
+  const remotePaidPence = getRemoteGiftPaidPence(gift);
+
+  if (remotePaidPence > 0 && gift.targetAmountPence) {
+    return remotePaidPence >= gift.targetAmountPence ? "Gifted" : "Part-funded";
+  }
+
+  if (remotePaidPence > 0 && gift.id === "honeymoon-pot") {
+    return "Part-funded";
+  }
+
+  const savedStatuses = getSavedGiftStatuses();
+
+  return savedStatuses[gift.id] || gift.status;
+}
+
+function getGiftFundingNote(gift) {
+  const remotePaidPence = getRemoteGiftPaidPence(gift);
+
+  if (remotePaidPence > 0 && gift.targetAmountPence) {
+    const amountLeft = Math.max(0, gift.targetAmountPence - remotePaidPence);
+
+    if (amountLeft === 0) {
+      return "This one has been kindly gifted.";
+    }
+
+    return `${formatGiftMoney(remotePaidPence)} contributed so far - ${formatGiftMoney(
+      amountLeft
+    )} left.`;
+  }
+
+  if (remotePaidPence > 0 && gift.id === "honeymoon-pot") {
+    return `${formatGiftMoney(remotePaidPence)} has been added to the honeymoon pot so far.`;
+  }
+
+  if (getGiftStatus(gift).toLowerCase() === "gifted") {
+    return "This one has been kindly gifted.";
+  }
+
+  if (getGiftStatus(gift).toLowerCase() === "part-funded") {
+    return "Someone has already contributed to this one.";
+  }
+
+  return "";
+}
+
+async function loadRemoteGiftStatuses() {
+  if (!giftGrid || isLocalPreview()) {
+    return;
+  }
+
+  try {
+    const response = await fetch(GIFT_STATUS_ENDPOINT, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Gift status endpoint did not respond successfully.");
+    }
+
+    const data = await response.json();
+    remoteGiftStatuses = data.gifts || {};
+    renderGiftList();
+  } catch (error) {
+    console.warn("Live gift statuses could not be loaded.", error);
+  }
+}
+
+function saveGiftStatusLocally(giftId, actionType) {
+  if (!giftId || !actionType) {
+    return;
+  }
+
+  try {
+    const savedStatuses = getSavedGiftStatuses();
+    savedStatuses[giftId] = actionType === "full" ? "Gifted" : "Part-funded";
+    window.localStorage.setItem(
+      GIFT_STATUS_STORAGE_KEY,
+      JSON.stringify(savedStatuses)
+    );
+  } catch (error) {
+    console.warn("Gift status could not be saved locally.", error);
+  }
+}
+
+function resetGiftStatusesLocally() {
+  try {
+    window.localStorage.removeItem(GIFT_STATUS_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Gift statuses could not be reset locally.", error);
+  }
+
+  renderGiftList();
+}
+
+function resetGiftStatusLocally(giftId) {
+  if (!giftId) {
+    return;
+  }
+
+  try {
+    const savedStatuses = getSavedGiftStatuses();
+    delete savedStatuses[giftId];
+    window.localStorage.setItem(
+      GIFT_STATUS_STORAGE_KEY,
+      JSON.stringify(savedStatuses)
+    );
+  } catch (error) {
+    console.warn("Gift status could not be reset locally.", error);
+  }
+
+  renderGiftList();
+}
+
+function resetGiftFromQuery() {
+  if (!isLocalPreview()) {
+    return;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const giftId = params.get("reset-gift");
+
+  if (!giftId) {
+    return;
+  }
+
+  resetGiftStatusLocally(giftId);
+
+  if (window.history?.replaceState) {
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
+function getGiftStatusClass(status) {
+  return `status-${status.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
+
+function isGiftAvailable(gift) {
+  return getGiftStatus(gift).toLowerCase() !== "gifted";
+}
+
+function isGiftPartFunded(gift) {
+  return getGiftStatus(gift).toLowerCase() === "part-funded";
+}
+
 function getGiftActions(gift) {
+  const status = getGiftStatus(gift).toLowerCase();
+  const isGifted = status === "gifted";
+  const isPartFunded = status === "part-funded";
+
   if (gift.id === "honeymoon-pot") {
     return [
       {
         type: "flexible",
-        label: "Contribute to honeymoon pot",
+        label: isPartFunded
+          ? "Add another contribution"
+          : "Contribute to honeymoon pot",
         selectedAmount: "General honeymoon contribution",
         paymentLinkKey: "flexibleContribution",
-        disabled: !gift.allowFlexibleContribution,
+        disabled: isGifted || !gift.allowFlexibleContribution,
       },
     ];
   }
@@ -897,14 +1107,14 @@ function getGiftActions(gift) {
       label: `Gift the full experience — ${gift.fullGiftAmount}`,
       selectedAmount: gift.fullGiftAmount,
       paymentLinkKey: gift.fixedPaymentLinkKey,
-      disabled: gift.status.toLowerCase() === "gifted",
+      disabled: isGifted || isPartFunded,
     },
     {
       type: "flexible",
-      label: "Contribute towards this",
+      label: isPartFunded ? "Add another contribution" : "Contribute towards this",
       selectedAmount: `Contribution towards ${gift.title}`,
-      paymentLinkKey: "flexibleContribution",
-      disabled: !gift.allowFlexibleContribution,
+      paymentLinkKey: gift.flexiblePaymentLinkKey || "flexibleContribution",
+      disabled: isGifted || !gift.allowFlexibleContribution,
     },
   ];
 }
@@ -991,14 +1201,16 @@ function renderGiftList() {
   giftGrid.innerHTML = "";
 
   HONEYMOON_GIFTS.forEach((gift) => {
+    const status = getGiftStatus(gift);
     const isAvailable = isGiftAvailable(gift);
     const card = document.createElement("article");
     card.className = `gift-card ${isAvailable ? "" : "is-gifted"} ${
       gift.isTestItem ? "gift-card-test" : ""
     }`.trim();
-    const statusNote = isGiftAvailable(gift)
-      ? ""
-      : `<p class="gift-status-note">This one has been kindly gifted.</p>`;
+    const fundingNote = getGiftFundingNote(gift);
+    const statusNote = fundingNote
+      ? `<p class="gift-status-note">${fundingNote}</p>`
+      : "";
     const testBadge = gift.badgeLabel
       ? `<span class="gift-test-badge">${gift.badgeLabel}</span>`
       : "";
@@ -1025,8 +1237,8 @@ function renderGiftList() {
           </div>
           <div class="gift-card-badges">
             ${testBadge}
-            <span class="gift-status-badge ${getGiftStatusClass(gift.status)}">
-              ${isGiftPartFunded(gift) ? "Part-funded" : gift.status}
+            <span class="gift-status-badge ${getGiftStatusClass(status)}">
+              ${isGiftPartFunded(gift) ? "Part-funded" : status}
             </span>
           </div>
         </div>
@@ -1103,6 +1315,10 @@ function openGiftModal(giftId, actionType) {
     giftNoteAmountInput.value = option.selectedAmount;
   }
 
+  if (giftActionTypeInput) {
+    giftActionTypeInput.value = option.type;
+  }
+
   if (giftPaymentLinkKeyInput) {
     giftPaymentLinkKeyInput.value = option.paymentLinkKey;
   }
@@ -1132,6 +1348,52 @@ function closeGiftModal() {
 
   giftModal.hidden = true;
   document.body.classList.remove("modal-open");
+}
+
+function showGiftThankYou() {
+  if (!giftModal || !giftNoteForm || !giftNoteSuccess) {
+    return;
+  }
+
+  const modalIntro = giftModal.querySelector(".gift-modal-thanks");
+  const modalReassurance = giftModal.querySelector(".gift-modal-reassurance");
+  const successHeading = giftNoteSuccess.querySelector("h3");
+  const successCopy = giftNoteSuccess.querySelector("p");
+
+  if (giftModalTitle) {
+    giftModalTitle.textContent = "Thank you";
+  }
+
+  if (giftModalAmount) {
+    giftModalAmount.textContent = "Gift received";
+  }
+
+  if (modalIntro) {
+    modalIntro.textContent =
+      "Thank you so much for helping us make our honeymoon feel extra special.";
+  }
+
+  if (modalReassurance) {
+    modalReassurance.textContent =
+      "Stripe will send your payment confirmation separately.";
+  }
+
+  if (successHeading) {
+    successHeading.textContent = "Thank you - your gift means so much to us.";
+  }
+
+  if (successCopy) {
+    successCopy.textContent =
+      "We can’t wait to tell you all about it after the wedding.";
+  }
+
+  window.scrollTo({ top: 0, behavior: "auto" });
+  cleanGiftThankYouUrl();
+
+  giftNoteForm.hidden = true;
+  giftNoteSuccess.hidden = false;
+  giftModal.hidden = false;
+  document.body.classList.add("modal-open");
 }
 
 function buildGiftNoteEmailMessage(payload) {
@@ -1190,13 +1452,16 @@ async function handleGiftNoteSubmit(event) {
   }
 
   const formData = new FormData(giftNoteForm);
+  const giftId = formData.get("gift_id")?.toString() || "";
   const storedAmount = formData.get("gift_amount")?.toString() || "";
+  const actionType = formData.get("gift_action_type")?.toString() || "";
   const paymentLinkKey = formData.get("payment_link_key")?.toString() || "";
   const paymentLink = getPaymentLink(paymentLinkKey);
   const payload = {
-    gift_id: formData.get("gift_id")?.toString() || "",
+    gift_id: giftId,
     gift_title: formData.get("gift_title")?.toString() || "",
     selected_amount: storedAmount,
+    action_type: actionType,
     payment_link_key: paymentLinkKey,
     guest_name: formData.get("guest_name")?.toString().trim() || "",
     guest_email: formData.get("guest_email")?.toString().trim() || "",
@@ -1205,16 +1470,13 @@ async function handleGiftNoteSubmit(event) {
   };
 
   saveGiftNoteLocally(payload);
-  renderPrivateGiftNotes();
+  saveGiftStatusLocally(giftId, actionType);
 
   if (giftNoteFeedback) {
     giftNoteFeedback.textContent = "Preparing secure payment...";
   }
 
-  if (
-    window.location.hostname !== "localhost" &&
-    window.location.hostname !== "127.0.0.1"
-  ) {
+  if (!isLocalPreview()) {
     submitGiftNote(payload).catch((error) => {
       console.warn("Gift note email could not be sent.", error);
     });
@@ -1234,7 +1496,7 @@ async function handleGiftNoteSubmit(event) {
 
 function setupScrollReveals() {
   const revealItems = document.querySelectorAll(
-    ".section-heading, .hero-image, .hero-copy, .weekend-card, .evening-detail-card, .evening-info-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .gift-note-card, .gift-card, .rsvp-card, .faq-item, .bottom-image-card"
+    ".section-heading, .hero-image, .hero-copy, .weekend-card, .evening-detail-card, .evening-info-card, .timeline-card, .gallery-card, .stay-group, .stay-personalised-card, .honeymoon-copy, .honeymoon-photo, .gift-note-card, .gift-card, .rsvp-card, .faq-item, .bottom-image-card"
   );
 
   if (!revealItems.length) {
@@ -1594,14 +1856,15 @@ navLinks.forEach((link) => {
 });
 
 const guest = resolveGuestFromQuery();
-hideGiftListForPersonalisedGuest(guest);
+showHoneymoonGiftTeaser();
 
 renderFaqSection();
 setupFaqAccordion();
 
 if (!guest) {
   renderGiftList();
-  renderPrivateGiftNotes();
+  resetGiftFromQuery();
+  loadRemoteGiftStatuses();
 }
 
 if (!guest && giftGrid) {
@@ -1634,6 +1897,15 @@ if (!guest && giftModalClose) {
 
 if (!guest && giftNoteForm) {
   giftNoteForm.addEventListener("submit", handleGiftNoteSubmit);
+}
+
+if (!guest && giftStatusReset && isLocalPreview()) {
+  giftStatusReset.hidden = false;
+  giftStatusReset.addEventListener("click", resetGiftStatusesLocally);
+}
+
+if (!guest && shouldShowGiftThankYou()) {
+  showGiftThankYou();
 }
 
 document.addEventListener("keydown", (event) => {

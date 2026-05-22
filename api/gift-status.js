@@ -1,0 +1,74 @@
+function sendJson(response, statusCode, body, extraHeaders = {}) {
+  response.statusCode = statusCode;
+  response.setHeader("Content-Type", "application/json");
+
+  Object.entries(extraHeaders).forEach(([key, value]) => {
+    response.setHeader(key, value);
+  });
+
+  response.end(JSON.stringify(body));
+}
+
+module.exports = async function handler(request, response) {
+  if (request.method !== "GET") {
+    return sendJson(response, 405, { error: "Method not allowed" });
+  }
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return sendJson(response, 500, { error: "Missing Supabase configuration" });
+  }
+
+  try {
+    const supabaseResponse = await fetch(
+      `${supabaseUrl}/rest/v1/gift_payments?select=gift_id,gift_action,amount_total,currency`,
+      {
+        headers: {
+          apikey: serviceRoleKey,
+          Authorization: `Bearer ${serviceRoleKey}`,
+        },
+      }
+    );
+
+    const data = await supabaseResponse.json();
+
+    if (!supabaseResponse.ok) {
+      return sendJson(response, supabaseResponse.status, { error: data });
+    }
+
+    const gifts = data.reduce((summary, payment) => {
+      const giftId = payment.gift_id;
+
+      if (!giftId) {
+        return summary;
+      }
+
+      if (!summary[giftId]) {
+        summary[giftId] = {
+          totalPaidPence: 0,
+          paymentCount: 0,
+          currency: payment.currency || "gbp",
+          fullGiftCount: 0,
+          contributionCount: 0,
+        };
+      }
+
+      summary[giftId].totalPaidPence += Number(payment.amount_total) || 0;
+      summary[giftId].paymentCount += 1;
+
+      if (payment.gift_action === "full") {
+        summary[giftId].fullGiftCount += 1;
+      } else {
+        summary[giftId].contributionCount += 1;
+      }
+
+      return summary;
+    }, {});
+
+    return sendJson(response, 200, { gifts }, { "Cache-Control": "public, max-age=30" });
+  } catch (error) {
+    return sendJson(response, 500, { error: "Failed to load gift statuses" });
+  }
+};

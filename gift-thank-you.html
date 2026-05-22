@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thank you | Nia &amp; Alan</title>
+    <meta
+      name="description"
+      content="Thank you for sending a honeymoon gift to Nia and Alan."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=20260521g" />
+  </head>
+  <body class="gift-thank-you-page">
+    <main class="hero-section" id="home">
+      <div class="flower hero-flower-left" aria-hidden="true"></div>
+      <div class="flower hero-flower-right" aria-hidden="true"></div>
+      <div class="hero">
+        <div class="hero-monogram" aria-hidden="true">N&amp;A</div>
+        <div class="hero-image">
+          <img
+            src="images/574062329_10164750919700979_4938779791068548409_n.jpg"
+            alt="Nia and Alan together"
+          />
+        </div>
+
+        <div class="hero-content">
+          <div class="hero-copy">
+            <p class="eyebrow">Gift received</p>
+            <h1>Thank you!</h1>
+            <p class="hero-intro">
+              Honestly, thank you so much. You’ve just helped make our
+              honeymoon feel even more special, and we’ll be thinking of you
+              when we’re off making those memories.
+            </p>
+            <figure
+              class="gift-thank-you-character"
+              id="gift-thank-you-character"
+              hidden
+            >
+              <img
+                id="gift-thank-you-character-image"
+                src="images/generated/honeymoon-pot-thank-you.png"
+                alt="A storybook honeymoon suitcase full of Scottish memories"
+              />
+            </figure>
+            <p class="gift-thank-you-note" id="gift-thank-you-note">
+              Scotland won’t know what’s hit it.
+            </p>
+            <p class="gift-thank-you-small">
+              Stripe will send your payment confirmation separately.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="gifts.html">Back to gift list</a>
+              <a class="button button-secondary" href="/">Back to the website</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      const thankYouMessages = {
+        "test-biscuit":
+          "Emergency biscuit support received. Morale is already improving, and the biscuit tin is reporting for duty.",
+        "whisky-research":
+          "Alan promises this whisky research will be conducted with the utmost seriousness. Notes may become less legible over time.",
+        "staffa-adventure":
+          "You’ve helped send us towards Staffa. We’ll try not to say wow every eight seconds, but no promises.",
+        "loch-lomond-boat-trip":
+          "You’ve helped us set sail on Loch Lomond. We’ll be gliding about like honeymoon professionals.",
+        "wildlife-sea-safari":
+          "Sea safari dreams unlocked. We’ll be scanning the waves like very excited professionals in waterproof coats.",
+        "honeymoon-pot":
+          "You’ve added a little extra magic to the honeymoon pot. That might become coffee, dinner, or something wonderfully unplanned.",
+      };
+      const thankYouCharacters = {
+        "test-biscuit": {
+          src: "images/generated/test-biscuit-thank-you.png",
+          alt: "A storybook emergency biscuit tin with a smiling biscuit",
+        },
+        "whisky-research": {
+          src: "images/generated/whisky-research-thank-you.png",
+          alt: "A storybook Highland cow making whisky research notes",
+        },
+        "staffa-adventure": {
+          src: "images/generated/staffa-adventure-thank-you.png",
+          alt: "A storybook puffin explorer on Staffa cliffs",
+        },
+        "loch-lomond-boat-trip": {
+          src: "images/generated/loch-lomond-boat-trip-thank-you.png",
+          alt: "A storybook squirrel skipper on a Loch Lomond boat",
+        },
+        "wildlife-sea-safari": {
+          src: "images/generated/wildlife-sea-safari-thank-you.png",
+          alt: "A storybook seal captain on a sea safari boat",
+        },
+        "honeymoon-pot": {
+          src: "images/generated/honeymoon-pot-thank-you.png",
+          alt: "A storybook honeymoon suitcase full of Scottish memories",
+        },
+      };
+
+      const params = new URLSearchParams(window.location.search);
+      const giftId = params.get("gift");
+      const message = thankYouMessages[giftId];
+      const characterDetails = thankYouCharacters[giftId];
+      const note = document.getElementById("gift-thank-you-note");
+      const character = document.getElementById("gift-thank-you-character");
+      const characterImage = document.getElementById(
+        "gift-thank-you-character-image"
+      );
+
+      if (note && message) {
+        note.textContent = message;
+      }
+
+      if (character && characterImage && characterDetails) {
+        characterImage.src = characterDetails.src;
+        characterImage.alt = characterDetails.alt;
+        character.hidden = false;
+      }
+    </script>
+  </body>
+</html>
