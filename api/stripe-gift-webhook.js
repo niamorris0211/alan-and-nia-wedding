@@ -6,6 +6,28 @@ function sendJson(response, statusCode, body) {
   response.end(JSON.stringify(body));
 }
 
+const GIFT_TARGET_AMOUNTS_PENCE = {
+  "test-biscuit": 1,
+  "whisky-research": 4400,
+  "staffa-adventure": 9000,
+  "loch-lomond-boat-trip": 4000,
+  "wildlife-sea-safari": 22200,
+};
+
+function getNormalisedGiftAction({ giftId, giftAction, amountTotal }) {
+  const targetAmountPence = GIFT_TARGET_AMOUNTS_PENCE[giftId];
+
+  if (
+    giftAction === "full" &&
+    targetAmountPence &&
+    amountTotal < targetAmountPence
+  ) {
+    return "contribution";
+  }
+
+  return giftAction;
+}
+
 async function readRawBody(request) {
   if (typeof request.body === "string") {
     return request.body;
@@ -99,11 +121,17 @@ async function saveGiftPayment({ supabaseUrl, serviceRoleKey, stripeEvent }) {
   const metadata = getSessionMetadata(session);
   const urlGiftDetails = getGiftDetailsFromSuccessUrl(session);
   const giftId = metadata.gift_id || metadata.giftId || urlGiftDetails.giftId;
-  const giftAction =
+  const rawGiftAction =
     metadata.gift_action ||
     metadata.giftAction ||
     urlGiftDetails.giftAction ||
     (giftId === "honeymoon-pot" ? "contribution" : "full");
+  const amountTotal = session.amount_total || 0;
+  const giftAction = getNormalisedGiftAction({
+    giftId,
+    giftAction: rawGiftAction,
+    amountTotal,
+  });
 
   if (!giftId) {
     return {
@@ -122,7 +150,7 @@ async function saveGiftPayment({ supabaseUrl, serviceRoleKey, stripeEvent }) {
     payment_link_id: session.payment_link || null,
     gift_id: giftId,
     gift_action: giftAction,
-    amount_total: session.amount_total || 0,
+    amount_total: amountTotal,
     currency: session.currency || "gbp",
     customer_email:
       session.customer_details?.email || session.customer_email || null,

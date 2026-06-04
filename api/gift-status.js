@@ -9,6 +9,29 @@ function sendJson(response, statusCode, body, extraHeaders = {}) {
   response.end(JSON.stringify(body));
 }
 
+const GIFT_TARGET_AMOUNTS_PENCE = {
+  "test-biscuit": 1,
+  "whisky-research": 4400,
+  "staffa-adventure": 9000,
+  "loch-lomond-boat-trip": 4000,
+  "wildlife-sea-safari": 22200,
+};
+
+function getNormalisedGiftAction(payment) {
+  const targetAmountPence = GIFT_TARGET_AMOUNTS_PENCE[payment.gift_id];
+  const amountTotal = Number(payment.amount_total) || 0;
+
+  if (
+    payment.gift_action === "full" &&
+    targetAmountPence &&
+    amountTotal < targetAmountPence
+  ) {
+    return "contribution";
+  }
+
+  return payment.gift_action;
+}
+
 module.exports = async function handler(request, response) {
   if (request.method !== "GET") {
     return sendJson(response, 405, { error: "Method not allowed" });
@@ -65,7 +88,7 @@ module.exports = async function handler(request, response) {
       summary[giftId].totalPaidPence += Number(payment.amount_total) || 0;
       summary[giftId].paymentCount += 1;
 
-      if (payment.gift_action === "full") {
+      if (getNormalisedGiftAction(payment) === "full") {
         summary[giftId].fullGiftCount += 1;
       } else {
         summary[giftId].contributionCount += 1;
