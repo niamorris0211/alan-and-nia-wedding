@@ -38,6 +38,13 @@ module.exports = async function handler(request, response) {
       return sendJson(response, supabaseResponse.status, { error: data });
     }
 
+    if (!Array.isArray(data)) {
+      return sendJson(response, 500, {
+        error: "Supabase returned an unexpected gift status response",
+        detail: data,
+      });
+    }
+
     const gifts = data.reduce((summary, payment) => {
       const giftId = payment.gift_id;
 
@@ -69,6 +76,9 @@ module.exports = async function handler(request, response) {
 
     return sendJson(response, 200, { gifts }, { "Cache-Control": "public, max-age=30" });
   } catch (error) {
-    return sendJson(response, 500, { error: "Failed to load gift statuses" });
+    return sendJson(response, 500, {
+      error: "Failed to load gift statuses",
+      detail: error.message,
+    });
   }
 };
