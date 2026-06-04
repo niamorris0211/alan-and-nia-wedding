@@ -7,6 +7,15 @@ const GIFT_TARGET_AMOUNTS_PENCE = {
   "loch-lomond-boat-trip": 4000,
   "wildlife-sea-safari": 22200,
 };
+const GIFT_TITLES = {
+  "test-biscuit": "Emergency Biscuit Fund",
+  "whisky-research": "Alan's Very Serious Whisky Research",
+  "staffa-adventure": "Staffa Adventure",
+  "loch-lomond-boat-trip": "Loch Lomond Boat Trip",
+  "wildlife-sea-safari": "Wildlife Sea Safari",
+  "honeymoon-pot": "Honeymoon Pot",
+};
+const DEFAULT_GIFT_NOTIFICATION_ENDPOINT = "https://formspree.io/f/xwvydezz";
 
 function jsonResponse(statusCode, body) {
   return {
@@ -110,6 +119,13 @@ function getNormalisedGiftAction({ giftId, giftAction, amountTotal }) {
   return giftAction;
 }
 
+function formatPaymentAmount(amountPence, currency) {
+  return new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: (currency || "gbp").toUpperCase(),
+  }).format((Number(amountPence) || 0) / 100);
+}
+
 async function saveGiftPayment({ supabaseUrl, serviceRoleKey, stripeEvent }) {
   const session = stripeEvent.data.object;
   const metadata = getSessionMetadata(session);
@@ -170,7 +186,73 @@ async function saveGiftPayment({ supabaseUrl, serviceRoleKey, stripeEvent }) {
     return jsonResponse(response.status, { error: data });
   }
 
-  return jsonResponse(200, { success: true, data });
+  const wasInserted = Array.isArray(data) ? data.length > 0 : true;
+
+  return {
+    response: jsonResponse(200, { success: true, data }),
+    record,
+    wasInserted,
+  };
+}
+
+function buildGiftPaymentNotification(record) {
+  const giftTitle = GIFT_TITLES[record.gift_id] || record.gift_id;
+  const amount = formatPaymentAmount(record.amount_total, record.currency);
+  const action =
+    record.gift_action === "full" ? "Full gift" : "Contribution";
+
+  return [
+    "Nia & Alan Honeymoon Gift Payment",
+    "",
+    `Gift: ${giftTitle}`,
+    `Type: ${action}`,
+    `Amount paid: ${amount}`,
+    "",
+    `Guest name: ${record.customer_name || "Not provided"}`,
+    `Email address: ${record.customer_email || "Not provided"}`,
+    "",
+    `Stripe checkout session: ${record.checkout_session_id}`,
+    `Stripe payment intent: ${record.payment_intent_id || "Not provided"}`,
+    `Paid at: ${record.paid_at}`,
+  ].join("\n");
+}
+
+async function sendGiftPaymentNotification(record) {
+  const endpoint =
+    process.env.GIFT_NOTIFICATION_ENDPOINT || DEFAULT_GIFT_NOTIFICATION_ENDPOINT;
+
+  if (!endpoint) {
+    return;
+  }
+
+  const giftTitle = GIFT_TITLES[record.gift_id] || record.gift_id;
+  const amount = formatPaymentAmount(record.amount_total, record.currency);
+  const formData = new FormData();
+
+  formData.append(
+    "subject",
+    `Honeymoon gift payment - ${giftTitle} - ${amount}`
+  );
+  formData.append("Gift Payment", buildGiftPaymentNotification(record));
+  formData.append("gift_id", record.gift_id);
+  formData.append("gift_title", giftTitle);
+  formData.append("gift_action", record.gift_action);
+  formData.append("amount_paid", amount);
+  formData.append("customer_name", record.customer_name || "");
+  formData.append("customer_email", record.customer_email || "");
+  formData.append("checkout_session_id", record.checkout_session_id);
+
+  const notificationResponse = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!notificationResponse.ok) {
+    throw new Error("Gift payment notification was not accepted.");
+  }
 }
 
 exports.handler = async (event) => {
@@ -218,11 +300,21 @@ exports.handler = async (event) => {
   }
 
   try {
-    return await saveGiftPayment({
+    const result = await saveGiftPayment({
       supabaseUrl,
       serviceRoleKey,
       stripeEvent,
     });
+
+    if (result.wasInserted && result.record) {
+      try {
+        await sendGiftPaymentNotification(result.record);
+      } catch (error) {
+        console.warn("Gift payment notification could not be sent.", error);
+      }
+    }
+
+    return result.response || result;
   } catch (error) {
     return jsonResponse(500, { error: "Failed to save gift payment" });
   }
