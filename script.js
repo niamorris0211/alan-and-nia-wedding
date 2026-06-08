@@ -70,7 +70,10 @@ const ACCOMMODATION_NAME_ALIASES = {
 };
 const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
 const GIFT_STATUS_STORAGE_KEY = "niaAlanGiftStatuses";
-const GIFT_STATUS_ENDPOINT = "/api/gift-status";
+const GIFT_STATUS_ENDPOINT =
+  "https://alan-and-nia-wedding.vercel.app/api/gift-status";
+const RSVP_API_ENDPOINT =
+  "https://alan-and-nia-wedding.vercel.app/api/submit-rsvp";
 let remoteGiftStatuses = {};
 const PAYMENT_LINKS = {
   testOnePenny: "https://buy.stripe.com/aFa9AU4voc5U7TB9HEfrW00",
@@ -1807,6 +1810,23 @@ async function submitToFormspree(payload) {
 }
 
 async function submitRsvp(payload) {
+  try {
+    const apiResponse = await fetch(RSVP_API_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (apiResponse.ok) {
+      return;
+    }
+  } catch (error) {
+    console.warn("RSVP API could not be reached. Trying email fallback.", error);
+  }
+
   if (getGoogleAppsScriptEndpoint()) {
     await submitToGoogleAppsScript(payload);
     return;

@@ -1,12 +1,21 @@
 function sendJson(response, statusCode, body, extraHeaders = {}) {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", "application/json");
+  response.setHeader("Access-Control-Allow-Origin", "*");
+  response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  response.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   Object.entries(extraHeaders).forEach(([key, value]) => {
     response.setHeader(key, value);
   });
 
   response.end(JSON.stringify(body));
+}
+
+function normaliseGiftId(giftId) {
+  return String(giftId || "")
+    .split(/\r?\n/)[0]
+    .trim();
 }
 
 const GIFT_TARGET_AMOUNTS_PENCE = {
@@ -33,6 +42,11 @@ function getNormalisedGiftAction(payment) {
 }
 
 module.exports = async function handler(request, response) {
+  if (request.method === "OPTIONS") {
+    response.statusCode = 204;
+    return response.end();
+  }
+
   if (request.method !== "GET") {
     return sendJson(response, 405, { error: "Method not allowed" });
   }
@@ -69,7 +83,7 @@ module.exports = async function handler(request, response) {
     }
 
     const gifts = data.reduce((summary, payment) => {
-      const giftId = payment.gift_id;
+      const giftId = normaliseGiftId(payment.gift_id);
 
       if (!giftId) {
         return summary;
