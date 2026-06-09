@@ -101,7 +101,10 @@ async function saveRsvpToSupabase(payload) {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return false;
+    return {
+      stored: false,
+      error: "Missing Supabase environment variables",
+    };
   }
 
   const supabaseResponse = await fetch(
@@ -118,7 +121,16 @@ async function saveRsvpToSupabase(payload) {
     }
   );
 
-  return supabaseResponse.ok;
+  if (supabaseResponse.ok) {
+    return { stored: true, error: "" };
+  }
+
+  const errorBody = await supabaseResponse.text();
+
+  return {
+    stored: false,
+    error: errorBody || `Supabase returned ${supabaseResponse.status}`,
+  };
 }
 
 async function sendRsvpToFormspree(payload) {
@@ -170,13 +182,17 @@ module.exports = async function handler(request, response) {
       });
     }
 
-    const stored = await saveRsvpToSupabase(payload).catch(() => false);
+    const storageResult = await saveRsvpToSupabase(payload).catch((error) => ({
+      stored: false,
+      error: error.message,
+    }));
     await sendRsvpToFormspree(payload);
 
     return sendJson(response, 200, {
       success: true,
-      stored,
-      emailed: true,
+      stored: storageResult.stored,
+      storageError: storageResult.error,
+      notificationAccepted: true,
     });
   } catch (error) {
     return sendJson(response, 500, {
