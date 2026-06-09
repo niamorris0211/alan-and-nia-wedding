@@ -3,15 +3,7 @@ const lidlRsvpFeedback = document.getElementById("lidl-rsvp-feedback");
 const lidlRsvpSuccess = document.getElementById("lidl-rsvp-success");
 
 function getLidlRsvpEndpoint() {
-  return window.RSVP_CONFIG?.emailSubmitEndpoint || "";
-}
-
-function getLidlGoogleAppsScriptEndpoint() {
-  return window.RSVP_CONFIG?.googleAppsScriptUrl?.trim() || "";
-}
-
-function getLidlFormspreeEndpoint() {
-  return window.RSVP_CONFIG?.formspreeEndpoint?.trim() || "";
+  return window.RSVP_CONFIG?.apiEndpoint?.trim() || "";
 }
 
 function getLidlFallbackEmail() {
@@ -21,10 +13,7 @@ function getLidlFallbackEmail() {
     return configuredEmail;
   }
 
-  const endpoint = getLidlRsvpEndpoint();
-  const match = endpoint.match(/formsubmit\.co\/(?:ajax\/)?([^/?#]+)/);
-
-  return match ? decodeURIComponent(match[1]) : "";
+  return "";
 }
 
 function buildLidlMailtoLink(emailAddress, subject, body) {
@@ -104,86 +93,18 @@ async function submitLidlRsvp(payload) {
     throw new Error("Missing email endpoint.");
   }
 
-  const formData = new FormData();
-  formData.append("_subject", getLidlEmailSubject(payload));
-  formData.append("_captcha", "false");
-  formData.append("_template", "box");
-  formData.append("RSVP", buildLidlEmailMessage(payload));
-
   const response = await fetch(endpoint, {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: formData,
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
     throw new Error("Lidl RSVP submission was not accepted.");
   }
-}
-
-async function submitLidlToGoogleAppsScript(payload) {
-  const endpoint = getLidlGoogleAppsScriptEndpoint();
-
-  if (!endpoint) {
-    throw new Error("Missing Google Apps Script endpoint.");
-  }
-
-  await fetch(endpoint, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify({
-      ...payload,
-      email_subject: getLidlEmailSubject(payload),
-      email_message: buildLidlEmailMessage(payload),
-    }),
-  });
-}
-
-async function submitLidlToFormspree(payload) {
-  const endpoint = getLidlFormspreeEndpoint();
-
-  if (!endpoint) {
-    throw new Error("Missing Formspree endpoint.");
-  }
-
-  const formData = new FormData();
-  formData.append("subject", getLidlEmailSubject(payload));
-  formData.append("RSVP", buildLidlEmailMessage(payload));
-
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, value || "");
-  });
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error("Formspree Lidl RSVP submission was not accepted.");
-  }
-}
-
-async function submitLidlRsvpWithConfiguredService(payload) {
-  if (getLidlGoogleAppsScriptEndpoint()) {
-    await submitLidlToGoogleAppsScript(payload);
-    return;
-  }
-
-  if (getLidlFormspreeEndpoint()) {
-    await submitLidlToFormspree(payload);
-    return;
-  }
-
-  await submitLidlRsvp(payload);
 }
 
 function saveLidlPreviewSubmission(payload) {
@@ -267,7 +188,7 @@ if (lidlRsvpForm && lidlRsvpFeedback) {
     lidlRsvpFeedback.textContent = "Sending your RSVP...";
 
     try {
-      await submitLidlRsvpWithConfiguredService(payload);
+      await submitLidlRsvp(payload);
       lidlRsvpForm.reset();
       lidlRsvpForm.hidden = true;
       lidlRsvpSuccess.hidden = false;

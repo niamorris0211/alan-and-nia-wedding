@@ -1,4 +1,4 @@
-const DEFAULT_FORMSPREE_ENDPOINT = "https://formspree.io/f/xwvydezz";
+const { sendNotificationEmail } = require("../lib/email-notifications");
 
 function setCorsHeaders(response) {
   response.setHeader("Access-Control-Allow-Origin", "*");
@@ -34,6 +34,21 @@ function formatSubmittedAt(submittedAt) {
 }
 
 function buildRsvpEmailMessage(payload) {
+  if (payload.invite_type === "lidl_shared_evening") {
+    return [
+      "Lidl shared evening invite RSVP",
+      "",
+      `Full name: ${payload.household_name}`,
+      `Email address: ${payload.email_address || "Not given"}`,
+      `Attending: ${payload.attending_response || "Not answered"}`,
+      `Dietary requirements: ${payload.dietary_requirements || "None given"}`,
+      `Minibus interest: ${payload.minibus_interest || "Not answered"}`,
+      `Optional message: ${payload.optional_note || "None given"}`,
+      "",
+      `Submitted: ${formatSubmittedAt(payload.submitted_at)}`,
+    ].join("\n");
+  }
+
   const isEveningRsvp = payload.invite_type === "evening";
   const breakfastLines =
     !isEveningRsvp &&
@@ -72,10 +87,22 @@ function buildRsvpEmailMessage(payload) {
 }
 
 function normalisePayload(input) {
+  const inviteType = String(input.invite_type || "day").trim();
+  const householdName = String(
+    input.household_name || input.full_name || ""
+  ).trim();
+  const generatedSlug = householdName
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
   return {
-    guest_slug: String(input.guest_slug || "").trim(),
-    household_name: String(input.household_name || "").trim(),
-    invite_type: String(input.invite_type || "day").trim(),
+    guest_slug: String(
+      input.guest_slug ||
+        (inviteType === "lidl_shared_evening" ? `lidl-${generatedSlug}` : "")
+    ).trim(),
+    household_name: householdName,
+    invite_type: inviteType,
     attending_guests: asStringArray(input.attending_guests),
     not_attending_guests: asStringArray(input.not_attending_guests),
     breakfast_attending: asStringArray(
@@ -91,8 +118,13 @@ function normalisePayload(input) {
     ).trim(),
     dietary_requirements: String(input.dietary_requirements || "").trim(),
     song_request: String(input.song_request || "").trim(),
-    optional_note: String(input.optional_note || "").trim(),
+    optional_note: String(
+      input.optional_note || input.optional_message || ""
+    ).trim(),
     submitted_at: input.submitted_at || new Date().toISOString(),
+    email_address: String(input.email_address || "").trim(),
+    attending_response: String(input.attending || "").trim(),
+    minibus_interest: String(input.minibus_interest || "").trim(),
   };
 }
 
@@ -107,6 +139,30 @@ async function saveRsvpToSupabase(payload) {
     };
   }
 
+  const databasePayload = {
+    guest_slug: payload.guest_slug,
+    household_name: payload.household_name,
+    invite_type: payload.invite_type,
+    attending_guests: payload.attending_guests,
+    not_attending_guests: payload.not_attending_guests,
+    breakfast_attending: payload.breakfast_attending,
+    breakfast_not_attending: payload.breakfast_not_attending,
+    breakfast_dietary_requirements: payload.breakfast_dietary_requirements,
+    dietary_requirements: payload.dietary_requirements,
+    song_request: payload.song_request,
+    optional_note:
+      payload.invite_type === "lidl_shared_evening"
+        ? [
+            payload.optional_note,
+            `Email: ${payload.email_address || "Not given"}`,
+            `Attending: ${payload.attending_response || "Not answered"}`,
+            `Minibus: ${payload.minibus_interest || "Not answered"}`,
+          ]
+            .filter(Boolean)
+            .join("\n")
+        : payload.optional_note,
+    submitted_at: payload.submitted_at,
+  };
   const supabaseResponse = await fetch(
     `${supabaseUrl}/rest/v1/rsvps?on_conflict=guest_slug`,
     {
@@ -117,7 +173,7 @@ async function saveRsvpToSupabase(payload) {
         Authorization: `Bearer ${serviceRoleKey}`,
         Prefer: "resolution=merge-duplicates,return=minimal",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(databasePayload),
     }
   );
 
@@ -133,32 +189,21 @@ async function saveRsvpToSupabase(payload) {
   };
 }
 
-async function sendRsvpToFormspree(payload) {
-  const endpoint =
-    process.env.RSVP_FORMSPREE_ENDPOINT || DEFAULT_FORMSPREE_ENDPOINT;
+async function sendRsvpNotification(payload) {
   const subject = `${
-    payload.invite_type === "evening" ? "Evening RSVP" : "Wedding RSVP"
+    payload.invite_type === "lidl_shared_evening"
+      ? "Lidl Evening RSVP"
+      : payload.invite_type === "evening"
+        ? "Evening RSVP"
+        : "Wedding RSVP"
   } from ${payload.household_name}`;
-  const formData = new FormData();
 
-  formData.append("subject", subject);
-  formData.append("RSVP", buildRsvpEmailMessage(payload));
-
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, Array.isArray(value) ? value.join(", ") : value || "");
+  return sendNotificationEmail({
+    subject,
+    text: buildRsvpEmailMessage(payload),
+    idempotencyKey: `rsvp/${payload.guest_slug}/${payload.submitted_at}`,
+    recipient: process.env.RSVP_NOTIFICATION_EMAIL_TO,
   });
-
-  const formspreeResponse = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: formData,
-  });
-
-  if (!formspreeResponse.ok) {
-    throw new Error("Formspree RSVP submission was not accepted.");
-  }
 }
 
 module.exports = async function handler(request, response) {
@@ -182,19 +227,24 @@ module.exports = async function handler(request, response) {
       });
     }
 
-    const storageResult = await saveRsvpToSupabase(payload).catch((error) => ({
-      stored: false,
-      error: error.message,
-    }));
-    await sendRsvpToFormspree(payload);
+    const storageResult = await saveRsvpToSupabase(payload);
+
+    if (!storageResult.stored) {
+      console.error("RSVP storage failed.", storageResult.error);
+      return sendJson(response, 502, {
+        error: "RSVP could not be stored",
+      });
+    }
+
+    await sendRsvpNotification(payload);
 
     return sendJson(response, 200, {
       success: true,
-      stored: storageResult.stored,
-      storageError: storageResult.error,
+      stored: true,
       notificationAccepted: true,
     });
   } catch (error) {
+    console.error("RSVP submission failed.", error);
     return sendJson(response, 500, {
       error: "Failed to submit RSVP",
     });

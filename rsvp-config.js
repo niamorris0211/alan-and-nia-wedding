@@ -1,6 +1,4 @@
 window.RSVP_CONFIG = {
-  emailSubmitEndpoint: "https://formsubmit.co/niamorris0211@hotmail.co.uk",
-  googleAppsScriptUrl: "",
-  formspreeEndpoint: "https://formspree.io/f/xwvydezz",
+  apiEndpoint: "https://alan-and-nia-wedding.vercel.app/api/submit-rsvp",
   fallbackEmail: "niamorris0211@hotmail.co.uk",
 };

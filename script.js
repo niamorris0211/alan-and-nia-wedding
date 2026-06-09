@@ -72,8 +72,7 @@ const GIFT_NOTES_STORAGE_KEY = "niaAlanGiftNotes";
 const GIFT_STATUS_STORAGE_KEY = "niaAlanGiftStatuses";
 const GIFT_STATUS_ENDPOINT =
   "https://alan-and-nia-wedding.vercel.app/api/gift-status";
-const RSVP_API_ENDPOINT =
-  "https://alan-and-nia-wedding.vercel.app/api/submit-rsvp";
+const DEFAULT_API_ORIGIN = "https://alan-and-nia-wedding.vercel.app";
 const GIFT_TEST_BASELINE_PENCE = {
   "test-biscuit": 30,
   "whisky-research": 100,
@@ -326,15 +325,18 @@ function getFaqItems() {
 }
 
 function getRsvpEndpoint() {
-  return window.RSVP_CONFIG?.emailSubmitEndpoint?.trim() || "";
+  return (
+    window.RSVP_CONFIG?.apiEndpoint?.trim() ||
+    `${DEFAULT_API_ORIGIN}/api/submit-rsvp`
+  );
 }
 
-function getGoogleAppsScriptEndpoint() {
-  return window.RSVP_CONFIG?.googleAppsScriptUrl?.trim() || "";
-}
-
-function getFormspreeEndpoint() {
-  return window.RSVP_CONFIG?.formspreeEndpoint?.trim() || "";
+function getApiOrigin() {
+  try {
+    return new URL(getRsvpEndpoint()).origin;
+  } catch (error) {
+    return DEFAULT_API_ORIGIN;
+  }
 }
 
 function isLocalPreview() {
@@ -351,24 +353,7 @@ function getFallbackRsvpEmail() {
     return configuredEmail;
   }
 
-  const endpoint = getRsvpEndpoint();
-  const match = endpoint.match(/formsubmit\.co\/(?:ajax\/)?([^/?#]+)/);
-
-  return match ? decodeURIComponent(match[1]) : "";
-}
-
-function getRsvpSubmissionEndpoint() {
-  const endpoint = getRsvpEndpoint();
-
-  if (!endpoint) {
-    return "";
-  }
-
-  if (endpoint.includes("formsubmit.co/") && !endpoint.includes("formsubmit.co/ajax/")) {
-    return endpoint.replace("formsubmit.co/", "formsubmit.co/ajax/");
-  }
-
-  return endpoint;
+  return "";
 }
 
 function buildMailtoLink(emailAddress, subject, body) {
@@ -1417,47 +1402,14 @@ function showGiftThankYou() {
   document.body.classList.add("modal-open");
 }
 
-function buildGiftNoteEmailMessage(payload) {
-  return [
-    "Nia & Alan Honeymoon Gift Note",
-    "",
-    `Gift: ${payload.gift_title}`,
-    `Amount selected: ${payload.selected_amount}`,
-    `Payment link key: ${payload.payment_link_key}`,
-    "",
-    `Guest name: ${payload.guest_name}`,
-    `Email address: ${payload.guest_email}`,
-    `Message: ${payload.optional_message || "None given"}`,
-    "",
-    `Submitted: ${formatSubmittedAt(payload.submitted_at)}`,
-  ].join("\n");
-}
-
-function getGiftNoteEmailSubject(payload) {
-  return `Honeymoon Gift Note - ${payload.guest_name}`;
-}
-
 async function submitGiftNote(payload) {
-  const endpoint = getFormspreeEndpoint();
-
-  if (!endpoint) {
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("subject", getGiftNoteEmailSubject(payload));
-  formData.append("Gift Note", buildGiftNoteEmailMessage(payload));
-
-  Object.entries(payload).forEach(([key, value]) => {
-    formData.append(key, value || "");
-  });
-
-  const response = await fetch(endpoint, {
+  const response = await fetch(`${getApiOrigin()}/api/submit-gift-note`, {
     method: "POST",
     headers: {
+      "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: formData,
+    body: JSON.stringify(payload),
   });
 
   if (!response.ok) {
@@ -1490,18 +1442,27 @@ async function handleGiftNoteSubmit(event) {
     submitted_at: new Date().toISOString(),
   };
 
-  saveGiftNoteLocally(payload);
-  saveGiftStatusLocally(giftId, actionType);
-
   if (giftNoteFeedback) {
     giftNoteFeedback.textContent = "Preparing secure payment...";
   }
 
   if (!isLocalPreview()) {
-    submitGiftNote(payload).catch((error) => {
-      console.warn("Gift note email could not be sent.", error);
-    });
+    try {
+      await submitGiftNote(payload);
+    } catch (error) {
+      console.error("Gift note notification failed.", error);
+
+      if (giftNoteFeedback) {
+        giftNoteFeedback.textContent =
+          "We could not prepare the secure payment just now. Please try again.";
+      }
+
+      return;
+    }
   }
+
+  saveGiftNoteLocally(payload);
+  saveGiftStatusLocally(giftId, actionType);
 
   giftNoteForm.reset();
   giftNoteForm.hidden = true;
@@ -1728,134 +1689,19 @@ function getRsvpEmailSubject(payload) {
   } from ${payload.household_name}`;
 }
 
-async function submitToEmailService(payload) {
-  const endpoint = getRsvpSubmissionEndpoint();
-
-  if (!endpoint) {
-    throw new Error("Missing email endpoint.");
-  }
-
-  const formData = new FormData();
-  formData.append("_subject", getRsvpEmailSubject(payload));
-  formData.append("_captcha", "false");
-  formData.append("_template", "box");
-  formData.append("RSVP", buildRsvpEmailMessage(payload));
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: formData,
-  });
-
-  let responseData = null;
-  const contentType = response.headers.get("content-type") || "";
-
-  if (contentType.includes("application/json")) {
-    responseData = await response.json();
-  } else {
-    responseData = await response.text();
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      typeof responseData === "object" && responseData?.message
-        ? responseData.message
-        : "RSVP submission was not accepted."
-    );
-  }
-
-  return responseData;
-}
-
-async function submitToGoogleAppsScript(payload) {
-  const endpoint = getGoogleAppsScriptEndpoint();
-
-  if (!endpoint) {
-    throw new Error("Missing Google Apps Script endpoint.");
-  }
-
-  await fetch(endpoint, {
-    method: "POST",
-    mode: "no-cors",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify({
-      ...payload,
-      email_subject: getRsvpEmailSubject(payload),
-      email_message: buildRsvpEmailMessage(payload),
-    }),
-  });
-}
-
-function appendFormspreeField(formData, key, value) {
-  if (Array.isArray(value)) {
-    formData.append(key, value.join(", "));
-    return;
-  }
-
-  formData.append(key, value || "");
-}
-
-async function submitToFormspree(payload) {
-  const endpoint = getFormspreeEndpoint();
-
-  if (!endpoint) {
-    throw new Error("Missing Formspree endpoint.");
-  }
-
-  const formData = new FormData();
-  formData.append("subject", getRsvpEmailSubject(payload));
-  formData.append("RSVP", buildRsvpEmailMessage(payload));
-
-  Object.entries(payload).forEach(([key, value]) => {
-    appendFormspreeField(formData, key, value);
-  });
-
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: formData,
-  });
-
-  if (!response.ok) {
-    throw new Error("Formspree RSVP submission was not accepted.");
-  }
-}
-
 async function submitRsvp(payload) {
-  try {
-    const apiResponse = await fetch(RSVP_API_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  const apiResponse = await fetch(getRsvpEndpoint(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
-    if (apiResponse.ok) {
-      return;
-    }
-  } catch (error) {
-    console.warn("RSVP API could not be reached. Trying email fallback.", error);
+  if (!apiResponse.ok) {
+    throw new Error("RSVP submission was not accepted.");
   }
-
-  if (getGoogleAppsScriptEndpoint()) {
-    await submitToGoogleAppsScript(payload);
-    return;
-  }
-
-  if (getFormspreeEndpoint()) {
-    await submitToFormspree(payload);
-    return;
-  }
-
-  await submitToEmailService(payload);
 }
 
 function savePreviewSubmission(payload) {
@@ -1995,12 +1841,6 @@ if (personalisedRsvpForm && rsvpFeedback) {
       savePreviewSubmission(payload);
       personalisedRsvpForm.reset();
       showRsvpSuccessState(activeGuest);
-      return;
-    }
-
-    if (!getRsvpEndpoint()) {
-      rsvpFeedback.textContent =
-        "RSVP email is almost ready. Add your email endpoint in rsvp-config.js.";
       return;
     }
 

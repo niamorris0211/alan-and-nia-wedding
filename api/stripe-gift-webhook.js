@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const { sendNotificationEmail } = require("../lib/email-notifications");
 
 function sendJson(response, statusCode, body) {
   response.statusCode = statusCode;
@@ -21,7 +22,6 @@ const GIFT_TITLES = {
   "wildlife-sea-safari": "Wildlife Sea Safari",
   "honeymoon-pot": "Honeymoon Pot",
 };
-const DEFAULT_GIFT_NOTIFICATION_ENDPOINT = "https://formspree.io/f/xwvydezz";
 
 function getNormalisedGiftAction({ giftId, giftAction, amountTotal }) {
   const targetAmountPence = GIFT_TARGET_AMOUNTS_PENCE[giftId];
@@ -233,41 +233,16 @@ function buildGiftPaymentNotification(record) {
 }
 
 async function sendGiftPaymentNotification(record) {
-  const endpoint =
-    process.env.GIFT_NOTIFICATION_ENDPOINT || DEFAULT_GIFT_NOTIFICATION_ENDPOINT;
-
-  if (!endpoint) {
-    return;
-  }
-
   const giftTitle = GIFT_TITLES[record.gift_id] || record.gift_id;
   const amount = formatPaymentAmount(record.amount_total, record.currency);
-  const formData = new FormData();
 
-  formData.append(
-    "subject",
-    `Honeymoon gift payment - ${giftTitle} - ${amount}`
-  );
-  formData.append("Gift Payment", buildGiftPaymentNotification(record));
-  formData.append("gift_id", record.gift_id);
-  formData.append("gift_title", giftTitle);
-  formData.append("gift_action", record.gift_action);
-  formData.append("amount_paid", amount);
-  formData.append("customer_name", record.customer_name || "");
-  formData.append("customer_email", record.customer_email || "");
-  formData.append("checkout_session_id", record.checkout_session_id);
-
-  const notificationResponse = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-    },
-    body: formData,
+  return sendNotificationEmail({
+    subject: `Honeymoon gift payment - ${giftTitle} - ${amount}`,
+    text: buildGiftPaymentNotification(record),
+    idempotencyKey: `gift-payment/${record.stripe_event_id}`,
+    replyTo: record.customer_email || undefined,
+    recipient: process.env.GIFT_NOTIFICATION_EMAIL_TO,
   });
-
-  if (!notificationResponse.ok) {
-    throw new Error("Gift payment notification was not accepted.");
-  }
 }
 
 module.exports = async function handler(request, response) {
@@ -320,16 +295,15 @@ module.exports = async function handler(request, response) {
       stripeEvent,
     });
 
-    if (result.statusCode === 200 && result.wasInserted && result.record) {
-      try {
-        await sendGiftPaymentNotification(result.record);
-      } catch (error) {
-        console.warn("Gift payment notification could not be sent.", error);
-      }
+    if (result.statusCode === 200 && result.record) {
+      await sendGiftPaymentNotification(result.record);
     }
 
     return sendJson(response, result.statusCode, result.body);
   } catch (error) {
-    return sendJson(response, 500, { error: "Failed to save gift payment" });
+    console.error("Gift payment webhook failed.", error);
+    return sendJson(response, 500, {
+      error: "Failed to process gift payment notification",
+    });
   }
 };
