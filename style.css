@@ -1909,6 +1909,15 @@ h3 {
   color: var(--muted);
 }
 
+.honeymoon-copy .gift-cash-note {
+  padding: 0.85rem 1rem;
+  border-left: 3px solid rgba(138, 102, 106, 0.42);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: rgba(246, 236, 232, 0.58);
+  color: var(--moss);
+  font-weight: 700;
+}
+
 .honeymoon-copy .button {
   justify-self: start;
   margin-top: 0.4rem;
@@ -2022,6 +2031,13 @@ h3 {
   margin-top: 0.65rem;
   color: var(--moss);
   font-weight: 700;
+}
+
+.gift-note-card .gift-cash-note {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(77, 102, 80, 0.12);
+  color: var(--berry);
 }
 
 .gift-trial-controls {

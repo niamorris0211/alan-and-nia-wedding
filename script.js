@@ -78,11 +78,11 @@ const GIFT_STATUS_ENDPOINT =
 const DEFAULT_API_ORIGIN = "https://alan-and-nia-wedding.vercel.app";
 const GIFT_TEST_BASELINE_PENCE = {
   "test-biscuit": 30,
-  "whisky-research": 100,
-  "staffa-adventure": 100,
-  "loch-lomond-boat-trip": 30,
-  "wildlife-sea-safari": 100,
-  "honeymoon-pot": 100,
+  "whisky-research": 200,
+  "staffa-adventure": 300,
+  "loch-lomond-boat-trip": 230,
+  "wildlife-sea-safari": 300,
+  "honeymoon-pot": 200,
 };
 let remoteGiftStatuses = {};
 let giftStatusRefreshTimers = [];
