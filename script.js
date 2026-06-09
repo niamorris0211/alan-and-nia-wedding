@@ -48,6 +48,7 @@ const giftGrid = document.getElementById("gift-grid");
 const giftPrivateNotes = document.getElementById("gift-private-notes");
 const giftPrivateNotesList = document.getElementById("gift-private-notes-list");
 const giftStatusReset = document.getElementById("gift-status-reset");
+const giftPreviewBanner = document.getElementById("gift-preview-banner");
 const giftModal = document.getElementById("gift-modal");
 const giftModalClose = document.getElementById("gift-modal-close");
 const giftModalTitle = document.getElementById("gift-modal-title");
@@ -56,6 +57,7 @@ const giftNoteForm = document.getElementById("gift-note-form");
 const giftNoteSuccess = document.getElementById("gift-note-success");
 const giftNoteFeedback = document.getElementById("gift-note-feedback");
 const giftPaymentFallback = document.getElementById("gift-payment-fallback");
+const giftPreviewReturn = document.getElementById("gift-preview-return");
 const giftGuestNameInput = document.getElementById("gift-guest-name");
 const giftNoteIdInput = document.getElementById("gift-note-id");
 const giftNoteTitleInput = document.getElementById("gift-note-title");
@@ -352,6 +354,34 @@ function isLocalPreview() {
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1"
   );
+}
+
+function isGiftPreviewMode() {
+  if (isLocalPreview()) {
+    return true;
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  return params.get("preview") === "1";
+}
+
+function redirectLocalStripeReturnToLive() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (!giftGrid || !isLocalPreview() || params.get("preview") === "1") {
+    return false;
+  }
+
+  const referrer = document.referrer.toLowerCase();
+
+  if (!referrer.includes("stripe.com")) {
+    return false;
+  }
+
+  window.location.replace(
+    `https://www.alanandnia.co.uk/gifts.html?refresh=${Date.now()}`
+  );
+  return true;
 }
 
 function getFallbackRsvpEmail() {
@@ -963,7 +993,7 @@ function getGiftStatus(gift) {
     return "Part-funded";
   }
 
-  if (!isLocalPreview()) {
+  if (!isGiftPreviewMode()) {
     return gift.status;
   }
 
@@ -972,7 +1002,7 @@ function getGiftStatus(gift) {
 }
 
 function getGiftFundingNote(gift) {
-  if (!isLocalPreview() && !giftStatusesLoaded) {
+  if (!isGiftPreviewMode() && !giftStatusesLoaded) {
     return giftStatusLoadFailed
       ? "We couldn’t check the live total just now. Please refresh before choosing this gift."
       : "Checking the latest contributions...";
@@ -1008,7 +1038,7 @@ function getGiftFundingNote(gift) {
 }
 
 async function loadRemoteGiftStatuses() {
-  if (!giftGrid || isLocalPreview()) {
+  if (!giftGrid || isGiftPreviewMode()) {
     return;
   }
 
@@ -1041,7 +1071,7 @@ async function loadRemoteGiftStatuses() {
 }
 
 function refreshGiftStatusesAfterNavigation() {
-  if (!giftGrid || isLocalPreview()) {
+  if (!giftGrid || isGiftPreviewMode()) {
     return;
   }
 
@@ -1138,7 +1168,7 @@ function getGiftActions(gift) {
   const status = getGiftStatus(gift).toLowerCase();
   const isGifted = status === "gifted";
   const isPartFunded = status === "part-funded";
-  const liveStatusUnavailable = !isLocalPreview() && !giftStatusesLoaded;
+  const liveStatusUnavailable = !isGiftPreviewMode() && !giftStatusesLoaded;
   const remainingPence = getGiftRemainingPence(gift);
 
   if (isGifted) {
@@ -1279,7 +1309,7 @@ function renderGiftList() {
   HONEYMOON_GIFTS.forEach((gift) => {
     const status = getGiftStatus(gift);
     const displayStatus =
-      !isLocalPreview() && !giftStatusesLoaded
+      !isGiftPreviewMode() && !giftStatusesLoaded
         ? giftStatusLoadFailed
           ? "Unavailable"
           : "Checking"
@@ -1397,6 +1427,10 @@ function openGiftModal(giftId, actionType) {
   if (giftPaymentFallback) {
     giftPaymentFallback.hidden = true;
     giftPaymentFallback.removeAttribute("href");
+  }
+
+  if (giftPreviewReturn) {
+    giftPreviewReturn.hidden = true;
   }
 
   if (giftNoteIdInput) {
@@ -1537,7 +1571,10 @@ async function handleGiftNoteSubmit(event) {
     giftNoteFeedback.textContent = "Preparing secure payment...";
   }
 
-  if (!paymentLink || isPlaceholderPaymentLink(paymentLink)) {
+  if (
+    !isGiftPreviewMode() &&
+    (!paymentLink || isPlaceholderPaymentLink(paymentLink))
+  ) {
     if (giftNoteFeedback) {
       giftNoteFeedback.textContent =
         "This payment link is temporarily unavailable. Please try another gift.";
@@ -1548,15 +1585,17 @@ async function handleGiftNoteSubmit(event) {
 
   if (submitButton) {
     submitButton.disabled = true;
-    submitButton.textContent = "Opening secure payment...";
+    submitButton.textContent = isGiftPreviewMode()
+      ? "Simulating payment..."
+      : "Opening secure payment...";
   }
 
-  if (giftPaymentFallback) {
+  if (giftPaymentFallback && !isGiftPreviewMode()) {
     giftPaymentFallback.href = paymentLink;
     giftPaymentFallback.hidden = false;
   }
 
-  if (!isLocalPreview()) {
+  if (!isGiftPreviewMode()) {
     try {
       await submitGiftNote(payload);
     } catch (error) {
@@ -1573,6 +1612,26 @@ async function handleGiftNoteSubmit(event) {
   giftNoteForm.reset();
   giftNoteForm.hidden = true;
   giftNoteSuccess.hidden = false;
+
+  if (isGiftPreviewMode()) {
+    const successHeading = giftNoteSuccess.querySelector("h3");
+    const successCopy = giftNoteSuccess.querySelector("p");
+
+    if (successHeading) {
+      successHeading.textContent = "Preview payment complete.";
+    }
+
+    if (successCopy) {
+      successCopy.textContent =
+        "This was only a simulation. The live gift list and Stripe were not changed.";
+    }
+
+    if (giftPreviewReturn) {
+      giftPreviewReturn.hidden = false;
+    }
+
+    return;
+  }
 
   window.location.assign(paymentLink);
 }
@@ -1869,12 +1928,13 @@ navLinks.forEach((link) => {
 });
 
 const guest = resolveGuestFromQuery();
+const redirectingStripeReturn = redirectLocalStripeReturnToLive();
 showHoneymoonGiftTeaser();
 
 renderFaqSection();
 setupFaqAccordion();
 
-if (!guest) {
+if (!guest && !redirectingStripeReturn) {
   renderGiftList();
   resetGiftFromQuery();
   refreshGiftStatusesAfterNavigation();
@@ -1922,9 +1982,28 @@ if (!guest && giftNoteForm) {
   giftNoteForm.addEventListener("submit", handleGiftNoteSubmit);
 }
 
-if (!guest && giftStatusReset && isLocalPreview()) {
+if (!guest && isGiftPreviewMode()) {
+  if (giftPreviewBanner) {
+    giftPreviewBanner.hidden = false;
+  }
+
+  document.body.classList.add("gift-preview-mode");
+}
+
+if (!guest && giftStatusReset && isGiftPreviewMode()) {
   giftStatusReset.hidden = false;
   giftStatusReset.addEventListener("click", resetGiftStatusesLocally);
+}
+
+if (!guest && giftPreviewReturn) {
+  giftPreviewReturn.addEventListener("click", () => {
+    closeGiftModal();
+    renderGiftList();
+    document.getElementById("gift-list")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  });
 }
 
 if (!guest && shouldShowGiftThankYou()) {
