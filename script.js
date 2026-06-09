@@ -47,7 +47,6 @@ const giftSection = document.getElementById("gift-list");
 const giftGrid = document.getElementById("gift-grid");
 const giftPrivateNotes = document.getElementById("gift-private-notes");
 const giftPrivateNotesList = document.getElementById("gift-private-notes-list");
-const giftStatusReset = document.getElementById("gift-status-reset");
 const giftPreviewBanner = document.getElementById("gift-preview-banner");
 const giftModal = document.getElementById("gift-modal");
 const giftModalClose = document.getElementById("gift-modal-close");
@@ -1087,16 +1086,6 @@ function saveGiftStatusLocally(giftId, actionType) {
   }
 }
 
-function resetGiftStatusesLocally() {
-  try {
-    window.localStorage.removeItem(GIFT_STATUS_STORAGE_KEY);
-  } catch (error) {
-    console.warn("Gift statuses could not be reset locally.", error);
-  }
-
-  renderGiftList();
-}
-
 function resetGiftStatusLocally(giftId) {
   if (!giftId) {
     return;
@@ -1971,11 +1960,6 @@ if (!guest && isGiftPreviewMode()) {
   }
 
   document.body.classList.add("gift-preview-mode");
-}
-
-if (!guest && giftStatusReset && isGiftPreviewMode()) {
-  giftStatusReset.hidden = false;
-  giftStatusReset.addEventListener("click", resetGiftStatusesLocally);
 }
 
 if (!guest && giftPreviewReturn) {

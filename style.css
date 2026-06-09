@@ -2040,17 +2040,6 @@ h3 {
   color: var(--berry);
 }
 
-.gift-trial-controls {
-  display: flex;
-  justify-content: center;
-  margin: -0.4rem 0 1.4rem;
-}
-
-.gift-trial-controls .button {
-  font-size: 0.82rem;
-  padding: 0.55rem 0.85rem;
-}
-
 .gift-preview-banner {
   display: flex;
   flex-wrap: wrap;
