@@ -111,7 +111,9 @@ module.exports = async function handler(request, response) {
       return summary;
     }, {});
 
-    return sendJson(response, 200, { gifts }, { "Cache-Control": "public, max-age=30" });
+    return sendJson(response, 200, { gifts }, {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    });
   } catch (error) {
     return sendJson(response, 500, {
       error: "Failed to load gift statuses",

@@ -1006,7 +1006,9 @@ async function loadRemoteGiftStatuses() {
   }
 
   try {
-    const response = await fetch(GIFT_STATUS_ENDPOINT, {
+    const statusUrl = `${GIFT_STATUS_ENDPOINT}?updated=${Date.now()}`;
+    const response = await fetch(statusUrl, {
+      cache: "no-store",
       headers: {
         Accept: "application/json",
       },
