@@ -43,7 +43,7 @@ You get this from Stripe after creating the webhook endpoint.
 In Stripe, create a webhook endpoint:
 
 ```text
-https://alanandnia.co.uk/api/stripe-gift-webhook
+https://alan-and-nia-wedding.vercel.app/api/stripe-gift-webhook
 ```
 
 Listen for:
@@ -52,7 +52,8 @@ Listen for:
 checkout.session.completed
 ```
 
-Then copy the webhook signing secret into Netlify as `STRIPE_WEBHOOK_SECRET`.
+Then copy the webhook signing secret into Vercel as
+`STRIPE_WEBHOOK_SECRET` and redeploy.
 
 ## 4. Add metadata to each Payment Link
 
@@ -74,7 +75,19 @@ Each Payment Link needs metadata so the webhook knows which gift to update.
 After that, the public gift list reads:
 
 ```text
-https://alanandnia.co.uk/api/gift-status
+https://alan-and-nia-wedding.vercel.app/api/gift-status
 ```
 
 and shows how much has been contributed and how much is left.
+
+## 5. Configure the payment completion page
+
+Set each Stripe Payment Link to redirect after payment to the matching page:
+
+```text
+https://www.alanandnia.co.uk/gift-thank-you.html?gift=GIFT_ID
+```
+
+Replace `GIFT_ID` with the same `gift_id` from the table above. The thank-you
+page links back to a freshly loaded gift list, and the list retries briefly
+while Stripe delivers the webhook.

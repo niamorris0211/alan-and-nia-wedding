@@ -2234,6 +2234,12 @@ h3 {
   color: #76533f;
 }
 
+.gift-status-badge.status-checking,
+.gift-status-badge.status-unavailable {
+  background: rgba(77, 102, 80, 0.08);
+  color: var(--muted);
+}
+
 .gift-description {
   margin: 0;
   color: var(--muted);

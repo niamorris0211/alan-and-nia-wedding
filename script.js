@@ -55,6 +55,7 @@ const giftModalAmount = document.getElementById("gift-modal-amount");
 const giftNoteForm = document.getElementById("gift-note-form");
 const giftNoteSuccess = document.getElementById("gift-note-success");
 const giftNoteFeedback = document.getElementById("gift-note-feedback");
+const giftPaymentFallback = document.getElementById("gift-payment-fallback");
 const giftGuestNameInput = document.getElementById("gift-guest-name");
 const giftNoteIdInput = document.getElementById("gift-note-id");
 const giftNoteTitleInput = document.getElementById("gift-note-title");
@@ -82,6 +83,9 @@ const GIFT_TEST_BASELINE_PENCE = {
   "honeymoon-pot": 100,
 };
 let remoteGiftStatuses = {};
+let giftStatusRefreshTimers = [];
+let giftStatusesLoaded = false;
+let giftStatusLoadFailed = false;
 const PAYMENT_LINKS = {
   testOnePenny: "https://buy.stripe.com/aFa9AU4voc5U7TB9HEfrW00",
   whisky: "https://buy.stripe.com/00w3cw4vob1Q3DlaLIfrW03",
@@ -100,7 +104,7 @@ const HONEYMOON_GIFTS = [
     fixedPaymentLinkKey: "testOnePenny",
     fullGiftAmount: "£0.01",
     targetAmountPence: 1,
-    allowFlexibleContribution: true,
+    allowFlexibleContribution: false,
     title: "Emergency Biscuit Fund",
     priceLabel: "£0.01",
     description:
@@ -940,6 +944,14 @@ function getRemoteGiftPaidPence(gift) {
   return Math.max(0, recordedTotal - testBaseline);
 }
 
+function getGiftRemainingPence(gift) {
+  if (!gift.targetAmountPence) {
+    return null;
+  }
+
+  return Math.max(0, gift.targetAmountPence - getRemoteGiftPaidPence(gift));
+}
+
 function getGiftStatus(gift) {
   const remotePaidPence = getRemoteGiftPaidPence(gift);
 
@@ -960,6 +972,12 @@ function getGiftStatus(gift) {
 }
 
 function getGiftFundingNote(gift) {
+  if (!isLocalPreview() && !giftStatusesLoaded) {
+    return giftStatusLoadFailed
+      ? "We couldn’t check the live total just now. Please refresh before choosing this gift."
+      : "Checking the latest contributions...";
+  }
+
   const remotePaidPence = getRemoteGiftPaidPence(gift);
 
   if (remotePaidPence > 0 && gift.targetAmountPence) {
@@ -1009,10 +1027,34 @@ async function loadRemoteGiftStatuses() {
 
     const data = await response.json();
     remoteGiftStatuses = data.gifts || {};
+    giftStatusesLoaded = true;
+    giftStatusLoadFailed = false;
     renderGiftList();
   } catch (error) {
     console.warn("Live gift statuses could not be loaded.", error);
+
+    if (!giftStatusesLoaded) {
+      giftStatusLoadFailed = true;
+      renderGiftList();
+    }
   }
+}
+
+function refreshGiftStatusesAfterNavigation() {
+  if (!giftGrid || isLocalPreview()) {
+    return;
+  }
+
+  giftStatusRefreshTimers.forEach((timer) => window.clearTimeout(timer));
+  giftStatusRefreshTimers = [];
+
+  [0, 1500, 4000, 8000].forEach((delay) => {
+    const timer = window.setTimeout(() => {
+      loadRemoteGiftStatuses();
+    }, delay);
+
+    giftStatusRefreshTimers.push(timer);
+  });
 }
 
 function saveGiftStatusLocally(giftId, actionType) {
@@ -1096,6 +1138,12 @@ function getGiftActions(gift) {
   const status = getGiftStatus(gift).toLowerCase();
   const isGifted = status === "gifted";
   const isPartFunded = status === "part-funded";
+  const liveStatusUnavailable = !isLocalPreview() && !giftStatusesLoaded;
+  const remainingPence = getGiftRemainingPence(gift);
+
+  if (isGifted) {
+    return [];
+  }
 
   if (gift.id === "honeymoon-pot") {
     return [
@@ -1106,7 +1154,25 @@ function getGiftActions(gift) {
           : "Contribute to honeymoon pot",
         selectedAmount: "General honeymoon contribution",
         paymentLinkKey: "flexibleContribution",
-        disabled: isGifted || !gift.allowFlexibleContribution,
+        disabled: liveStatusUnavailable || !gift.allowFlexibleContribution,
+      },
+    ];
+  }
+
+  if (isPartFunded) {
+    return [
+      {
+        type: "flexible",
+        label:
+          remainingPence === null
+            ? "Add another contribution"
+            : `Contribute towards ${formatGiftMoney(remainingPence)} left`,
+        selectedAmount:
+          remainingPence === null
+            ? `Contribution towards ${gift.title}`
+            : `Up to ${formatGiftMoney(remainingPence)} remaining`,
+        paymentLinkKey: gift.flexiblePaymentLinkKey,
+        disabled: liveStatusUnavailable || !gift.allowFlexibleContribution,
       },
     ];
   }
@@ -1117,14 +1183,14 @@ function getGiftActions(gift) {
       label: `Gift the full experience — ${gift.fullGiftAmount}`,
       selectedAmount: gift.fullGiftAmount,
       paymentLinkKey: gift.fixedPaymentLinkKey,
-      disabled: isGifted || isPartFunded,
+      disabled: liveStatusUnavailable,
     },
     {
       type: "flexible",
-      label: isPartFunded ? "Add another contribution" : "Contribute towards this",
+      label: "Contribute towards this",
       selectedAmount: `Contribution towards ${gift.title}`,
-      paymentLinkKey: gift.flexiblePaymentLinkKey || "flexibleContribution",
-      disabled: isGifted || !gift.allowFlexibleContribution,
+      paymentLinkKey: gift.flexiblePaymentLinkKey,
+      disabled: liveStatusUnavailable || !gift.allowFlexibleContribution,
     },
   ];
 }
@@ -1212,6 +1278,14 @@ function renderGiftList() {
 
   HONEYMOON_GIFTS.forEach((gift) => {
     const status = getGiftStatus(gift);
+    const displayStatus =
+      !isLocalPreview() && !giftStatusesLoaded
+        ? giftStatusLoadFailed
+          ? "Unavailable"
+          : "Checking"
+        : isGiftPartFunded(gift)
+          ? "Part-funded"
+          : status;
     const isAvailable = isGiftAvailable(gift);
     const card = document.createElement("article");
     card.className = `gift-card ${isAvailable ? "" : "is-gifted"} ${
@@ -1247,8 +1321,8 @@ function renderGiftList() {
           </div>
           <div class="gift-card-badges">
             ${testBadge}
-            <span class="gift-status-badge ${getGiftStatusClass(status)}">
-              ${isGiftPartFunded(gift) ? "Part-funded" : status}
+            <span class="gift-status-badge ${getGiftStatusClass(displayStatus)}">
+              ${displayStatus}
             </span>
           </div>
         </div>
@@ -1312,6 +1386,18 @@ function openGiftModal(giftId, actionType) {
   }
 
   giftNoteForm.reset();
+
+  const submitButton = giftNoteForm.querySelector('button[type="submit"]');
+
+  if (submitButton) {
+    submitButton.disabled = false;
+    submitButton.textContent = "Go to secure payment";
+  }
+
+  if (giftPaymentFallback) {
+    giftPaymentFallback.hidden = true;
+    giftPaymentFallback.removeAttribute("href");
+  }
 
   if (giftNoteIdInput) {
     giftNoteIdInput.value = gift.id;
@@ -1434,6 +1520,7 @@ async function handleGiftNoteSubmit(event) {
   const actionType = formData.get("gift_action_type")?.toString() || "";
   const paymentLinkKey = formData.get("payment_link_key")?.toString() || "";
   const paymentLink = getPaymentLink(paymentLinkKey);
+  const submitButton = giftNoteForm.querySelector('button[type="submit"]');
   const payload = {
     gift_id: giftId,
     gift_title: formData.get("gift_title")?.toString() || "",
@@ -1448,6 +1535,25 @@ async function handleGiftNoteSubmit(event) {
 
   if (giftNoteFeedback) {
     giftNoteFeedback.textContent = "Preparing secure payment...";
+  }
+
+  if (!paymentLink || isPlaceholderPaymentLink(paymentLink)) {
+    if (giftNoteFeedback) {
+      giftNoteFeedback.textContent =
+        "This payment link is temporarily unavailable. Please try another gift.";
+    }
+
+    return;
+  }
+
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Opening secure payment...";
+  }
+
+  if (giftPaymentFallback) {
+    giftPaymentFallback.href = paymentLink;
+    giftPaymentFallback.hidden = false;
   }
 
   if (!isLocalPreview()) {
@@ -1468,12 +1574,7 @@ async function handleGiftNoteSubmit(event) {
   giftNoteForm.hidden = true;
   giftNoteSuccess.hidden = false;
 
-  if (paymentLink && !isPlaceholderPaymentLink(paymentLink)) {
-    window.location.assign(paymentLink);
-  } else if (giftNoteFeedback) {
-    giftNoteFeedback.textContent =
-      "Payment link not added yet. Paste the Stripe link in script.js when it’s ready.";
-  }
+  window.location.assign(paymentLink);
 }
 
 function setupScrollReveals() {
@@ -1776,8 +1877,18 @@ setupFaqAccordion();
 if (!guest) {
   renderGiftList();
   resetGiftFromQuery();
-  loadRemoteGiftStatuses();
+  refreshGiftStatusesAfterNavigation();
 }
+
+window.addEventListener("pageshow", () => {
+  refreshGiftStatusesAfterNavigation();
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    refreshGiftStatusesAfterNavigation();
+  }
+});
 
 if (!guest && giftGrid) {
   giftGrid.addEventListener("click", (event) => {

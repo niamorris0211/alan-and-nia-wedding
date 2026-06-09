@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=20260521g" />
+    <link rel="stylesheet" href="style.css?v=20260609h" />
   </head>
   <body class="gift-thank-you-page">
     <main class="hero-section" id="home">
@@ -56,7 +56,12 @@
               Stripe will send your payment confirmation separately.
             </p>
             <div class="hero-actions">
-              <a class="button button-primary" href="gifts.html">Back to gift list</a>
+              <a
+                class="button button-primary"
+                id="gift-list-return"
+                href="gifts.html?refresh=payment"
+                >Back to gift list</a
+              >
               <a class="button button-secondary" href="/">Back to the website</a>
             </div>
           </div>
@@ -115,6 +120,7 @@
       const characterImage = document.getElementById(
         "gift-thank-you-character-image"
       );
+      const giftListReturn = document.getElementById("gift-list-return");
 
       if (note && message) {
         note.textContent = message;
@@ -124,6 +130,10 @@
         characterImage.src = characterDetails.src;
         characterImage.alt = characterDetails.alt;
         character.hidden = false;
+      }
+
+      if (giftListReturn) {
+        giftListReturn.href = `gifts.html?refresh=${Date.now()}`;
       }
     </script>
   </body>
