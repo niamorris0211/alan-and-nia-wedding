@@ -1,4 +1,4 @@
-const { sendNotificationEmail } = require("../lib/email-notifications");
+const DEFAULT_FORMSPREE_ENDPOINT = "https://formspree.io/f/xwvydezz";
 
 function setCorsHeaders(response) {
   response.setHeader("Access-Control-Allow-Origin", "*");
@@ -190,6 +190,8 @@ async function saveRsvpToSupabase(payload) {
 }
 
 async function sendRsvpNotification(payload) {
+  const endpoint =
+    process.env.RSVP_FORMSPREE_ENDPOINT || DEFAULT_FORMSPREE_ENDPOINT;
   const subject = `${
     payload.invite_type === "lidl_shared_evening"
       ? "Lidl Evening RSVP"
@@ -198,12 +200,26 @@ async function sendRsvpNotification(payload) {
         : "Wedding RSVP"
   } from ${payload.household_name}`;
 
-  return sendNotificationEmail({
-    subject,
-    text: buildRsvpEmailMessage(payload),
-    idempotencyKey: `rsvp/${payload.guest_slug}/${payload.submitted_at}`,
-    recipient: process.env.RSVP_NOTIFICATION_EMAIL_TO,
+  const formData = new FormData();
+
+  formData.append("_subject", subject);
+  formData.append("RSVP", buildRsvpEmailMessage(payload));
+
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, Array.isArray(value) ? value.join(", ") : value || "");
   });
+
+  const formspreeResponse = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!formspreeResponse.ok) {
+    throw new Error("Formspree RSVP submission was not accepted.");
+  }
 }
 
 module.exports = async function handler(request, response) {
@@ -227,20 +243,20 @@ module.exports = async function handler(request, response) {
       });
     }
 
-    const storageResult = await saveRsvpToSupabase(payload);
+    await sendRsvpNotification(payload);
+    const storageResult = await saveRsvpToSupabase(payload).catch((error) => ({
+      stored: false,
+      error: error.message,
+    }));
 
     if (!storageResult.stored) {
       console.error("RSVP storage failed.", storageResult.error);
-      return sendJson(response, 502, {
-        error: "RSVP could not be stored",
-      });
     }
-
-    await sendRsvpNotification(payload);
 
     return sendJson(response, 200, {
       success: true,
-      stored: true,
+      stored: storageResult.stored,
+      storageError: storageResult.error,
       notificationAccepted: true,
     });
   } catch (error) {

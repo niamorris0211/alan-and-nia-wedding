@@ -1,4 +1,4 @@
-const { sendNotificationEmail } = require("../../lib/email-notifications");
+const DEFAULT_FORMSPREE_ENDPOINT = "https://formspree.io/f/xwvydezz";
 
 function jsonResponse(statusCode, body) {
   return {
@@ -164,6 +164,38 @@ async function saveRsvp(payload) {
   }
 }
 
+async function sendRsvpNotification(payload) {
+  const endpoint =
+    process.env.RSVP_FORMSPREE_ENDPOINT || DEFAULT_FORMSPREE_ENDPOINT;
+  const subject = `${
+    payload.invite_type === "lidl_shared_evening"
+      ? "Lidl Evening RSVP"
+      : payload.invite_type === "evening"
+        ? "Evening RSVP"
+        : "Wedding RSVP"
+  } from ${payload.household_name}`;
+  const formData = new FormData();
+
+  formData.append("_subject", subject);
+  formData.append("RSVP", buildRsvpEmailMessage(payload));
+
+  Object.entries(payload).forEach(([key, value]) => {
+    formData.append(key, Array.isArray(value) ? value.join(", ") : value || "");
+  });
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error("Formspree RSVP submission was not accepted.");
+  }
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") {
     return jsonResponse(204, {});
@@ -182,26 +214,23 @@ exports.handler = async (event) => {
       });
     }
 
-    await saveRsvp(payload);
+    await sendRsvpNotification(payload);
 
-    const subject = `${
-      payload.invite_type === "lidl_shared_evening"
-        ? "Lidl Evening RSVP"
-        : payload.invite_type === "evening"
-          ? "Evening RSVP"
-          : "Wedding RSVP"
-    } from ${payload.household_name}`;
+    let stored = true;
+    let storageError = "";
 
-    await sendNotificationEmail({
-      subject,
-      text: buildRsvpEmailMessage(payload),
-      idempotencyKey: `rsvp/${payload.guest_slug}/${payload.submitted_at}`,
-      recipient: process.env.RSVP_NOTIFICATION_EMAIL_TO,
-    });
+    try {
+      await saveRsvp(payload);
+    } catch (error) {
+      stored = false;
+      storageError = error.message;
+      console.error("RSVP storage failed.", storageError);
+    }
 
     return jsonResponse(200, {
       success: true,
-      stored: true,
+      stored,
+      storageError,
       notificationAccepted: true,
     });
   } catch (error) {

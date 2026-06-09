@@ -1,9 +1,17 @@
 # Email Notification Setup
 
-RSVP and gift notifications are sent server-side through Resend. Formspree and
-FormSubmit are no longer used.
+RSVP notifications are sent through the existing Formspree form. Gift
+notifications are sent server-side through Resend.
 
-## 1. Verify a sending domain
+## RSVP
+
+The active Formspree endpoint is configured in `rsvp-config.js`. The server
+fallback uses the same endpoint by default, or `RSVP_FORMSPREE_ENDPOINT` when
+that environment variable is set.
+
+## Gift notifications
+
+### 1. Verify a sending domain
 
 1. Create or sign in to a Resend account.
 2. Add a sending subdomain such as `notifications.alanandnia.co.uk`.
@@ -13,12 +21,12 @@ FormSubmit are no longer used.
 Using a sending subdomain keeps these transactional emails separate from other
 mail sent from `alanandnia.co.uk`.
 
-## 2. Create a Resend API key
+### 2. Create a Resend API key
 
 Create an API key in Resend and keep it private. It belongs in deployment
 environment variables, never in `rsvp-config.js` or committed source code.
 
-## 3. Add Vercel environment variables
+### 3. Add Vercel environment variables
 
 Add these to the Vercel project for Production and Preview:
 
@@ -46,10 +54,10 @@ STRIPE_WEBHOOK_SECRET=...
 Redeploy after adding or changing environment variables. Vercel only applies
 environment-variable changes to new deployments.
 
-## 4. Production behavior
+### 4. Production behavior
 
-- RSVP success requires both a successful Supabase upsert and acceptance by
-  Resend.
+- RSVP success requires acceptance by Formspree. Supabase storage is attempted
+  separately and cannot prevent the RSVP email from being sent.
 - Gift selections collected before Stripe are emailed through the first-party
   `/api/submit-gift-note` endpoint.
 - Confirmed gift payments are emailed by the signed Stripe webhook.
@@ -57,7 +65,7 @@ environment-variable changes to new deployments.
 - If a gift email cannot be accepted, the webhook returns an error so Stripe
   retries it instead of silently treating the notification as complete.
 
-## 5. Verify
+### 5. Verify
 
 1. Submit a test RSVP and confirm it appears in Supabase and in the Resend email
    log.

@@ -331,6 +331,10 @@ function getRsvpEndpoint() {
   );
 }
 
+function getFormspreeEndpoint() {
+  return window.RSVP_CONFIG?.formspreeEndpoint?.trim() || "";
+}
+
 function getApiOrigin() {
   try {
     return new URL(getRsvpEndpoint()).origin;
@@ -1450,14 +1454,10 @@ async function handleGiftNoteSubmit(event) {
     try {
       await submitGiftNote(payload);
     } catch (error) {
-      console.error("Gift note notification failed.", error);
-
-      if (giftNoteFeedback) {
-        giftNoteFeedback.textContent =
-          "We could not prepare the secure payment just now. Please try again.";
-      }
-
-      return;
+      console.warn(
+        "Gift selection notification failed; continuing to Stripe.",
+        error
+      );
     }
   }
 
@@ -1690,6 +1690,34 @@ function getRsvpEmailSubject(payload) {
 }
 
 async function submitRsvp(payload) {
+  const formspreeEndpoint = getFormspreeEndpoint();
+
+  if (formspreeEndpoint) {
+    const formData = new FormData();
+
+    formData.append("_subject", getRsvpEmailSubject(payload));
+    formData.append("RSVP", buildRsvpEmailMessage(payload));
+
+    Object.entries(payload).forEach(([key, value]) => {
+      formData.append(
+        key,
+        Array.isArray(value) ? value.join(", ") : value || ""
+      );
+    });
+
+    const formspreeResponse = await fetch(formspreeEndpoint, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      body: formData,
+    });
+
+    if (formspreeResponse.ok) {
+      return;
+    }
+  }
+
   const apiResponse = await fetch(getRsvpEndpoint(), {
     method: "POST",
     headers: {

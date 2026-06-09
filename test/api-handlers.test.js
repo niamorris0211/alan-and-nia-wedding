@@ -2,6 +2,7 @@ const assert = require("node:assert/strict");
 const crypto = require("node:crypto");
 const test = require("node:test");
 
+const giftStatus = require("../api/gift-status");
 const submitRsvp = require("../api/submit-rsvp");
 const stripeGiftWebhook = require("../api/stripe-gift-webhook");
 
@@ -33,32 +34,27 @@ function restoreEnvironment(values) {
   });
 }
 
-test("RSVP endpoint stores the response and sends a notification", async () => {
+test("RSVP endpoint sends Formspree email and stores the response", async () => {
   const originalFetch = global.fetch;
   const environment = preserveEnvironment([
     "SUPABASE_URL",
     "SUPABASE_SERVICE_ROLE_KEY",
-    "RESEND_API_KEY",
-    "NOTIFICATION_EMAIL_FROM",
-    "NOTIFICATION_EMAIL_TO",
+    "RSVP_FORMSPREE_ENDPOINT",
   ]);
   const requests = [];
 
   process.env.SUPABASE_URL = "https://project.supabase.co";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role";
-  process.env.RESEND_API_KEY = "re_test";
-  process.env.NOTIFICATION_EMAIL_FROM =
-    "Nia & Alan <wedding@notifications.alanandnia.co.uk>";
-  process.env.NOTIFICATION_EMAIL_TO = "couple@example.com";
+  process.env.RSVP_FORMSPREE_ENDPOINT = "https://formspree.io/f/test";
 
   global.fetch = async (url, options) => {
     requests.push({ url, options });
 
-    if (url.startsWith(process.env.SUPABASE_URL)) {
-      return new Response("", { status: 201 });
+    if (url === process.env.RSVP_FORMSPREE_ENDPOINT) {
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
     }
 
-    return new Response(JSON.stringify({ id: "email_rsvp" }), { status: 200 });
+    return new Response("", { status: 201 });
   };
 
   try {
@@ -80,12 +76,59 @@ test("RSVP endpoint stores the response and sends a notification", async () => {
 
     assert.equal(response.statusCode, 200);
     assert.equal(requests.length, 2);
-    assert.match(requests[0].url, /supabase\.co\/rest\/v1\/rsvps/);
-    assert.equal(requests[1].url, "https://api.resend.com/emails");
+    assert.equal(requests[0].url, process.env.RSVP_FORMSPREE_ENDPOINT);
     assert.equal(
-      requests[1].options.headers["Idempotency-Key"],
-      "rsvp/test-household/2026-06-09T12:00:00.000Z"
+      requests[0].options.body.get("_subject"),
+      "Wedding RSVP from Test Household"
     );
+    assert.match(requests[1].url, /supabase\.co\/rest\/v1\/rsvps/);
+  } finally {
+    global.fetch = originalFetch;
+    restoreEnvironment(environment);
+  }
+});
+
+test("gift status adds multiple contributions for the same gift", async () => {
+  const originalFetch = global.fetch;
+  const environment = preserveEnvironment([
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+  ]);
+
+  process.env.SUPABASE_URL = "https://project.supabase.co";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = "service-role";
+  global.fetch = async () =>
+    new Response(
+      JSON.stringify([
+        {
+          gift_id: "staffa-adventure",
+          gift_action: "contribution",
+          amount_total: 2500,
+          currency: "gbp",
+        },
+        {
+          gift_id: "staffa-adventure",
+          gift_action: "contribution",
+          amount_total: 1500,
+          currency: "gbp",
+        },
+      ]),
+      { status: 200 }
+    );
+
+  try {
+    const response = createResponse();
+
+    await giftStatus({ method: "GET" }, response);
+
+    assert.equal(response.statusCode, 200);
+    assert.deepEqual(JSON.parse(response.body).gifts["staffa-adventure"], {
+      totalPaidPence: 4000,
+      paymentCount: 2,
+      currency: "gbp",
+      fullGiftCount: 0,
+      contributionCount: 2,
+    });
   } finally {
     global.fetch = originalFetch;
     restoreEnvironment(environment);
