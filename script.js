@@ -74,6 +74,14 @@ const GIFT_STATUS_ENDPOINT =
   "https://alan-and-nia-wedding.vercel.app/api/gift-status";
 const RSVP_API_ENDPOINT =
   "https://alan-and-nia-wedding.vercel.app/api/submit-rsvp";
+const GIFT_TEST_BASELINE_PENCE = {
+  "test-biscuit": 30,
+  "whisky-research": 100,
+  "staffa-adventure": 100,
+  "loch-lomond-boat-trip": 30,
+  "wildlife-sea-safari": 100,
+  "honeymoon-pot": 100,
+};
 let remoteGiftStatuses = {};
 const PAYMENT_LINKS = {
   testOnePenny: "https://buy.stripe.com/aFa9AU4voc5U7TB9HEfrW00",
@@ -934,8 +942,13 @@ function getRemoteGiftStatus(gift) {
 
 function getRemoteGiftPaidPence(gift) {
   const remoteStatus = getRemoteGiftStatus(gift);
+  const recordedTotal = Math.max(
+    0,
+    Number(remoteStatus?.totalPaidPence) || 0
+  );
+  const testBaseline = GIFT_TEST_BASELINE_PENCE[gift.id] || 0;
 
-  return Math.max(0, Number(remoteStatus?.totalPaidPence) || 0);
+  return Math.max(0, recordedTotal - testBaseline);
 }
 
 function getGiftStatus(gift) {
@@ -949,8 +962,11 @@ function getGiftStatus(gift) {
     return "Part-funded";
   }
 
-  const savedStatuses = getSavedGiftStatuses();
+  if (!isLocalPreview()) {
+    return gift.status;
+  }
 
+  const savedStatuses = getSavedGiftStatuses();
   return savedStatuses[gift.id] || gift.status;
 }
 
