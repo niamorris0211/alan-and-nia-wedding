@@ -77,7 +77,6 @@ const GIFT_STATUS_ENDPOINT =
   "https://alan-and-nia-wedding.vercel.app/api/gift-status";
 const DEFAULT_API_ORIGIN = "https://alan-and-nia-wedding.vercel.app";
 const GIFT_TEST_BASELINE_PENCE = {
-  "test-biscuit": 30,
   "whisky-research": 200,
   "staffa-adventure": 300,
   "loch-lomond-boat-trip": 230,
@@ -89,7 +88,6 @@ let giftStatusRefreshTimers = [];
 let giftStatusesLoaded = false;
 let giftStatusLoadFailed = false;
 const PAYMENT_LINKS = {
-  testOnePenny: "https://buy.stripe.com/aFa9AU4voc5U7TB9HEfrW00",
   whisky: "https://buy.stripe.com/00w3cw4vob1Q3DlaLIfrW03",
   whiskyContribution: "https://buy.stripe.com/fZudRa4vo5Hwgq74nkfrW07",
   staffa: "https://buy.stripe.com/9B68wQge62vk2zhf1YfrW01",
@@ -101,21 +99,6 @@ const PAYMENT_LINKS = {
   flexibleContribution: "https://buy.stripe.com/4gM6oIfa21rg5Lt3jgfrW05",
 };
 const HONEYMOON_GIFTS = [
-  {
-    id: "test-biscuit",
-    fixedPaymentLinkKey: "testOnePenny",
-    fullGiftAmount: "£0.01",
-    targetAmountPence: 1,
-    allowFlexibleContribution: false,
-    title: "Emergency Biscuit Fund",
-    priceLabel: "£0.01",
-    description:
-      "In case wedding planning gets too much and we require immediate emergency biscuit intervention.",
-    status: "Available",
-    imagePlaceholder: "TEST ITEM",
-    isTestItem: true,
-    badgeLabel: "Testing only",
-  },
   {
     id: "whisky-research",
     fixedPaymentLinkKey: "whisky",

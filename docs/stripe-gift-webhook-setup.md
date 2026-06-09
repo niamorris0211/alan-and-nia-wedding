@@ -61,7 +61,6 @@ Each Payment Link needs metadata so the webhook knows which gift to update.
 
 | Payment link | `gift_id` | `gift_action` |
 | --- | --- | --- |
-| Test biscuit | `test-biscuit` | `full` |
 | Whisky full gift | `whisky-research` | `full` |
 | Whisky contribution | `whisky-research` | `contribution` |
 | Staffa full gift | `staffa-adventure` | `full` |
