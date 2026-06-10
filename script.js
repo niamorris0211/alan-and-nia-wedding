@@ -87,13 +87,13 @@ let giftStatusRefreshTimers = [];
 let giftStatusesLoaded = false;
 let giftStatusLoadFailed = false;
 const PAYMENT_LINKS = {
-  whisky: "https://buy.stripe.com/00w3cw4vob1Q3DlaLIfrW03",
+  whisky: "https://buy.stripe.com/28E28s1jc8TI5Lt8DAfrW0e",
   whiskyContribution: "https://buy.stripe.com/fZudRa4vo5Hwgq74nkfrW07",
-  staffa: "https://buy.stripe.com/9B68wQge62vk2zhf1YfrW01",
+  staffa: "https://buy.stripe.com/9B68wQ6Dw0ncc9RdXUfrW0c",
   staffaContribution: "https://buy.stripe.com/8x200k7HA6LAehZf1YfrW08",
-  lochLomond: "https://buy.stripe.com/6oU3cw8LEgmaddV3jgfrW06",
+  lochLomond: "https://buy.stripe.com/7sY6oIfa20nc0r99HEfrW0b",
   lochLomondContribution: "https://buy.stripe.com/eVq5kE0f8b1Q8XFf1YfrW09",
-  safari: "https://buy.stripe.com/5kQfZi4voee23Dlf1YfrW02",
+  safari: "https://buy.stripe.com/14AeVe4vo5Hw5Lt1b8frW0d",
   safariContribution: "https://buy.stripe.com/4gMcN6d1U8TI5Lt3jgfrW0a",
   flexibleContribution: "https://buy.stripe.com/4gM6oIfa21rg5Lt3jgfrW05",
 };
