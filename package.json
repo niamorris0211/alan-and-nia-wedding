@@ -3,8 +3,17 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "python3 -m http.server 8000",
-    "start": "python3 -m http.server 8000",
+    "dev": "node local-photo-server.js",
+    "dev:phone": "PHOTO_SERVER_HOST=0.0.0.0 node local-photo-server.js",
+    "start": "node local-photo-server.js",
     "test": "node --test"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.108.1",
+    "archiver": "^8.0.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "ws": "^8.21.0"
   }
 }

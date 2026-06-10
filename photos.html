@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Share Your Photos | Nia &amp; Alan</title>
+    <meta
+      name="description"
+      content="Share your wedding photos and videos with Nia and Alan."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css?v=photos-cloud-1" />
+  </head>
+  <body class="photo-page">
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="/">Nia &amp; Alan</a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="/">Wedding Site</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="photo-page-main">
+      <section class="photo-upload-section">
+        <div class="flower hero-flower-left" aria-hidden="true"></div>
+        <div class="flower hero-flower-right" aria-hidden="true"></div>
+        <div class="container photo-page-container">
+          <div class="photo-page-heading">
+            <p class="eyebrow">Nia &amp; Alan</p>
+            <h1>Share your photos</h1>
+            <p>Help us relive the day through your eyes.</p>
+          </div>
+
+          <div class="photo-upload-card">
+            <form id="photo-upload-form" class="photo-upload-form">
+              <label class="rsvp-label" for="photo-uploader-name">
+                Your name
+              </label>
+              <input
+                id="photo-uploader-name"
+                name="uploaderName"
+                type="text"
+                autocomplete="name"
+                maxlength="120"
+                required
+                placeholder="So we know who captured the moment"
+              />
+
+              <label class="photo-file-picker" for="photo-files">
+                <strong>Choose photos or videos</strong>
+                <span id="photo-file-summary">
+                  Select up to 100 files from your phone or computer
+                </span>
+              </label>
+              <input
+                id="photo-files"
+                name="photos"
+                type="file"
+                accept="image/*,video/*"
+                multiple
+              />
+
+              <button class="button button-primary" type="submit">
+                Upload photos
+              </button>
+              <p
+                class="photo-form-feedback"
+                id="photo-form-feedback"
+                aria-live="polite"
+              ></p>
+            </form>
+
+            <div
+              class="photo-upload-success"
+              id="photo-upload-success"
+              hidden
+              aria-live="polite"
+            >
+              <div class="rsvp-success-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" role="presentation" focusable="false">
+                  <circle cx="24" cy="24" r="23"></circle>
+                  <path d="M16 24.5 21.5 30 33 18.5"></path>
+                </svg>
+              </div>
+              <h2>Thank you — your photos have been uploaded 🤍</h2>
+              <button
+                class="button button-secondary"
+                id="photo-upload-more"
+                type="button"
+              >
+                Upload more
+              </button>
+            </div>
+          </div>
+
+          <p class="photo-local-note">
+            Your uploads are stored privately for Nia and Alan.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/photos.js?v=photos-cloud-1"></script>
+  </body>
+</html>

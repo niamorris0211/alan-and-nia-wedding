@@ -3084,3 +3084,241 @@ body.modal-open {
     transform: none;
   }
 }
+
+.photo-page-main {
+  min-height: calc(100vh - 78px);
+}
+
+.photo-upload-section {
+  position: relative;
+  min-height: calc(100vh - 78px);
+  display: grid;
+  align-items: center;
+  overflow: hidden;
+  padding: clamp(3rem, 7vw, 6rem) 0;
+}
+
+.photo-page-container,
+.photo-admin-container {
+  width: min(calc(100% - 2rem), 880px);
+  margin: 0 auto;
+}
+
+.photo-page-heading {
+  max-width: 680px;
+  margin: 0 auto 1.5rem;
+  text-align: center;
+}
+
+.photo-page-heading h1,
+.photo-admin-page h1 {
+  margin: 0.15rem 0 0.6rem;
+  font-size: clamp(3rem, 10vw, 5.4rem);
+  line-height: 0.95;
+}
+
+.photo-page-heading > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: clamp(1rem, 3vw, 1.2rem);
+}
+
+.photo-upload-card {
+  max-width: 650px;
+  margin: 0 auto;
+  padding: clamp(1.2rem, 4vw, 2rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(160deg, rgba(255, 253, 249, 0.98), rgba(239, 245, 236, 0.9));
+  box-shadow: var(--shadow);
+}
+
+.photo-upload-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.photo-upload-form input[type="text"] {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(77, 102, 80, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.9);
+  color: var(--text);
+}
+
+.photo-upload-form input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.photo-file-picker {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 1.5rem 1rem;
+  border: 2px dashed rgba(77, 102, 80, 0.24);
+  border-radius: var(--radius-md);
+  background: rgba(255, 253, 249, 0.66);
+  color: var(--moss);
+  text-align: center;
+  cursor: pointer;
+}
+
+.photo-file-picker strong {
+  font-size: 1.05rem;
+}
+
+.photo-file-picker span,
+.rsvp-label span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.photo-file-picker:hover,
+.photo-file-picker:focus-within {
+  border-color: rgba(77, 102, 80, 0.5);
+  background: rgba(239, 245, 236, 0.9);
+}
+
+.photo-upload-form .button {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+.photo-upload-form .button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.photo-form-feedback {
+  min-height: 1.5rem;
+  margin: 0;
+  color: var(--berry);
+  text-align: center;
+}
+
+.photo-upload-success {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.photo-upload-success[hidden] {
+  display: none;
+}
+
+.photo-upload-success h2 {
+  max-width: 12ch;
+  margin: 0;
+  font-size: clamp(2.2rem, 7vw, 3.3rem);
+  line-height: 1;
+}
+
+.photo-local-note {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.photo-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.photo-admin-actions {
+  display: flex;
+  justify-content: center;
+  margin: 0 0 1.25rem;
+}
+
+.photo-admin-login {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 460px;
+  margin: 0 auto 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.photo-admin-login[hidden],
+#photo-admin-content[hidden] {
+  display: none;
+}
+
+.photo-admin-login input {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border: 1px solid rgba(77, 102, 80, 0.16);
+  border-radius: 18px;
+  background: rgba(255, 253, 249, 0.9);
+  color: var(--text);
+}
+
+.photo-admin-login .button {
+  width: 100%;
+}
+
+.photo-admin-actions [hidden] {
+  display: none;
+}
+
+.photo-admin-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.photo-admin-preview {
+  aspect-ratio: 4 / 3;
+  background: rgba(77, 102, 80, 0.08);
+}
+
+.photo-admin-preview img,
+.photo-admin-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-admin-details {
+  padding: 1rem;
+}
+
+.photo-admin-details h2 {
+  margin: 0 0 0.6rem;
+  overflow-wrap: anywhere;
+  font-size: 1.5rem;
+}
+
+.photo-admin-details p {
+  margin: 0.2rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.photo-download-button {
+  width: 100%;
+  margin-top: 0.8rem;
+}
+
+@media (max-width: 680px) {
+  .photo-admin-grid {
+    grid-template-columns: 1fr;
+  }
+}

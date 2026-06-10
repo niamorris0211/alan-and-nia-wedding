@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Photo Uploads | Nia &amp; Alan</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css?v=photos-cloud-1" />
+  </head>
+  <body class="photo-page photo-admin-page">
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="/">Nia &amp; Alan</a>
+        <nav class="site-nav" aria-label="Photo navigation">
+          <a href="/photos/">Upload Page</a>
+          <a href="/">Wedding Site</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="photo-page-main">
+      <section class="section">
+        <div class="container photo-admin-container">
+          <div class="section-heading">
+            <p class="eyebrow">Private Gallery</p>
+            <h1>Uploaded photos</h1>
+            <p class="section-intro">
+              View and save the photos and videos shared by your guests.
+            </p>
+          </div>
+
+          <form class="photo-admin-login" id="photo-admin-login">
+            <label class="rsvp-label" for="photo-admin-password">
+              Admin password
+            </label>
+            <input
+              id="photo-admin-password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+            <button class="button button-primary" type="submit">
+              Open gallery
+            </button>
+          </form>
+
+          <div id="photo-admin-content" hidden>
+            <div class="photo-admin-actions">
+              <a
+                class="button button-primary"
+                id="photo-download-all"
+                href="/api/photos/download-all"
+                download
+                hidden
+              >
+                Download everything as ZIP
+              </a>
+            </div>
+            <div class="photo-admin-grid" id="photo-admin-grid"></div>
+          </div>
+
+          <p
+            class="photo-form-feedback"
+            id="photo-admin-feedback"
+            aria-live="polite"
+          >
+            Please enter the admin password.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <script src="/photos-admin.js?v=photos-cloud-1"></script>
+  </body>
+</html>
