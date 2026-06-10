@@ -1,7 +1,10 @@
-*
-!api/
-!api/**
-!lib/
-!lib/**
-!package.json
-!package-lock.json
+images/
+graphics/
+docs/
+test/
+uploads/
+node_modules/
+.git/
+.env
+.env.local
+.env.*.local
