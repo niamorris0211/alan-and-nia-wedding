@@ -83,7 +83,9 @@ function renderUploads(photos) {
     const title = document.createElement("h2");
     title.textContent = photo.originalName;
     const uploader = document.createElement("p");
-    uploader.textContent = `Uploaded by: ${photo.uploaderName}`;
+    uploader.textContent = `Uploaded by: ${
+      photo.uploaderName || "Name not provided"
+    }`;
     const date = document.createElement("p");
     date.textContent = formatUploadDate(photo.uploadedAt);
     const type = document.createElement("p");

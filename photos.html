@@ -14,13 +14,14 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=photos-cloud-1" />
+    <link rel="stylesheet" href="/style.css?v=photos-album-11" />
   </head>
   <body class="photo-page">
     <header class="site-header">
       <div class="container nav-wrap">
         <a class="brand" href="/">Nia &amp; Alan</a>
         <nav class="site-nav" aria-label="Primary navigation">
+          <a href="/photos-gallery">Shared Gallery</a>
           <a href="/">Wedding Site</a>
         </nav>
       </div>
@@ -31,16 +32,63 @@
         <div class="flower hero-flower-left" aria-hidden="true"></div>
         <div class="flower hero-flower-right" aria-hidden="true"></div>
         <div class="container photo-page-container">
-          <div class="photo-page-heading">
-            <p class="eyebrow">Nia &amp; Alan</p>
-            <h1>Share your photos</h1>
-            <p>Help us relive the day through your eyes.</p>
+          <div class="photo-upload-hero">
+            <div class="photo-page-heading">
+              <p class="eyebrow">The shared wedding album</p>
+              <h1>Share the moments we might have missed</h1>
+              <p class="photo-hero-intro">
+                From happy tears to blurry dancefloor masterpieces, add your
+                photos and videos to our album for everyone to enjoy.
+              </p>
+              <div class="photo-hero-actions">
+                <a class="button button-primary" href="#photo-upload-card">
+                  Add your memories
+                </a>
+                <a class="photo-gallery-text-link" href="/photos-gallery">
+                  View the shared gallery <span aria-hidden="true">→</span>
+                </a>
+              </div>
+              <div class="photo-hero-reassurance" aria-label="Upload details">
+                <span>No app</span>
+                <span>No login</span>
+                <span>Photos &amp; videos</span>
+              </div>
+            </div>
+
+            <div class="photo-memory-stack" aria-hidden="true">
+              <figure class="photo-memory-card photo-memory-card-one">
+                <img
+                  src="/images/Rob-Tarren-Birtsmorton-Court-2-scaled.jpg"
+                  alt=""
+                />
+              </figure>
+              <figure class="photo-memory-card photo-memory-card-two">
+                <img
+                  src="/images/birtsmorton-court-wedding-photography_0064-750x502.jpg"
+                  alt=""
+                />
+              </figure>
+              <figure class="photo-memory-card photo-memory-card-three">
+                <img src="/images/Emily-Nick-688-1-1024x683.jpg" alt="" />
+              </figure>
+              <div class="photo-memory-note">
+                <span>With love,</span>
+                <strong>Nia &amp; Alan</strong>
+              </div>
+            </div>
           </div>
 
-          <div class="photo-upload-card">
+          <div class="photo-upload-card" id="photo-upload-card">
+            <div class="photo-upload-card-heading">
+              <span class="photo-upload-step">Your<br />turn</span>
+              <div>
+                <h2>Add to our album</h2>
+                <p>Choose as many favourites as you like.</p>
+              </div>
+            </div>
             <form id="photo-upload-form" class="photo-upload-form">
               <label class="rsvp-label" for="photo-uploader-name">
-                Your name
+                Your name <span>(optional)</span>
               </label>
               <input
                 id="photo-uploader-name"
@@ -48,15 +96,21 @@
                 type="text"
                 autocomplete="name"
                 maxlength="120"
-                required
                 placeholder="So we know who captured the moment"
               />
 
               <label class="photo-file-picker" for="photo-files">
+                <span class="photo-picker-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" role="presentation">
+                    <path d="M16 22V7m0 0-5 5m5-5 5 5"></path>
+                    <path d="M8 16H6a3 3 0 0 0-3 3v6a3 3 0 0 0 3 3h20a3 3 0 0 0 3-3v-6a3 3 0 0 0-3-3h-2"></path>
+                  </svg>
+                </span>
                 <strong>Choose photos or videos</strong>
-                <span id="photo-file-summary">
+                <span id="photo-file-summary" aria-live="polite">
                   Select up to 100 files from your phone or computer
                 </span>
+                <small>Videos can be up to 50 MB each</small>
               </label>
               <input
                 id="photo-files"
@@ -65,10 +119,50 @@
                 accept="image/*,video/*"
                 multiple
               />
+              <p class="photo-iphone-note" id="photo-iphone-note" hidden>
+                <strong>Using an iPhone?</strong> After tapping Add, keep the
+                picker open while Apple prepares your selection. Smaller
+                batches are usually quicker.
+              </p>
 
-              <button class="button button-primary" type="submit">
-                Upload photos
+              <button
+                class="button button-primary"
+                id="photo-upload-button"
+                type="submit"
+                disabled
+              >
+                Add to the shared album
               </button>
+              <div
+                class="photo-upload-progress"
+                id="photo-upload-progress"
+                hidden
+                aria-live="polite"
+              >
+                <div class="photo-upload-progress-heading">
+                  <strong id="photo-upload-progress-label">
+                    Preparing upload...
+                  </strong>
+                  <span id="photo-upload-progress-percent">0%</span>
+                </div>
+                <div
+                  class="photo-upload-progress-track"
+                  role="progressbar"
+                  aria-label="Photo upload progress"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  aria-valuenow="0"
+                  id="photo-upload-progress-track"
+                >
+                  <span id="photo-upload-progress-bar"></span>
+                </div>
+              </div>
+              <p class="photo-reassurance">
+                <span aria-hidden="true">♡</span> No app. No login. Just upload.
+              </p>
+              <p class="photo-sharing-note">
+                Please only upload photos you’re happy for other guests to see.
+              </p>
               <p
                 class="photo-form-feedback"
                 id="photo-form-feedback"
@@ -88,24 +182,42 @@
                   <path d="M16 24.5 21.5 30 33 18.5"></path>
                 </svg>
               </div>
-              <h2>Thank you — your photos have been uploaded 🤍</h2>
-              <button
-                class="button button-secondary"
-                id="photo-upload-more"
-                type="button"
-              >
-                Upload more
-              </button>
+              <h2>Thank you — your memories have been added 🤍</h2>
+              <p class="photo-upload-result" id="photo-upload-result"></p>
+              <div class="photo-success-actions">
+                <a class="button button-primary" href="/photos-gallery">
+                  View shared gallery
+                </a>
+                <button
+                  class="button button-secondary"
+                  id="photo-upload-more"
+                  type="button"
+                >
+                  Upload more
+                </button>
+              </div>
             </div>
           </div>
 
-          <p class="photo-local-note">
-            Your uploads are stored privately for Nia and Alan.
-          </p>
+          <p class="photo-local-note">Thank you for sharing the day with us.</p>
         </div>
       </section>
     </main>
 
-    <script src="/photos.js?v=photos-cloud-1"></script>
+    <div
+      class="photo-picker-preparing"
+      id="photo-picker-preparing"
+      role="status"
+      aria-live="polite"
+      hidden
+    >
+      <div class="photo-picker-preparing-card">
+        <span class="photo-picker-spinner" aria-hidden="true"></span>
+        <strong>Preparing your photos…</strong>
+        <p>Large selections can take a few moments. You’re all good.</p>
+      </div>
+    </div>
+
+    <script src="/photos.js?v=photos-album-10"></script>
   </body>
 </html>

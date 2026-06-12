@@ -41,6 +41,7 @@ PHOTO_ADMIN_PASSWORD=choose-a-long-private-password
 Then run `npm run dev` and open:
 
 - Upload: `http://localhost:8000/photos`
+- Shared gallery: `http://localhost:8000/photos-gallery`
 - Admin: `http://localhost:8000/photos-admin`
 
 Localhost uses Supabase by default. To test the old computer-only fallback,
@@ -54,9 +55,10 @@ service role key in browser JavaScript or commit `.env.local`.
 ## Production TODO
 
 1. Add rate limiting and bot protection before sharing the upload URL widely.
-2. Consider malware scanning and file-signature validation.
-3. Decide how long original uploads should be retained.
-4. Review whether 50 MB per video is sufficient.
-5. Add a background ZIP export if one-click bulk downloads are required for a
+2. Add moderation/reporting controls for the public shared gallery.
+3. Consider malware scanning and file-signature validation.
+4. Decide how long original uploads should be retained.
+5. Review whether 50 MB per video is sufficient.
+6. Add a background ZIP export if one-click bulk downloads are required for a
    very large gallery. Individual private downloads already work on phones and
    laptops.

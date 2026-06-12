@@ -8,6 +8,7 @@ const dotenv = require("dotenv");
 const photosUploadInit = require("./api/photos-upload-init");
 const photosUploadComplete = require("./api/photos-upload-complete");
 const photosAdmin = require("./api/photos-admin");
+const photosGallery = require("./api/photos-gallery");
 
 dotenv.config({ path: path.join(__dirname, ".env.local"), quiet: true });
 dotenv.config({ path: path.join(__dirname, ".env"), quiet: true });
@@ -15,7 +16,7 @@ dotenv.config({ path: path.join(__dirname, ".env"), quiet: true });
 const DEFAULT_PORT = 8000;
 const DEFAULT_HOST = "127.0.0.1";
 const MAX_FILES = 100;
-const MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
+const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
 
 function ensureDirectory(directory) {
   fs.mkdirSync(directory, { recursive: true });
@@ -107,6 +108,10 @@ function createApp({
     response.sendFile(path.join(publicRoot, "photos-admin.html"));
   });
 
+  app.get("/photos-gallery", (request, response) => {
+    response.sendFile(path.join(publicRoot, "photos-gallery.html"));
+  });
+
   app.post(
     "/api/photos/upload",
     upload.array("photos", MAX_FILES),
@@ -122,13 +127,6 @@ function createApp({
       const uploaderName = String(request.body.uploaderName || "")
         .trim()
         .slice(0, 120);
-
-      if (!uploaderName) {
-        files.forEach((file) => fs.rmSync(file.path, { force: true }));
-        return response.status(400).json({
-          error: "Please add your name before uploading.",
-        });
-      }
 
       const uploadedAt = new Date().toISOString();
       const newRecords = files.map((file) => ({
@@ -162,6 +160,7 @@ function createApp({
   app.all("/api/photos-upload-init", photosUploadInit);
   app.all("/api/photos-upload-complete", photosUploadComplete);
   app.all("/api/photos-admin", photosAdmin);
+  app.all("/api/photos-gallery", photosGallery);
 
   app.get("/api/photos", (request, response) => {
     const records = readMetadata(metadataPath).map(
@@ -249,7 +248,7 @@ function createApp({
     if (error instanceof multer.MulterError) {
       const message =
         error.code === "LIMIT_FILE_SIZE"
-          ? "One of the files is larger than 100 MB."
+          ? "One of the files is larger than 50 MB."
           : error.code === "LIMIT_FILE_COUNT"
             ? `Please upload no more than ${MAX_FILES} files at once.`
             : "Only photo and video files can be uploaded.";
@@ -279,6 +278,7 @@ if (require.main === module) {
   app.listen(port, host, () => {
     console.log(`Wedding site running at http://localhost:${port}`);
     console.log(`Photo upload: http://localhost:${port}/photos`);
+    console.log(`Photo gallery: http://localhost:${port}/photos-gallery`);
     console.log(`Photo admin:  http://localhost:${port}/photos-admin`);
 
     if (
@@ -296,6 +296,7 @@ if (require.main === module) {
       console.log("\nPhone links on this Wi-Fi:");
       getLocalNetworkUrls(port).forEach((origin) => {
         console.log(`Photo upload: ${origin}/photos`);
+        console.log(`Photo gallery: ${origin}/photos-gallery`);
         console.log(`Photo admin:  ${origin}/photos-admin`);
       });
       console.log("\nOnly use this option on a trusted private network.");
