@@ -941,6 +941,16 @@ function formatGiftMoney(pence) {
   }).format(pounds);
 }
 
+function isNiaAlanGiftView() {
+  const guestParam = new URLSearchParams(window.location.search).get("guest");
+
+  return guestParam?.trim().toLowerCase() === "nia-alan";
+}
+
+function canShowGiftContributionTotals() {
+  return isNiaAlanGiftView() || isGiftPreviewMode();
+}
+
 function getRemoteGiftStatus(gift) {
   return remoteGiftStatuses[gift.id] || null;
 }
@@ -999,12 +1009,20 @@ function getGiftFundingNote(gift) {
       return "This one has been kindly gifted.";
     }
 
+    if (!canShowGiftContributionTotals()) {
+      return "Someone has already contributed to this one.";
+    }
+
     return `${formatGiftMoney(remotePaidPence)} contributed so far - ${formatGiftMoney(
       amountLeft
     )} left.`;
   }
 
   if (remotePaidPence > 0 && gift.id === "honeymoon-pot") {
+    if (!canShowGiftContributionTotals()) {
+      return "Someone has already contributed to the honeymoon pot.";
+    }
+
     return `${formatGiftMoney(remotePaidPence)} has been added to the honeymoon pot so far.`;
   }
 
@@ -1142,6 +1160,7 @@ function getGiftActions(gift) {
   const isPartFunded = status === "part-funded";
   const liveStatusUnavailable = !isGiftPreviewMode() && !giftStatusesLoaded;
   const remainingPence = getGiftRemainingPence(gift);
+  const showContributionTotals = canShowGiftContributionTotals();
 
   if (isGifted) {
     return [];
@@ -1166,11 +1185,11 @@ function getGiftActions(gift) {
       {
         type: "flexible",
         label:
-          remainingPence === null
+          remainingPence === null || !showContributionTotals
             ? "Add another contribution"
             : `Contribute towards ${formatGiftMoney(remainingPence)} left`,
         selectedAmount:
-          remainingPence === null
+          remainingPence === null || !showContributionTotals
             ? `Contribution towards ${gift.title}`
             : `Up to ${formatGiftMoney(remainingPence)} remaining`,
         paymentLinkKey: gift.flexiblePaymentLinkKey,
