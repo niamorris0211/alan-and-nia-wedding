@@ -24,6 +24,7 @@ const GIFT_TARGET_AMOUNTS_PENCE = {
   "staffa-adventure": 9000,
   "loch-lomond-boat-trip": 4000,
   "wildlife-sea-safari": 22200,
+  "oak-tree-balmaha-lunch": 9000,
 };
 
 function getNormalisedGiftAction(payment) {

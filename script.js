@@ -161,13 +161,12 @@ const HONEYMOON_GIFTS = [
   },
   {
     id: "oak-tree-balmaha-lunch",
-    fixedPaymentLinkKey: null,
-    fullGiftAmount: null,
-    targetAmountPence: null,
-    allowFlexibleContribution: true,
-    flexiblePaymentLinkKey: "oakTreeLunch",
+    fixedPaymentLinkKey: "oakTreeLunch",
+    fullGiftAmount: "£90",
+    targetAmountPence: 9000,
+    allowFlexibleContribution: false,
     title: "Lunch at The Oak Tree in Balmaha",
-    priceLabel: "Any amount",
+    priceLabel: "£90",
     description:
       "A cosy Loch Lomond lunch stop in Balmaha, ideally involving good food, a view, and a very slow honeymoon afternoon.",
     status: "Available",

@@ -69,7 +69,7 @@ Each Payment Link needs metadata so the webhook knows which gift to update.
 | Loch Lomond contribution | `loch-lomond-boat-trip` | `contribution` |
 | Wildlife safari full gift | `wildlife-sea-safari` | `full` |
 | Wildlife safari contribution | `wildlife-sea-safari` | `contribution` |
-| Oak Tree Balmaha lunch | `oak-tree-balmaha-lunch` | `contribution` |
+| Oak Tree Balmaha lunch | `oak-tree-balmaha-lunch` | `full` |
 | Honeymoon pot | `honeymoon-pot` | `contribution` |
 
 After that, the public gift list reads:
