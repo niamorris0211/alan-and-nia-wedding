@@ -172,7 +172,7 @@ const HONEYMOON_GIFTS = [
       "A cosy Loch Lomond lunch stop in Balmaha, ideally involving good food, a view, and a very slow honeymoon afternoon.",
     status: "Available",
     imagePlaceholder: "Balmaha lunch",
-    imageUrl: "images/Loch-Lomond-Tours-02-800x360.jpg",
+    imageUrl: "images/generated/oak-tree-balmaha-lunch-card.png",
   },
   {
     id: "honeymoon-pot",
