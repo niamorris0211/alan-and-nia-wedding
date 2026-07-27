@@ -95,6 +95,7 @@ const PAYMENT_LINKS = {
   lochLomondContribution: "https://buy.stripe.com/eVq5kE0f8b1Q8XFf1YfrW09",
   safari: "https://buy.stripe.com/14AeVe4vo5Hw5Lt1b8frW0d",
   safariContribution: "https://buy.stripe.com/4gMcN6d1U8TI5Lt3jgfrW0a",
+  oakTreeLunch: "https://buy.stripe.com/6oU8wQ6Dwfi6b5N7zwfrW0f",
   flexibleContribution: "https://buy.stripe.com/4gM6oIfa21rg5Lt3jgfrW05",
 };
 const HONEYMOON_GIFTS = [
@@ -157,6 +158,21 @@ const HONEYMOON_GIFTS = [
     status: "Available",
     imagePlaceholder: "Sea safari",
     imageUrl: "images/wildlife tour.jpeg",
+  },
+  {
+    id: "oak-tree-balmaha-lunch",
+    fixedPaymentLinkKey: null,
+    fullGiftAmount: null,
+    targetAmountPence: null,
+    allowFlexibleContribution: true,
+    flexiblePaymentLinkKey: "oakTreeLunch",
+    title: "Lunch at The Oak Tree in Balmaha",
+    priceLabel: "Any amount",
+    description:
+      "A cosy Loch Lomond lunch stop in Balmaha, ideally involving good food, a view, and a very slow honeymoon afternoon.",
+    status: "Available",
+    imagePlaceholder: "Balmaha lunch",
+    imageUrl: "images/Loch-Lomond-Tours-02-800x360.jpg",
   },
   {
     id: "honeymoon-pot",
@@ -981,7 +997,7 @@ function getGiftStatus(gift) {
     return remotePaidPence >= gift.targetAmountPence ? "Gifted" : "Part-funded";
   }
 
-  if (remotePaidPence > 0 && gift.id === "honeymoon-pot") {
+  if (remotePaidPence > 0 && !gift.targetAmountPence) {
     return "Part-funded";
   }
 
@@ -1018,12 +1034,16 @@ function getGiftFundingNote(gift) {
     )} left.`;
   }
 
-  if (remotePaidPence > 0 && gift.id === "honeymoon-pot") {
+  if (remotePaidPence > 0 && !gift.targetAmountPence) {
     if (!canShowGiftContributionTotals()) {
-      return "Someone has already contributed to the honeymoon pot.";
+      return gift.id === "honeymoon-pot"
+        ? "Someone has already contributed to the honeymoon pot."
+        : "Someone has already contributed to this one.";
     }
 
-    return `${formatGiftMoney(remotePaidPence)} has been added to the honeymoon pot so far.`;
+    return gift.id === "honeymoon-pot"
+      ? `${formatGiftMoney(remotePaidPence)} has been added to the honeymoon pot so far.`
+      : `${formatGiftMoney(remotePaidPence)} has been contributed so far.`;
   }
 
   if (getGiftStatus(gift).toLowerCase() === "gifted") {
@@ -1166,15 +1186,20 @@ function getGiftActions(gift) {
     return [];
   }
 
-  if (gift.id === "honeymoon-pot") {
+  if (!gift.fixedPaymentLinkKey) {
     return [
       {
         type: "flexible",
         label: isPartFunded
           ? "Add another contribution"
-          : "Contribute to honeymoon pot",
-        selectedAmount: "General honeymoon contribution",
-        paymentLinkKey: "flexibleContribution",
+          : gift.id === "honeymoon-pot"
+            ? "Contribute to honeymoon pot"
+            : "Contribute towards this",
+        selectedAmount:
+          gift.id === "honeymoon-pot"
+            ? "General honeymoon contribution"
+            : `Contribution towards ${gift.title}`,
+        paymentLinkKey: gift.flexiblePaymentLinkKey || "flexibleContribution",
         disabled: liveStatusUnavailable || !gift.allowFlexibleContribution,
       },
     ];

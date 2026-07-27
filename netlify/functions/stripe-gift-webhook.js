@@ -16,6 +16,7 @@ const GIFT_TITLES = {
   "staffa-adventure": "Staffa Adventure",
   "loch-lomond-boat-trip": "Loch Lomond Boat Trip",
   "wildlife-sea-safari": "Wildlife Sea Safari",
+  "oak-tree-balmaha-lunch": "Lunch at The Oak Tree in Balmaha",
   "honeymoon-pot": "Honeymoon Pot",
 };
 
