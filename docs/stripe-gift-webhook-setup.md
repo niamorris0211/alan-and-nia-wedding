@@ -70,6 +70,7 @@ Each Payment Link needs metadata so the webhook knows which gift to update.
 | Wildlife safari full gift | `wildlife-sea-safari` | `full` |
 | Wildlife safari contribution | `wildlife-sea-safari` | `contribution` |
 | Oak Tree Balmaha lunch | `oak-tree-balmaha-lunch` | `full` |
+| Romantic evening out | `romantic-evening-out` | `full` |
 | Honeymoon pot | `honeymoon-pot` | `contribution` |
 
 After that, the public gift list reads:

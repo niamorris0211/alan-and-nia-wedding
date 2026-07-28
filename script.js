@@ -96,6 +96,7 @@ const PAYMENT_LINKS = {
   safari: "https://buy.stripe.com/14AeVe4vo5Hw5Lt1b8frW0d",
   safariContribution: "https://buy.stripe.com/4gMcN6d1U8TI5Lt3jgfrW0a",
   oakTreeLunch: "https://buy.stripe.com/6oU8wQ6Dwfi6b5N7zwfrW0f",
+  romanticEveningOut: "https://buy.stripe.com/14A3cw3rk1rg2zh2fcfrW0g",
   flexibleContribution: "https://buy.stripe.com/4gM6oIfa21rg5Lt3jgfrW05",
 };
 const HONEYMOON_GIFTS = [
@@ -172,6 +173,20 @@ const HONEYMOON_GIFTS = [
     status: "Available",
     imagePlaceholder: "Balmaha lunch",
     imageUrl: "images/generated/oak-tree-balmaha-lunch-card.png",
+  },
+  {
+    id: "romantic-evening-out",
+    fixedPaymentLinkKey: "romanticEveningOut",
+    fullGiftAmount: "£90",
+    targetAmountPence: 9000,
+    allowFlexibleContribution: false,
+    title: "Romantic Evening Out for Food",
+    priceLabel: "£90",
+    description:
+      "Treat us to a properly lovely dinner out, wherever we end up finding the perfect honeymoon table for two.",
+    status: "Available",
+    imagePlaceholder: "Dinner for two",
+    imageUrl: "images/generated/romantic-evening-out-card.png",
   },
   {
     id: "honeymoon-pot",

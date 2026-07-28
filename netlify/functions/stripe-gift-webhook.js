@@ -10,6 +10,7 @@ const GIFT_TARGET_AMOUNTS_PENCE = {
   "loch-lomond-boat-trip": 4000,
   "wildlife-sea-safari": 22200,
   "oak-tree-balmaha-lunch": 9000,
+  "romantic-evening-out": 9000,
 };
 const GIFT_TITLES = {
   "test-biscuit": "Emergency Biscuit Fund",
@@ -18,6 +19,7 @@ const GIFT_TITLES = {
   "loch-lomond-boat-trip": "Loch Lomond Boat Trip",
   "wildlife-sea-safari": "Wildlife Sea Safari",
   "oak-tree-balmaha-lunch": "Lunch at The Oak Tree in Balmaha",
+  "romantic-evening-out": "Romantic Evening Out for Food",
   "honeymoon-pot": "Honeymoon Pot",
 };
 
