@@ -3,6 +3,7 @@ const faqList = document.getElementById("faq-list");
 const guestWelcomeSection = document.getElementById("guest-welcome");
 const guestWelcomeHeading = document.getElementById("guest-welcome-heading");
 const guestWelcomeCopy = document.getElementById("guest-welcome-copy");
+const guestHoneymoonLink = document.getElementById("guest-honeymoon-link");
 const scheduleWeekendOverview = document.getElementById("schedule-weekend-overview");
 const scheduleSection = document.getElementById("schedule");
 const eveningDetailsSection = document.getElementById("evening-details");
@@ -466,6 +467,10 @@ function renderGuestWelcome(guest) {
       const visitLabel = guest.inviteType === "weekend" ? "weekend" : "day";
       guestWelcomeCopy.textContent = `We’re so excited to celebrate with you. Everything you need for the ${visitLabel} is here.`;
     }
+  }
+
+  if (guestHoneymoonLink) {
+    guestHoneymoonLink.hidden = guest.slug !== "nia-alan";
   }
 
   guestWelcomeSection.hidden = false;
