@@ -4,6 +4,8 @@ const guestWelcomeSection = document.getElementById("guest-welcome");
 const guestWelcomeHeading = document.getElementById("guest-welcome-heading");
 const guestWelcomeCopy = document.getElementById("guest-welcome-copy");
 const guestHoneymoonLink = document.getElementById("guest-honeymoon-link");
+const heroHoneymoonLink = document.getElementById("hero-honeymoon-link");
+const navHoneymoonLink = document.getElementById("nav-honeymoon-link");
 const scheduleWeekendOverview = document.getElementById("schedule-weekend-overview");
 const scheduleSection = document.getElementById("schedule");
 const eveningDetailsSection = document.getElementById("evening-details");
@@ -471,6 +473,14 @@ function renderGuestWelcome(guest) {
 
   if (guestHoneymoonLink) {
     guestHoneymoonLink.hidden = guest.slug !== "nia-alan";
+  }
+
+  if (heroHoneymoonLink) {
+    heroHoneymoonLink.hidden = guest.slug !== "nia-alan";
+  }
+
+  if (navHoneymoonLink) {
+    navHoneymoonLink.hidden = guest.slug !== "nia-alan";
   }
 
   guestWelcomeSection.hidden = false;
