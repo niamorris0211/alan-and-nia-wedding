@@ -59,7 +59,7 @@ async function writeComments(client, bucket, comments) {
     COMMENTS_PATH,
     Buffer.from(`${JSON.stringify(comments, null, 2)}\n`, "utf8"),
     {
-      contentType: "application/json; charset=utf-8",
+      contentType: "image/svg+xml",
       upsert: true,
     }
   );
