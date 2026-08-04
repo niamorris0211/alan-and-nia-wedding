@@ -3942,7 +3942,34 @@ body.modal-open {
 
 .photo-download-button {
   width: 100%;
+}
+
+.photo-admin-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
   margin-top: 0.8rem;
+}
+
+.photo-admin-card-actions .button {
+  width: 100%;
+}
+
+.photo-delete-button {
+  border: 1px solid rgba(138, 76, 82, 0.28);
+  background: rgba(249, 232, 232, 0.92);
+  color: #7d3f45;
+}
+
+.photo-delete-button:hover,
+.photo-delete-button:focus-visible {
+  background: #7d3f45;
+  color: white;
+}
+
+.photo-delete-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .photo-gallery-section {

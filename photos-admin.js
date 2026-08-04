@@ -14,6 +14,7 @@ const photoDownloadAll = document.getElementById("photo-download-all");
 const photoAdminLogin = document.getElementById("photo-admin-login");
 const photoAdminContent = document.getElementById("photo-admin-content");
 const photoAdminPassword = document.getElementById("photo-admin-password");
+let activeAdminPassword = "";
 
 function formatUploadDate(uploadedAt) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -97,7 +98,51 @@ function renderUploads(photos) {
       `/api/photos/download/${encodeURIComponent(photo.id)}`;
     download.download = photo.originalName;
     download.textContent = "Download";
-    details.append(title, uploader, date, type, download);
+    const actions = document.createElement("div");
+    actions.className = "photo-admin-card-actions";
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "button photo-delete-button";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete photo";
+    deleteButton.addEventListener("click", async () => {
+      const confirmed = window.confirm(
+        `Permanently delete “${photo.originalName}”? This cannot be undone.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      deleteButton.disabled = true;
+      deleteButton.textContent = "Deleting...";
+      photoAdminFeedback.textContent = "Deleting photo...";
+
+      try {
+        const response = await fetch(`${photoApiOrigin}/api/photos-admin`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Photo-Admin-Password": activeAdminPassword,
+          },
+          body: JSON.stringify({ photoId: photo.id }),
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "The photo could not be deleted.");
+        }
+
+        await loadUploads(activeAdminPassword);
+        photoAdminFeedback.textContent = "Photo deleted permanently.";
+      } catch (error) {
+        photoAdminFeedback.textContent =
+          error.message || "The photo could not be deleted.";
+        deleteButton.disabled = false;
+        deleteButton.textContent = "Delete photo";
+      }
+    });
+    actions.append(download, deleteButton);
+    details.append(title, uploader, date, type, actions);
     card.appendChild(details);
     photoAdminGrid.appendChild(card);
   });
@@ -117,6 +162,7 @@ async function loadUploads(password = "") {
     throw new Error(result.error || "Uploads could not be loaded.");
   }
 
+  activeAdminPassword = password;
   photoAdminLogin.hidden = true;
   photoAdminContent.hidden = false;
   renderUploads(result.photos);
