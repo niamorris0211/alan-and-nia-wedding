@@ -254,6 +254,51 @@ p {
   color: rgba(38, 52, 45, 0.78);
 }
 
+.tebay-stop {
+  display: grid;
+  gap: 14px;
+  margin: 4px 0 20px;
+  padding: 14px;
+  border: 1px solid rgba(182, 122, 82, 0.3);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255, 241, 220, 0.92), rgba(244, 248, 239, 0.84)),
+    #fff7ea;
+}
+
+.tebay-copy .eyebrow {
+  margin: 0 0 4px;
+}
+
+.tebay-copy h3 {
+  margin: 0;
+  color: var(--forest);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.9rem, 8vw, 2.8rem);
+  line-height: 0.98;
+}
+
+.tebay-copy p:last-child {
+  margin: 8px 0 0;
+  color: rgba(38, 52, 45, 0.78);
+}
+
+.tebay-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tebay-photo-grid img {
+  display: block;
+  width: 100%;
+  min-height: 112px;
+  aspect-ratio: 4 / 3;
+  border-radius: 14px;
+  object-fit: cover;
+  box-shadow: 0 10px 24px rgba(35, 65, 54, 0.13);
+}
+
 dl {
   display: grid;
   gap: 10px;
@@ -643,6 +688,20 @@ dd {
     grid-column: span 2;
   }
 
+  .day.tebay-day {
+    grid-column: span 2;
+  }
+
+  .tebay-stop {
+    grid-template-columns: minmax(210px, 0.72fr) minmax(0, 1.28fr);
+    align-items: center;
+    padding: 16px;
+  }
+
+  .tebay-photo-grid img {
+    min-height: 138px;
+  }
+
   .day.feature-day {
     grid-column: span 2;
   }
@@ -743,6 +802,10 @@ dd {
   }
 
   .day.important {
+    grid-column: span 2;
+  }
+
+  .day.tebay-day {
     grid-column: span 2;
   }
 
