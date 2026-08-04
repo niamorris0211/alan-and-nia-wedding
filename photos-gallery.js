@@ -25,6 +25,12 @@ const lightboxDownload = document.getElementById("photo-lightbox-download");
 const lightboxClose = document.getElementById("photo-lightbox-close");
 const lightboxPrevious = document.getElementById("photo-lightbox-previous");
 const lightboxNext = document.getElementById("photo-lightbox-next");
+const commentsCount = document.getElementById("photo-comments-count");
+const commentForm = document.getElementById("photo-comment-form");
+const commentName = document.getElementById("photo-comment-name");
+const commentMessage = document.getElementById("photo-comment-message");
+const commentFeedback = document.getElementById("photo-comment-feedback");
+const commentList = document.getElementById("photo-comment-list");
 const selectToggle = document.getElementById("photo-select-toggle");
 const selectionDownload = document.getElementById(
   "photo-selection-download"
@@ -70,6 +76,7 @@ const saveAssistantNext = document.getElementById("photo-save-assistant-next");
 
 let galleryItems = [];
 let visibleItems = [];
+let commentsByPhoto = {};
 let activeFilter = "all";
 let activeIndex = 0;
 let touchStartX = 0;
@@ -91,6 +98,25 @@ function formatUploadDate(uploadedAt) {
   return new Intl.DateTimeFormat("en-GB", {
     dateStyle: "medium",
   }).format(new Date(uploadedAt));
+}
+
+function formatCommentDate(createdAt) {
+  return new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(createdAt));
+}
+
+function getPhotoComments(photoId) {
+  return commentsByPhoto[photoId] || [];
+}
+
+function getCommentLabel(count) {
+  if (!count) {
+    return "No comments yet";
+  }
+
+  return `${count} ${count === 1 ? "comment" : "comments"}`;
 }
 
 function getFileExtension(item) {
@@ -340,6 +366,15 @@ function renderGallery() {
       card.appendChild(videoBadge);
     }
 
+    const commentCount = getPhotoComments(item.id).length;
+
+    if (commentCount) {
+      const commentBadge = document.createElement("span");
+      commentBadge.className = "photo-comment-badge";
+      commentBadge.textContent = getCommentLabel(commentCount);
+      card.appendChild(commentBadge);
+    }
+
     card.addEventListener("click", () => {
       if (selectionMode) {
         toggleSelectedItem(item.id);
@@ -532,6 +567,44 @@ function updateLightbox() {
   const hasMultiple = visibleItems.length > 1;
   lightboxPrevious.hidden = !hasMultiple;
   lightboxNext.hidden = !hasMultiple;
+  if (commentFeedback) {
+    commentFeedback.textContent = "";
+  }
+  renderComments(item);
+}
+
+function renderComments(item) {
+  if (!commentList || !commentsCount) {
+    return;
+  }
+
+  const comments = getPhotoComments(item.id);
+  commentsCount.textContent = String(comments.length);
+  commentList.replaceChildren();
+
+  if (!comments.length) {
+    const empty = document.createElement("p");
+    empty.className = "photo-comment-empty";
+    empty.textContent = "No comments yet. Be the first.";
+    commentList.appendChild(empty);
+    return;
+  }
+
+  comments.forEach((comment) => {
+    const article = document.createElement("article");
+    article.className = "photo-comment";
+    const meta = document.createElement("p");
+    meta.className = "photo-comment-meta";
+    const name = document.createElement("strong");
+    name.textContent = comment.name;
+    const date = document.createElement("span");
+    date.textContent = formatCommentDate(comment.createdAt);
+    meta.append(name, date);
+    const message = document.createElement("p");
+    message.textContent = comment.message;
+    article.append(meta, message);
+    commentList.appendChild(article);
+  });
 }
 
 function moveLightbox(direction) {
@@ -552,21 +625,86 @@ function closeLightbox() {
 
 async function loadGallery() {
   try {
-    const response = await fetch(`${photoApiOrigin}/api/photos-gallery`, {
+    const galleryResponse = await fetch(`${photoApiOrigin}/api/photos-gallery`, {
       cache: "no-store",
     });
-    const result = await response.json();
+    const result = await galleryResponse.json();
 
-    if (!response.ok) {
+    if (!galleryResponse.ok) {
       throw new Error(result.error);
     }
 
     galleryItems = result.items || [];
+    try {
+      const commentsResponse = await fetch(
+        `${photoApiOrigin}/api/photo-comments`,
+        { cache: "no-store" }
+      );
+      const commentsResult = await commentsResponse.json();
+
+      if (!commentsResponse.ok) {
+        throw new Error(commentsResult.error);
+      }
+
+      commentsByPhoto = commentsResult.commentsByPhoto || {};
+    } catch (error) {
+      console.warn("Photo comments failed to load.", error);
+      commentsByPhoto = {};
+    }
+
     renderGallery();
   } catch (error) {
     console.error("Shared gallery failed to load.", error);
     galleryStatus.textContent =
       "The gallery is having a little wobble — please try again.";
+  }
+}
+
+async function postComment(event) {
+  event.preventDefault();
+
+  const item = visibleItems[activeIndex];
+
+  if (!item) {
+    return;
+  }
+
+  const submitButton = commentForm.querySelector("button[type='submit']");
+  const originalText = submitButton.textContent;
+  submitButton.disabled = true;
+  submitButton.textContent = "Posting...";
+  commentFeedback.textContent = "Posting your comment...";
+
+  try {
+    const response = await fetch(`${photoApiOrigin}/api/photo-comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        photoId: item.id,
+        name: commentName.value,
+        message: commentMessage.value,
+      }),
+    });
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || "Your comment could not be posted.");
+    }
+
+    commentsByPhoto[item.id] = [
+      result.comment,
+      ...getPhotoComments(item.id),
+    ];
+    commentMessage.value = "";
+    commentFeedback.textContent = "Comment posted.";
+    renderComments(item);
+    renderGallery();
+  } catch (error) {
+    commentFeedback.textContent =
+      error.message || "Your comment could not be posted.";
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = originalText;
   }
 }
 
@@ -581,6 +719,7 @@ filterButtons.forEach((button) => {
 });
 
 gallerySort?.addEventListener("change", renderGallery);
+commentForm?.addEventListener("submit", postComment);
 selectToggle?.addEventListener("click", () => {
   setSelectionMode(!selectionMode);
 });

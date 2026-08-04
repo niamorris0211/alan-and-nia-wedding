@@ -9,6 +9,7 @@ const photosUploadInit = require("./api/photos-upload-init");
 const photosUploadComplete = require("./api/photos-upload-complete");
 const photosAdmin = require("./api/photos-admin");
 const photosGallery = require("./api/photos-gallery");
+const photoComments = require("./api/photo-comments");
 
 dotenv.config({ path: path.join(__dirname, ".env.local"), quiet: true });
 dotenv.config({ path: path.join(__dirname, ".env"), quiet: true });
@@ -168,6 +169,7 @@ function createApp({
   app.all("/api/photos-upload-complete", photosUploadComplete);
   app.all("/api/photos-admin", photosAdmin);
   app.all("/api/photos-gallery", photosGallery);
+  app.all("/api/photo-comments", photoComments);
 
   app.get("/api/photos", (request, response) => {
     const records = readMetadata(metadataPath).map(

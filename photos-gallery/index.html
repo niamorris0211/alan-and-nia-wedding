@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Inter:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/style.css?v=photos-album-17" />
+    <link rel="stylesheet" href="/style.css?v=photo-comments-1" />
   </head>
   <body class="photo-page photo-gallery-page">
     <header class="site-header">
@@ -154,6 +154,44 @@
         >
           Save photo to phone
         </button>
+        <section class="photo-comments" aria-labelledby="photo-comments-title">
+          <div class="photo-comments-heading">
+            <h2 id="photo-comments-title">Comments</h2>
+            <span id="photo-comments-count">0</span>
+          </div>
+          <form class="photo-comment-form" id="photo-comment-form">
+            <label>
+              <span>Your name</span>
+              <input
+                id="photo-comment-name"
+                name="name"
+                type="text"
+                autocomplete="name"
+                maxlength="80"
+                required
+              />
+            </label>
+            <label>
+              <span>Comment</span>
+              <textarea
+                id="photo-comment-message"
+                name="message"
+                maxlength="500"
+                rows="3"
+                required
+              ></textarea>
+            </label>
+            <button class="button button-primary" type="submit">
+              Post comment
+            </button>
+          </form>
+          <p
+            class="photo-comment-feedback"
+            id="photo-comment-feedback"
+            aria-live="polite"
+          ></p>
+          <div class="photo-comment-list" id="photo-comment-list"></div>
+        </section>
       </div>
     </div>
 
@@ -254,6 +292,6 @@
       </div>
     </div>
 
-    <script src="/photos-gallery.js?v=photos-latest-first-1"></script>
+    <script src="/photos-gallery.js?v=photo-comments-1"></script>
   </body>
 </html>
