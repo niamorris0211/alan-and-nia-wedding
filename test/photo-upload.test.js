@@ -85,6 +85,38 @@ test("photo upload stores metadata and provides a local preview", async () => {
   });
 });
 
+test("photo upload list shows newest uploads first", async () => {
+  await withServer(async (origin) => {
+    async function uploadMemory(name, content) {
+      const formData = new FormData();
+      formData.append("uploaderName", name);
+      formData.append(
+        "photos",
+        new Blob([content], { type: "image/jpeg" }),
+        `${name.toLowerCase().replaceAll(" ", "-")}.jpg`
+      );
+
+      const response = await fetch(`${origin}/api/photos/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      assert.equal(response.status, 201);
+    }
+
+    await uploadMemory("First Guest", "older image");
+    await uploadMemory("Second Guest", "newer image");
+
+    const listResponse = await fetch(`${origin}/api/photos`);
+    const listBody = await listResponse.json();
+
+    assert.deepEqual(
+      listBody.photos.map((photo) => photo.uploaderName),
+      ["Second Guest", "First Guest"]
+    );
+  });
+});
+
 test("photo upload requires an uploader name", async () => {
   await withServer(async (origin) => {
     const formData = new FormData();

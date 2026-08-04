@@ -79,6 +79,10 @@ let saveQueue = [];
 let saveQueueIndex = 0;
 let saveAssistantTouchStartX = 0;
 
+if (gallerySort) {
+  gallerySort.value = "latest";
+}
+
 function getMediaKind(item) {
   return item.mimeType.startsWith("video/") ? "video" : "image";
 }
