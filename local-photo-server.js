@@ -128,6 +128,13 @@ function createApp({
         .trim()
         .slice(0, 120);
 
+      if (!uploaderName) {
+        files.forEach((file) => fs.rmSync(file.path, { force: true }));
+        return response.status(400).json({
+          error: "Please add your name so we know who shared these.",
+        });
+      }
+
       const uploadedAt = new Date().toISOString();
       const newRecords = files.map((file) => ({
         id: crypto.randomUUID(),

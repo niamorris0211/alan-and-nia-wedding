@@ -85,7 +85,7 @@ test("photo upload stores metadata and provides a local preview", async () => {
   });
 });
 
-test("photo upload allows an optional uploader name", async () => {
+test("photo upload requires an uploader name", async () => {
   await withServer(async (origin) => {
     const formData = new FormData();
     formData.append(
@@ -100,12 +100,8 @@ test("photo upload allows an optional uploader name", async () => {
     });
     const body = await response.json();
 
-    assert.equal(response.status, 201);
-    assert.equal(body.uploadedCount, 1);
-
-    const listResponse = await fetch(`${origin}/api/photos`);
-    const listBody = await listResponse.json();
-    assert.equal(listBody.photos[0].uploaderName, "");
+    assert.equal(response.status, 400);
+    assert.match(body.error, /add your name/i);
   });
 });
 

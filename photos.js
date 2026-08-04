@@ -16,6 +16,7 @@ const photoUploadSuccess = document.getElementById("photo-upload-success");
 const photoUploadMore = document.getElementById("photo-upload-more");
 const photoUploadButton = document.getElementById("photo-upload-button");
 const photoUploadResult = document.getElementById("photo-upload-result");
+const photoUploaderName = document.getElementById("photo-uploader-name");
 const photoUploadProgress = document.getElementById("photo-upload-progress");
 const photoUploadProgressLabel = document.getElementById(
   "photo-upload-progress-label"
@@ -120,6 +121,7 @@ function updateFileSummary() {
   const files = Array.from(photoFiles?.files || []);
   const { validFiles, skippedFiles } = classifyFiles(files);
   const count = validFiles.length;
+  const hasUploaderName = Boolean(photoUploaderName?.value.trim());
 
   if (!photoFileSummary) {
     return;
@@ -147,7 +149,7 @@ function updateFileSummary() {
   filePicker?.classList.toggle("has-file-error", count === 0 && files.length > 0);
 
   if (photoUploadButton) {
-    photoUploadButton.disabled = count === 0;
+    photoUploadButton.disabled = count === 0 || !hasUploaderName;
     photoUploadButton.textContent = count
       ? `Upload ${count} ${count === 1 ? "file" : "files"}`
       : "Add to the shared album";
@@ -316,6 +318,10 @@ photoFiles?.addEventListener("click", () => {
 photoFiles?.addEventListener("change", handleFileSelection);
 photoFiles?.addEventListener("input", handleFileSelection);
 photoFiles?.addEventListener("cancel", hidePickerPreparing);
+photoUploaderName?.addEventListener("input", () => {
+  photoFormFeedback.textContent = "";
+  updateFileSummary();
+});
 window.addEventListener("focus", () => {
   showPickerPreparing();
   window.setTimeout(updateFileSummary, 250);
@@ -333,6 +339,13 @@ photoUploadForm?.addEventListener("submit", async (event) => {
   const uploaderName = document
     .getElementById("photo-uploader-name")
     ?.value.trim();
+
+  if (!uploaderName) {
+    photoFormFeedback.textContent =
+      "Please add your name so we know who shared these.";
+    photoUploaderName?.focus();
+    return;
+  }
 
   if (!selectedFiles.length) {
     photoFormFeedback.textContent =

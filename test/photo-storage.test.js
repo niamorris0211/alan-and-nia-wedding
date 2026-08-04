@@ -18,14 +18,13 @@ test("cloud photo validation accepts multiple image and video files", () => {
   assert.equal(result.files.length, 2);
 });
 
-test("cloud photo validation allows an optional name", () => {
+test("cloud photo validation requires an uploader name", () => {
   const result = validateUploadInput({
     uploaderName: "",
     files: [{ name: "one.jpg", type: "image/jpeg", size: 100 }],
   });
 
-  assert.equal(result.uploaderName, "");
-  assert.equal(result.files.length, 1);
+  assert.match(result.error, /add your name/i);
 });
 
 test("cloud photo validation rejects non-media files", () => {
@@ -40,7 +39,7 @@ test("cloud photo validation rejects non-media files", () => {
 
 test("cloud photo validation infers common phone media types", () => {
   const result = validateUploadInput({
-    uploaderName: "",
+    uploaderName: "Guest",
     files: [
       { name: "iphone-photo.heic", type: "", size: 100 },
       { name: "iphone-video.MOV", type: "", size: 100 },
